@@ -1,0 +1,34 @@
+Arithmetische Operationen
+ADD 
+ADDI
+LOADI
+MOVE
+
+Shift Operationen
+SHR
+SHL
+
+Logische Operationen
+AND
+OR
+NOT
+NOP
+
+Branches
+JMP
+BRE (branch equal zero)
+BRL (branch less zero)
+BRG (branch greater zero)
+
+Speicheroperationen
+LOAD
+STORE 
+
+32 general purpose register
+
+Kodierung: 
+
+32 Register => 5 Bits pro Register => 15 Bits für Registeradressierung
+Opcode => 5 Bit
+Funktion => ??? Bit
+

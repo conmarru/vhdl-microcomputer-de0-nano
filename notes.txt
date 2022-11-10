@@ -1,0 +1,10 @@
+Entscheidungen bzgl. ISA:
+
+- reine signed Darstellung, weil Wertebereich vom Zweierkomplementgenügend
+- erstmal keine eigene Instruktion für Subtraktion, weil Zweierkomplement
+- Stackoperationen wie push und pop werden Softwareseitig umgesetzt, weil
+  geringere Komplexität
+- keine Multiplikation, weil wiederholte Addition
+- keine Gleitkommazahlen, weil zu komplex
+
+
