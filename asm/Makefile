@@ -12,5 +12,11 @@ main.o: $(SRC_DIR)/main.c
 scan.o : $(SRC_DIR)/scan.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/scan.c
 
+test : 
+	./main test.txt; \
+	./main test1.txt; \
+	./main test2.txt; \
+	./main test3.txt
+
 clean: 
 	rm *.o; rm main

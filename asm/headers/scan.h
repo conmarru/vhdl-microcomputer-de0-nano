@@ -1,14 +1,17 @@
 typedef enum {
-	TOKEN_REG,
-	TOKEN_INSTR,
+	TOKEN_IDNT,
 	TOKEN_NUM,
 	TOKEN_PERCENT,
+	TOKEN_DOLLAR,
 	TOKEN_COMMA,
 	TOKEN_NEWLINE
 } token_type; 
 
 typedef struct {
-	char* value;	
+	union {
+		char* value;	
+		int num_value;
+	};
 	token_type type;
 } token;
 
