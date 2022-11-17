@@ -1,34 +1,36 @@
+Misc
+NOP (00000|00000|00000|00000|<unused:7>|00000)
+HLT (00001|00000|00000|00000|<unused:7>|00000)
+
 Arithmetische Operationen
-ADD 
-ADDI
-LOADI
-MOVE
+MOVE (00010|<destination:5>|<source:5>|00000|<unused:7>|00000)
+LOADI (00011|<destination:5>|<immediate:22>)
+ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
+ADDI (00101|<destination:5>|<operand1:5>|<immediate:17>) 
 
 Shift Operationen
-SHR
-SHL
+SHR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
+SHL (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
 
 Logische Operationen
-AND
-OR
-NOT
-NOP
+AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
+OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
+NOT (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00101)
 
 Branches
-JMP
-BRE (branch equal zero)
-BRL (branch less zero)
-BRG (branch greater zero)
+JMP (00110|<scalereg:5>|<address:22>)
+BRE (branch equal zero) (00111|<condreg:5>|<func:3>|<offset:19>)
+BRL (branch less zero) (00111|<condreg:5>|<func:3>|<offset:19>)
+BRG (branch greater zero) (00111|<condreg:5>|<func:3>|<offset:19>)
 
 Speicheroperationen
-LOAD
-STORE 
+LOAD (01000|<destination:5>|<scalereg:5>|<address:18>) 
+STORE (01001|<source:5>|<scalereg:5>|<address:18>) 
 
-32 general purpose register
+Zur Skalierung:
 
-Kodierung: 
+bei JMP: Adresse = base address + (scale << 22)
+bei LOAD/STORE: Adresse = base address + (scale << 18)
 
-32 Register => 5 Bits pro Register => 15 Bits für Registeradressierung
-Opcode => 5 Bit
-Funktion => ??? Bit
+32 General Purpose Register:
 
