@@ -1,10 +1,10 @@
-CFLAGS = -fno-common -O3 -Wall
+CFLAGS = -fno-common -O3 -Wall -Wextra 
 
 SRC_DIR = src
 HEADER_DIR = header
 
-main: main.o scan.o
-	gcc main.o scan.o $(CFLAGS) -o main
+main: main.o scan.o gen.o
+	gcc main.o scan.o gen.o $(CFLAGS) -o $@
 
 main.o: $(SRC_DIR)/main.c 
 	gcc -c $(CFLAGS) $(SRC_DIR)/main.c
@@ -12,11 +12,11 @@ main.o: $(SRC_DIR)/main.c
 scan.o : $(SRC_DIR)/scan.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/scan.c
 
+gen.o : $(SRC_DIR)/gen.c
+	gcc -c $(CFLAGS) $(SRC_DIR)/gen.c
+
 test : 
-	./main test.txt; \
-	./main test1.txt; \
-	./main test2.txt; \
-	./main test3.txt
+	./main test.txt
 
 clean: 
 	rm *.o; rm main

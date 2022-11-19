@@ -6,8 +6,10 @@
 #include <sys/mman.h>
 #include "../headers/def.h"
 #include "../headers/scan.h"
+#include "../headers/gen.h"
 
 FILE* input_file = NULL;
+FILE* output_file = NULL;
 
 int main(int argc, char** args)
 {
@@ -16,6 +18,12 @@ int main(int argc, char** args)
 		return 1;
 	}
 	input_file = fopen(args[1], "r");
+	output_file = fopen("output", "wb");	
+	if (!output_file)
+	{
+		printf("ERROR: Couldn't create output file\n");
+		exit(1);
+	}
 	if (input_file == NULL) return 1;
 	int ifd = fileno(input_file);
 	int fsize = lseek(ifd, 0, SEEK_END);
@@ -27,6 +35,7 @@ int main(int argc, char** args)
 	input[fsize] = 0x00;
 	munmap(buf, fsize);
 	init_scanner(input, fsize);
+	gen_binary();
 	free(input);
 
 	return 0;

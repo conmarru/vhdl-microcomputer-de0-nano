@@ -1,2 +1,16 @@
-$$$$$$%%%%%%,,,$,%,,
-$$$$,%%%%%$
+add	%r0, %r1, %r2 
+shr	%r2, %r3, %r4
+and	%r0, %r2, %r3
+nop
+nop
+move	%r3, %r4
+loadi	$1234, %r4
+addi	$420, %r4, %r5
+not	%r5, %r5
+jmp	%r7, $10
+bre	%r8, $8
+brl	%r9, $12
+brg	%r10, $16
+load	%r17, $32, %r19
+store	%r20, %r21, $64
+hlt
