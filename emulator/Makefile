@@ -1,10 +1,13 @@
 CFLAGS = -fno-common -O3 -Wall -Wextra
 
-main: main.o
-	gcc main.o $(CFLAGS) -o $@
+emu: main.o disasm.o
+	gcc main.o disasm.o $(CFLAGS) -o $@
 
-main.o: main.c
+main.o: main.c 
 	gcc -c $(CFLAGS) main.c
 
+disasm.o: disasm.c
+	gcc -c $(CFLAGS) disasm.c
+
 clean: 
-	rm *.o; rm main
+	rm *.o; rm emu

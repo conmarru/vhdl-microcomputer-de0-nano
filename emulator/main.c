@@ -6,25 +6,28 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <getopt.h>
+#include "defs.h"
+#include "disasm.h"
 
 #define REG_NUM 32
 #define MEM_32 4294967296
-#define OPCODE_SHIFT_VAL 27
-#define DEST_REG_SHIFT_VAL 22
-#define OP1_REG_SHIFT_VAL 17
-#define OP2_REG_SHIFT_VAL 12
+#define MAX_CMD_LEN 50
 
 #define MAX_FILENAME 200
 
-static const uint32_t EXTRACT_MASK = 0x0000001f;
+const uint32_t EXTRACT_MASK = 0x0000001f;
 static uint8_t flags = 0;
 
 static uint8_t* mem;
 static int32_t reg[REG_NUM] = { 0 };
 
-static const char* REG_STRINGS[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
-				     "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
-				     "r25", "r26", "r27", "r28", "r29", "r30", "r31" };
+const char* REG_STRINGS[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r8", "r9", "r10", "r11", "r12",
+			      "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
+		              "r25", "r26", "r27", "r28", "r29", "r30", "r31" };
+
+static const char* CMDS[] = { "next", "n", "print", "p" };
+
+static char user_input[MAX_CMD_LEN+1] = { 0x00 };
 
 static bool jmp_flag = false;
 
@@ -41,6 +44,7 @@ static void load_program(uint8_t* bin_data, int size)
 
 static void reg_dump()
 {
+	printf("==================== Registers ====================\n");
 	printf("PC = 0x%.8x\n", pc);
 	for (int i = 0; i < 16; i++)	
 	{
@@ -49,7 +53,29 @@ static void reg_dump()
 	}
 }
 
-static void exec()
+static void print_mem(int amount, bool disasm_flag)
+{
+	printf("===================== Memory ======================\n");
+	for (int i = 0; i < amount; i+=4)
+	{
+		char* fstr = (disasm_flag) ? "0x%.8x: %.2x %.2x %.2x %.2x" : "0x%.8x: %.2x %.2x %.2x %.2x\n";
+		printf(fstr, i, mem[i], mem[i+1], mem[i+2], mem[i+3]);
+		if (disasm_flag)
+		{
+			printf("\t[ ");
+			uint32_t b1 = ((int32_t)mem[i]) << 24;
+			uint32_t b2 = ((int32_t)mem[i+1]) << 16;
+			uint32_t b3 = ((int32_t)mem[i+2]) << 8;
+			uint32_t b4 = (int32_t)mem[i+3];
+			uint32_t instr = b1 | b2 | b3 | b4;
+			disasm_instr(instr);
+			printf(" ]\n");
+		}
+
+	}
+}
+
+static void exec(int flag)
 {	
 	uint32_t instr;
 	uint8_t dest_reg;
@@ -62,6 +88,32 @@ static void exec()
 	uint32_t offset;
 	while (1)
 	{
+		if (flag & 0x04)
+		{
+			bool break_cond = false;
+			while (!break_cond)
+			{
+				printf("> ");
+				char* r = fgets(user_input, MAX_CMD_LEN, stdin);	
+				user_input[strlen(user_input)-1] = (user_input[strlen(user_input)-1] == '\n') ? 0x00 : user_input[strlen(user_input)-1];
+				if (!r) exit(1);
+
+				if (!strcmp(user_input, CMDS[0]) || !strcmp(user_input, CMDS[1]))
+				{
+					break_cond = true;
+				}
+				else if (!strcmp(user_input, CMDS[2]) || !strcmp(user_input, CMDS[3]))
+				{
+					bool disasm_flag = true;
+					reg_dump();
+					print_mem(pc+4, disasm_flag);
+				}
+				else
+				{
+					printf("ERROR: Command not found\n");
+				}
+			}
+		}
 		instr = (mem[pc] << 24) | (mem[pc+1] << 16) | (mem[pc+2] << 8) | mem[pc+3];
 
 		switch (instr >> OPCODE_SHIFT_VAL)
@@ -139,16 +191,7 @@ static void exec()
 				 break;
 		}
 		pc = (jmp_flag) ? pc : pc + 4;
-		jmp_flag = false;
-	}
-}
-
-static void print_mem(int amount)
-{
-	for (int i = 0; i < amount; i+=4)
-	{
-		char* fstr = "0x%.8x: %.2x %.2x %.2x %.2x\n";
-		printf(fstr, i, mem[i], mem[i+1], mem[i+2], mem[i+3]);
+		jmp_flag = false;	
 	}
 }
 
@@ -162,11 +205,12 @@ static void parse_cli_args(int argc, char** args, char* filename)
 			{"input", required_argument, NULL, 'i'},
 			{"regdump", no_argument, NULL, 'r'},
 			{"memdump", no_argument, NULL, 'm'},
+			{"interactive", no_argument, NULL, 'I'},
 			{NULL, 0, NULL, 0}
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:rm", long_options, &option_index);
+		c = getopt_long(argc, args, "i:rmI", long_options, &option_index);
 
 		if (c == -1)
 		{
@@ -181,9 +225,12 @@ static void parse_cli_args(int argc, char** args, char* filename)
 				   break;
 			case 'm' : flags |= 2;
 				   break;
+			case 'I' : flags |= 4;
+				   break;
 			case '?' : printf("usage:./main -i <filename> [flags]\n");
 				   printf("flags:\t-r, --regdump\n");
 				   printf("\t-m, --memdump\n");
+				   printf("\t-I, --interactive\n");
 				   exit(1);
 		}
 	}
@@ -210,14 +257,17 @@ int main(int argc, char** args)
 	uint8_t* binary_data = (uint8_t*)calloc(fsize,sizeof(uint8_t));
 	memcpy(binary_data, buf, fsize);
 	load_program(binary_data, fsize);
-	exec();
-	if (flags & 0x01)
+	exec(flags);
+	if (!(flags & 0x04))
 	{
-		reg_dump();
-	}
-	if (flags & 0x02)
-	{
-		print_mem(0x00000100);
+		if (flags & 0x01)
+		{
+			reg_dump();
+		}
+		if (flags & 0x02)
+		{
+			print_mem(0x00000100, false);
+		}
 	}
 	munmap(buf, fsize);
 	return 0;

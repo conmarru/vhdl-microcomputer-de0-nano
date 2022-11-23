@@ -3,7 +3,7 @@ CFLAGS = -fno-common -O3 -Wall -Wextra
 SRC_DIR = src
 HEADER_DIR = header
 
-main: main.o scan.o gen.o
+asm: main.o scan.o gen.o
 	gcc main.o scan.o gen.o $(CFLAGS) -o $@
 
 main.o: $(SRC_DIR)/main.c 
@@ -19,4 +19,4 @@ test :
 	./main test.txt
 
 clean: 
-	rm *.o; rm main
+	rm *.o; rm asm

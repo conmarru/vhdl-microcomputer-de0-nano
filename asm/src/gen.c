@@ -23,6 +23,9 @@
 static const uint8_t ADDR_REG = 29;
 static const uint8_t SCALE_REG = 28;
 
+static uint32_t cur_addr = 0;
+static int dyn_instr_counter = 0;
+
 typedef enum {
 	REG_OP1,
 	REG_OP2,
@@ -406,7 +409,8 @@ static void parse_newline()
 	{
 		error_unexpected_token(TOKEN_NEWLINE, t);
 	}
-	free_token(t);
+	free_token(t);	
+	cur_addr = cur_addr + 4;
 }
 
 static void parse_num(uint32_t* bin_instr, int bits)
@@ -557,6 +561,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr)
 	}
 	free(dyn_instr);
 	write_file(bin_instr);
+	dyn_instr_counter++;
 }
 
 // r29,r28 reserved for jump addresses and scaling
@@ -572,7 +577,7 @@ static void gen_jump(struct keyword_node* knode)
 
 	parse_num(&bin_instr, ADDR_22);
 
-	uint32_t address = bin_instr + 16;
+	uint32_t address = (!(bin_instr < cur_addr)) ? bin_instr + 16 : (bin_instr + dyn_instr_counter*4);
 	bin_instr = 0;
 	
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address));
