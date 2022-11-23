@@ -572,7 +572,7 @@ static void gen_jump(struct keyword_node* knode)
 
 	parse_num(&bin_instr, ADDR_22);
 
-	uint32_t address = bin_instr;
+	uint32_t address = bin_instr + 16;
 	bin_instr = 0;
 	
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address));
