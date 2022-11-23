@@ -74,7 +74,7 @@ static void exec()
 				break;
 			case 3: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				immediate = instr & 0x003fffff;
-				if (immediate >> 21) immediate |= 0x11800000;
+				if (immediate >> 21) immediate |= 0xffc00000;
 				reg[dest_reg] = immediate;
 				break;
 			case 4: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;

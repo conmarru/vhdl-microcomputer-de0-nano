@@ -72,7 +72,7 @@ static char* scan_identifier(int* pointer)
 	return idnt;
 }
 
-static int scan_num(int* pointer)
+static int scan_num(int* pointer, bool sign_flag)
 {
 	int val = 0;
 	int k = 0;
@@ -81,8 +81,8 @@ static int scan_num(int* pointer)
 		k = input[(*pointer)++] - '0';
 		val = val * 10 + k;
 	}
-
-	return val;
+	
+	return (!sign_flag) ? val : -val;
 }
 
 static void scan()
@@ -114,9 +114,16 @@ static void scan()
 					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
 					break;
 				  }
-				  else if (is_digit(input[pointer]))
+				  else if (is_digit(input[pointer]) || input[pointer] == '-')
 				  {
-					int val = scan_num(&pointer);
+					bool sign_flag = false;
+					if (input[pointer] == '-')
+					{
+						sign_flag = true;
+						pointer++;
+						
+					}
+					int val = scan_num(&pointer, sign_flag);
 					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					break;
 				  }

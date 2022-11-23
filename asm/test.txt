@@ -1,4 +1,3 @@
-loadi	$0, %r0
-jmp	%r0, $12
+loadi	$-7, %r0
 loadi	$7, %r1
 hlt
