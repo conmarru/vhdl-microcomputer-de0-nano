@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "../headers/scan.h"
 #include "../headers/def.h"
+#include "../headers/utils.h"
 
 #define KEYWORD_HASHSET_LEN 20
 #define REG_NUM 32
@@ -135,7 +136,7 @@ unsigned int get_reg_hash(char* name)
 
 void add_reg(char* name, uint8_t encoding)
 {
-	struct reg_struct_node* head = reg_hashset[get_reg_hash(name)];	
+	struct reg_struct_node* head = reg_hashset[get_hash(name, REG_NUM)];	
 	struct reg_struct* reg = new_reg_struct(name, encoding);
 	if (!head->next)
 	{
@@ -148,7 +149,7 @@ void add_reg(char* name, uint8_t encoding)
 
 struct reg_struct* get_reg_struct(char* name)
 {
-	struct reg_struct_node* node = reg_hashset[get_reg_hash(name)]->next;
+	struct reg_struct_node* node = reg_hashset[get_hash(name, REG_NUM)]->next;
 
 	while (node)
 	{
@@ -246,7 +247,7 @@ static unsigned int get_keyword_hash(char* keyword)
 
 static void add_keyword(char* keyword, uint8_t opcode, uint8_t func)
 {
-	struct keyword_node* head = keyword_hashset[get_keyword_hash(keyword)];
+	struct keyword_node* head = keyword_hashset[get_hash(keyword, KEYWORD_HASHSET_LEN)];
 
 	if (!head->next)
 	{
@@ -259,7 +260,7 @@ static void add_keyword(char* keyword, uint8_t opcode, uint8_t func)
 
 static struct keyword_node* get_keyword_node(char* keyword)
 {
-	struct keyword_node* node = keyword_hashset[get_keyword_hash(keyword)]->next;
+	struct keyword_node* node = keyword_hashset[get_hash(keyword, KEYWORD_HASHSET_LEN)]->next;
 
 	while (node)
 	{
@@ -415,20 +416,37 @@ static void parse_newline()
 
 static void parse_num(uint32_t* bin_instr, int bits)
 {
+	uint32_t immediate_val;
+	bool label_flag = false;
 	token* t = consume_token();
-	if (!expect(t, TOKEN_DOLLAR))
+	if (t->type == TOKEN_IDNT)
 	{
-		error_unexpected_token(TOKEN_DOLLAR, t);
+		label* lbl = get_label(t->value);
+		if (!lbl)
+		{
+			printf("ERROR: Referenced undefinied label\n");
+			exit(1);
+		}
+		immediate_val = lbl->addr;
+		label_flag = true;
 	}
-	free_token(t);
-
-	t = consume_token();
-	if (!expect(t, TOKEN_NUM))
+	else
 	{
-		error_unexpected_token(TOKEN_NUM, t);
-	}
 
-	uint32_t immediate_val = t->num_value;
+		if (!expect(t, TOKEN_DOLLAR))
+		{
+			error_unexpected_token(TOKEN_DOLLAR, t);
+		}
+		free_token(t);
+
+		t = consume_token();
+		if (!expect(t, TOKEN_NUM))
+		{
+			error_unexpected_token(TOKEN_NUM, t);
+		}
+
+		immediate_val = t->num_value;
+	}
 	switch (bits)
 	{
 		case IMM_22: immediate_val &= 0x003fffff;
@@ -437,7 +455,12 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		case IMM_17: immediate_val &= 0x00003fff;
 			     *bin_instr |= immediate_val;
 			     break;
-		case OFFSET_19: immediate_val &= 0x0007ffff;
+		case OFFSET_19: if (label_flag) 
+				{
+					int dif = immediate_val - cur_addr;
+					immediate_val = (dif < 0) ? immediate_val - cur_addr + 4 : immediate_val - cur_addr;
+				}
+			     	immediate_val &= 0x0007ffff;
 				*bin_instr |= immediate_val;
 				break;
 		case ADDR_18: immediate_val &= 0x0003ffff;
@@ -692,7 +715,12 @@ void gen_binary()
 		struct keyword_node* knode = get_keyword_node(current->value);
 		if (!knode)
 		{
-			if (current->type == TOKEN_IDNT) printf("Invalid instruction found at line %d\n", current->line_num);
+			if (current->type == TOKEN_IDNT && get_label(current->value))
+			{
+				parse_newline(current);	
+				continue;
+			}
+			else if (current->type == TOKEN_IDNT) printf("Invalid instruction found at line %d\n", current->line_num);
 			else printf("ERROR: Instruction expected at line %d\n", current->line_num);
 			exit(1);
 		}

@@ -1,8 +1,8 @@
 loadi	$0, %r0
-jmp	%r0, $12
 loadi	$7, %r1
+brg	%r1, target
 loadi	$123, %r2
-nop
-nop
-jmp	%r0, $16
+add 	%r0, %r2, %r1
+.target
+loadi 	$77, %r3
 hlt
