@@ -8,3 +8,6 @@ Entscheidungen bzgl. ISA:
 - keine Gleitkommazahlen, weil zu komplex
 
 
+Entscheidungen bzgl. VHDL:
+- Alle Datentypen sind wegen Vereinfachung IEEE signed Bitvektoren.
+ -> Damit sind alle normalen Bitvektor Operationen verfügbar, arithmetische Operationen sind definiert und Type Casting wird vermieden

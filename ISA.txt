@@ -34,3 +34,13 @@ bei LOAD/STORE: Adresse = base address + (scale << 18)
 
 32 General Purpose Register:
 
+
+
+
+ALU:
+ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
+SHR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
+SHL (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
+AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
+OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
+NOT (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00101)
