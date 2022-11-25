@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "defs.h"
+#include "../headers/defs.h"
 
 static const char* MNEMONICS[] = {"nop", "hlt", "move", "loadi", "add", "addi", "shr", "shl", "and", "or", "not", "jmp", "bre", "brl", "brg", "load", "store"};
 

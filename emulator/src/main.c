@@ -6,8 +6,10 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <getopt.h>
-#include "defs.h"
-#include "disasm.h"
+#include "../headers/defs.h"
+#include "../headers/disasm.h"
+#include "../headers/cmds.h"
+#include "../headers/utils.h"
 
 #define REG_NUM 32
 #define MEM_32 4294967296
@@ -25,7 +27,9 @@ const char* REG_STRINGS[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r
 			      "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
 		              "r25", "r26", "r27", "r28", "r29", "r30", "r31" };
 
-static const char* CMDS[] = { "next", "n", "print", "p" };
+int err_val = 0;
+
+static const char* CMDS[] = { "next", "n", "print", "p", "quit", "q" };
 
 static char user_input[MAX_CMD_LEN+1] = { 0x00 };
 
@@ -53,10 +57,10 @@ static void reg_dump()
 	}
 }
 
-static void print_mem(int amount, bool disasm_flag)
+static void print_mem(uint32_t start_addr, uint32_t end_addr, bool disasm_flag, bool verbose_flag)
 {
-	printf("===================== Memory ======================\n");
-	for (int i = 0; i < amount; i+=4)
+	if (verbose_flag) printf("===================== Memory ======================\n");
+	for (uint32_t i = start_addr; i < end_addr; i+=4)
 	{
 		char* fstr = (disasm_flag) ? "0x%.8x: %.2x %.2x %.2x %.2x" : "0x%.8x: %.2x %.2x %.2x %.2x\n";
 		printf(fstr, i, mem[i], mem[i+1], mem[i+2], mem[i+3]);
@@ -96,22 +100,47 @@ static void exec(int flag)
 				printf("> ");
 				char* r = fgets(user_input, MAX_CMD_LEN, stdin);	
 				user_input[strlen(user_input)-1] = (user_input[strlen(user_input)-1] == '\n') ? 0x00 : user_input[strlen(user_input)-1];
+				int argc = 0;
+				char** user_args = parse_uinput(user_input, &argc);
 				if (!r) exit(1);
 
-				if (!strcmp(user_input, CMDS[0]) || !strcmp(user_input, CMDS[1]))
+				if (!strcmp(user_args[0], CMDS[0]) || !strcmp(user_args[0], CMDS[1]))
 				{
 					break_cond = true;
 				}
-				else if (!strcmp(user_input, CMDS[2]) || !strcmp(user_input, CMDS[3]))
+				else if (!strcmp(user_args[0], CMDS[2]) || !strcmp(user_args[0], CMDS[3]))
 				{
 					bool disasm_flag = true;
-					reg_dump();
-					print_mem(pc+4, disasm_flag);
+					switch (argc)
+					{
+						case 1 : reg_dump();
+							 print_mem(0, pc+4, disasm_flag, true);
+							 break;
+						case 3 : if (!strcmp(user_args[1], "-x"))
+							 {
+							 	uint32_t maddr = strtohex(user_args[2]);				 
+								if (err_val == 1)
+								{
+									printf("ERROR: invalid address\n");
+								}
+								else
+								{
+									print_mem(maddr - (maddr % 4), (maddr - (maddr % 4)) + 4, false, false);
+								}
+							 }
+					}
+				}
+				else if (!strcmp(user_args[0], CMDS[4]) || !strcmp(user_args[0], CMDS[5]))
+				{
+
+					free_userargs(user_args, argc);	
+					exit(0);
 				}
 				else
 				{
 					printf("ERROR: Command not found\n");
 				}
+				free_userargs(user_args, argc);	
 			}
 		}
 		instr = (mem[pc] << 24) | (mem[pc+1] << 16) | (mem[pc+2] << 8) | mem[pc+3];
@@ -266,7 +295,7 @@ int main(int argc, char** args)
 		}
 		if (flags & 0x02)
 		{
-			print_mem(0x00000100, false);
+			print_mem(0, 0x00000100, false, true);
 		}
 	}
 	munmap(buf, fsize);

@@ -209,19 +209,6 @@ static void scan()
 	}
 }
 
-static void debug_print_label_hashset()
-{
-	for (int i = 0; i < LABEL_HASHSET_SIZE; i++)
-	{
-		struct label_node* node = label_hashset[i]->next;
-		while (node)
-		{
-			printf("Name: %s, address: %d\n", node->lbl->name, node->lbl->addr);
-			node = node->next;
-		}
-	}
-}
-
 void init_scanner(char* buf, int length)
 {
 	input = (char*)calloc(length+1, sizeof(char));

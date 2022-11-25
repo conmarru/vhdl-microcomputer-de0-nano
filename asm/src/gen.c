@@ -37,7 +37,8 @@ typedef enum {
 	DYN_INSTR_ADD,
 	DYN_INSTR_ADDI,
 	DYN_INSTR_LOADI,
-	DYN_INSTR_SHL
+	DYN_INSTR_SHL,
+	DYN_INSTR_NOT
 } dyn_instr_type;
 
 struct dyn_instr_struct {
@@ -231,20 +232,6 @@ static void free_keyword_hashset()
 	}
 }
 
-static unsigned int get_keyword_hash(char* keyword)
-{
-	unsigned int i = 0;
-	unsigned int hash = 0;
-
-	while (keyword[i] != 0x00)
-	{
-		hash += keyword[i] + i;
-		i++;
-	}
-
-	return hash % KEYWORD_HASHSET_LEN;
-}
-
 static void add_keyword(char* keyword, uint8_t opcode, uint8_t func)
 {
 	struct keyword_node* head = keyword_hashset[get_hash(keyword, KEYWORD_HASHSET_LEN)];
@@ -302,6 +289,9 @@ static void init_keyword_hashset()
 	add_keyword("jmp", 6, 0);	
 	add_keyword("load", 8, 0);
 	add_keyword("store", 9, 0);
+
+	// pseudoinstructions
+	add_keyword("sub", 32, 0);
 }
 
 static token* consume_token()
@@ -412,6 +402,10 @@ static void parse_newline()
 	}
 	free_token(t);	
 	cur_addr = cur_addr + 4;
+	while (get_current_token() && get_current_token()->type == TOKEN_NEWLINE)
+	{
+		consume_token();
+	}
 }
 
 static void parse_num(uint32_t* bin_instr, int bits)
@@ -570,7 +564,11 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr)
 				     bin_instr |= dyn_instr->reg_op2 << OP2_REG_SHIFT_VAL;
 				     bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				     break;
-		case DYN_INSTR_ADDI: break;
+		case DYN_INSTR_ADDI: bin_instr |= 5 << OPCODE_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				     bin_instr |= dyn_instr->num_val;
+				     break;
 		case DYN_INSTR_LOADI: bin_instr |= 3 << OPCODE_SHIFT_VAL;
 				      bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				      bin_instr |= dyn_instr->num_val;
@@ -579,6 +577,10 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr)
 				    bin_instr |= 2;
 				    bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
 				    bin_instr |= dyn_instr->reg_op2 << OP2_REG_SHIFT_VAL;
+				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				    break;
+		case DYN_INSTR_NOT: bin_instr |= 10 << OPCODE_SHIFT_VAL; 
+				    bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
 				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				    break;
 	}
@@ -701,6 +703,32 @@ static void gen_store(struct keyword_node* knode)
 	write_file(bin_instr);
 }
 
+void gen_pseudo_sub()
+{
+	uint32_t bin_instr = 0;
+
+	parse_reg(&bin_instr, REG_OP1);
+	uint32_t reg_op1 = bin_instr >> OP1_REG_SHIFT_VAL;
+	bin_instr = 0;
+
+	parse_comma();
+
+	parse_reg(&bin_instr, REG_OP2);
+	uint32_t reg_op2 = bin_instr >> OP2_REG_SHIFT_VAL;
+	bin_instr = 0;
+
+	parse_comma();
+
+	parse_reg(&bin_instr, REG_DEST);
+	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
+	
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0));
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1));
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0));
+
+	parse_newline();
+}
+
 void gen_binary()
 {
 	init_keyword_hashset();
@@ -750,6 +778,8 @@ void gen_binary()
 			case 9: gen_store(knode);
 				break;
 			case 10: gen_not(knode);
+				 break;
+			case 32: gen_pseudo_sub();
 				 break;
 			default : exit(1);
 		}		

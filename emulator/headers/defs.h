@@ -7,3 +7,4 @@
 
 extern const uint32_t EXTRACT_MASK;
 extern const char* REG_STRINGS[];
+extern int err_val;

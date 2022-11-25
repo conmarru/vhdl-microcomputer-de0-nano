@@ -15,7 +15,7 @@ SHL (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
 Logische Operationen
 AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
 OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
-NOT (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00101)
+NOT (01010|<destination:5>|<operand1:5>|00000|<unused:7>|00000)
 
 Branches
 JMP (00110|<jmpreg:5>|<unused:22>)
@@ -32,10 +32,7 @@ Zur Skalierung:
 bei JMP: Adresse = base address + (scale << 22)
 bei LOAD/STORE: Adresse = base address + (scale << 18)
 
-32 General Purpose Register:
-
-
-
+32 General Purpose Register
 
 ALU:
 ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
@@ -44,3 +41,10 @@ SHL (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
 AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
 OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
 NOT (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00101)
+
+Assembler-Pseudoinstruktionen
+
+sub	<op1>, <op2>, <dest> =>	REG[dest] = REG[op1] - REG[op2]
+
+
+
