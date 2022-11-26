@@ -1,4 +1,5 @@
 loadi $7, %r0
 loadi $0, %r1
+loadi $0xff, %r2
 store %r0, %r1, $48
 hlt

@@ -7,6 +7,8 @@
 #include "../headers/utils.h"
 
 char* TOKEN_TYPE_NAMES[] = {"Identifier", "Number", "Percent", "Dollar", "Comma", "Newline"};
+static const int HEX_DIGITVALS[6] = { 10, 11, 12, 13, 14, 15 };
+
 struct label_node* label_hashset[LABEL_HASHSET_SIZE] = { NULL };
 
 struct token_stream_node head = {NULL, &head, NULL};
@@ -145,6 +147,25 @@ static int scan_num(int* pointer, bool sign_flag)
 	return (!sign_flag) ? val : -val;
 }
 
+bool is_hexdigit(char c)
+{
+	return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
+}
+
+uint32_t scan_hexnum(int* pointer)
+{
+	int val = 0;
+	int k = 0;
+	while (is_hexdigit(input[*pointer]))
+	{	
+		k = (input[*pointer] >= 'a' && input[*pointer] <= 'f') ? HEX_DIGITVALS[input[*pointer] - 'a'] : input[*pointer] - '0';
+		val = val * 16 + k;
+		(*pointer)++;
+	}
+
+	return val;
+}
+
 static void scan()
 {		
 	int pointer = 0;
@@ -187,6 +208,13 @@ static void scan()
 					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
 					break;
 				  }
+				  else if (input[pointer] == '0' && input[pointer+1] == 'x')
+				  {
+					  pointer += 2;
+					  int val = scan_hexnum(&pointer);
+					  append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
+					  break;
+				  }
 				  else if (is_digit(input[pointer]) || input[pointer] == '-')
 				  {
 					bool sign_flag = false;
@@ -199,7 +227,7 @@ static void scan()
 					int val = scan_num(&pointer, sign_flag);
 					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					break;
-				  }
+				  } 
 				  else
 				  {
 					  printf("ERROR: Unknown token at line %d\n", line);
