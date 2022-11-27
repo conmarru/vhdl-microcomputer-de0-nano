@@ -66,8 +66,29 @@ struct reg_struct_node {
 	struct reg_struct* reg;	
 };
 
+struct instr_struct {
+	bool jmp_tag;
+	uint32_t encoding;
+	uint32_t instr_addr;
+};
+
 static struct keyword_node* keyword_hashset[KEYWORD_HASHSET_LEN] = { NULL };
 static struct reg_struct_node* reg_hashset[REG_NUM] = { NULL };
+
+static unsigned int instr_list_len = 50;
+static unsigned int instr_list_ptr = 0;
+struct instr_struct** instr_list = NULL;
+
+static struct instr_struct* new_instr_struct(int32_t encoding, bool jmp_tag, uint32_t instr_addr)
+{
+	struct instr_struct* new = (struct instr_struct*)malloc(sizeof(struct instr_struct));
+
+	new->jmp_tag = jmp_tag;
+	new->encoding = encoding;
+	new->instr_addr = instr_addr;
+
+	return new;
+}
 
 static struct dyn_instr_struct* new_dyn_instr_struct(dyn_instr_type ditype, uint8_t op1, uint8_t op2, uint8_t dest, uint32_t num)
 {
@@ -121,21 +142,32 @@ static void free_reg_hashset()
 	}
 }
 
-unsigned int get_reg_hash(char* name)
+static void add_instr_struct(uint32_t encoding, bool jmp_flag)
 {
-	unsigned int i = 0; 
-	unsigned int hash = 0; 
-
-	while (name[i] != 0x00)
+	if (instr_list_ptr == instr_list_len-1)
 	{
-		hash += name[i] + i;
-		i++;
+		instr_list = realloc(instr_list, instr_list_len*2);
 	}
-
-	return hash % REG_NUM;
+	instr_list[instr_list_ptr++] = new_instr_struct(encoding, jmp_flag, cur_addr);
 }
 
-void add_reg(char* name, uint8_t encoding)
+static void update_addrs()
+{
+	for (unsigned int i = 0; i < instr_list_ptr; i++)
+	{
+		if (instr_list[i]->jmp_tag)
+		{
+			// correct jmp
+			if ((instr_list[i]->encoding >> OPCODE_SHIFT_VAL) == 6 && (instr_list[i]->encoding & 0x003fffff) < cur_addr)
+			{
+				uint32_t new_val = (instr_list[i]->encoding & 0x003fffff) + 4;
+				instr_list[i]->encoding = (instr_list[i]->encoding & 0xffc00000) | new_val;
+			}	
+		}
+	}
+}
+
+static void add_reg(char* name, uint8_t encoding)
 {
 	struct reg_struct_node* head = reg_hashset[get_hash(name, REG_NUM)];	
 	struct reg_struct* reg = new_reg_struct(name, encoding);
@@ -349,6 +381,14 @@ static void write_file(uint32_t instr)
 	fwrite(&p3, 1, 1, output_file);
 }
 
+static void write_all()
+{
+	for (unsigned int i = 0; i < instr_list_ptr; i++)
+	{
+		write_file(instr_list[i]->encoding);
+	}
+}
+
 static void parse_reg(uint32_t* bin_instr, reg_type rtype)
 {
 	token* t = consume_token();
@@ -454,8 +494,9 @@ static void parse_num(uint32_t* bin_instr, int bits)
 					int dif = immediate_val - cur_addr;
 					immediate_val = (dif < 0) ? immediate_val - cur_addr + 4 : immediate_val - cur_addr;
 				}
-			     	immediate_val &= 0x0007ffff;
-				*bin_instr |= immediate_val;
+			     	if (immediate_val >> 18) immediate_val |= 0xfff80000;
+				else immediate_val &= 0x0007ffff;
+				*bin_instr |= immediate_val & 0x0007ffff;
 				break;
 		case ADDR_18: immediate_val &= 0x0003ffff;
 			      *bin_instr |= immediate_val;
@@ -482,7 +523,7 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 
 	parse_newline();
 
-	write_file(bin_instr);
+	//write_file(bin_instr);
 }
 
 static void gen_move_instr(struct keyword_node* knode)
@@ -498,7 +539,9 @@ static void gen_move_instr(struct keyword_node* knode)
 	
 	parse_newline();	
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
 static void gen_loadi(struct keyword_node* knode)
@@ -514,7 +557,9 @@ static void gen_loadi(struct keyword_node* knode)
 
 	parse_newline();	
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 
 }
 
@@ -535,7 +580,9 @@ static void gen_addi(struct keyword_node* knode)
 
 	parse_newline();
 	
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
 static void gen_not(struct keyword_node* knode)
@@ -551,10 +598,12 @@ static void gen_not(struct keyword_node* knode)
 
 	parse_newline();
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
-static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr)
+static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 {
 	uint32_t bin_instr = 0;
 	switch (dyn_instr->ditype)
@@ -585,37 +634,57 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr)
 				    break;
 	}
 	free(dyn_instr);
-	write_file(bin_instr);
 	dyn_instr_counter++;
+	add_instr_struct(bin_instr, jmp_tag);
+	update_addrs();
+	cur_addr += 4;
+	//write_file(bin_instr);
 }
 
 // r29,r28 reserved for jump addresses and scaling
 static void gen_jump(struct keyword_node* knode)
 {
 	uint32_t bin_instr = 0;
-	parse_reg(&bin_instr, REG_DEST);
+	uint32_t scale_reg = 0;
+	bool scaling = false;
 	
-	uint8_t scale_reg = bin_instr >> DEST_REG_SHIFT_VAL;
+	// no scaling
+	if (get_current_token() && get_current_token()->type == TOKEN_DOLLAR)
+	{
+		parse_num(&bin_instr, ADDR_22);	
+	}
+	else
+	{
+		scaling = true;
+		parse_reg(&bin_instr, REG_DEST);
+
+		scale_reg = bin_instr >> DEST_REG_SHIFT_VAL;
+		bin_instr = 0;
+
+		parse_comma();
+
+		parse_num(&bin_instr, ADDR_22);
+	}
+	uint32_t address = bin_instr;
 	bin_instr = 0;
-
-	parse_comma();
-
-	parse_num(&bin_instr, ADDR_22);
-
-	uint32_t address = (!(bin_instr < cur_addr)) ? bin_instr + 16 : (bin_instr + dyn_instr_counter*4);
-	bin_instr = 0;
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 22));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0));
-	
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address), true);
+
+	if (scaling) 
+	{	
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 22), false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0), false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
+	}
+
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= ADDR_REG << DEST_REG_SHIFT_VAL;
 
 	parse_newline();
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
 static void gen_branches(struct keyword_node* knode)
@@ -632,7 +701,9 @@ static void gen_branches(struct keyword_node* knode)
 
 	parse_newline();
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, true);
+
+	//write_file(bin_instr);
 }
 
 static void gen_load(struct keyword_node* knode)
@@ -655,10 +726,10 @@ static void gen_load(struct keyword_node* knode)
 	uint32_t dest_reg = bin_instr >> DEST_REG_SHIFT_VAL;
 	bin_instr = 0;
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 18));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0));
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 18), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
 
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;	
 	bin_instr |= dest_reg << DEST_REG_SHIFT_VAL;
@@ -666,7 +737,9 @@ static void gen_load(struct keyword_node* knode)
 
 	parse_newline();
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
 static void gen_store(struct keyword_node* knode)
@@ -689,10 +762,10 @@ static void gen_store(struct keyword_node* knode)
 	uint32_t addr = bin_instr;
 	bin_instr = 0;
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 18));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0));
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, SCALE_REG, 18), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, SCALE_REG, scale_reg, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
 
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= ADDR_REG << OP1_REG_SHIFT_VAL;
@@ -700,7 +773,9 @@ static void gen_store(struct keyword_node* knode)
 
 	parse_newline();
 
-	write_file(bin_instr);
+	add_instr_struct(bin_instr, false);
+
+	//write_file(bin_instr);
 }
 
 void gen_pseudo_sub()
@@ -722,9 +797,9 @@ void gen_pseudo_sub()
 	parse_reg(&bin_instr, REG_DEST);
 	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1));
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0));
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0), false);
 
 	parse_newline();
 }
@@ -733,6 +808,7 @@ void gen_binary()
 {
 	init_keyword_hashset();
 	init_reg_hashset();
+	instr_list = (struct instr_struct**)malloc(sizeof(struct instr_struct*)*instr_list_len);
 	while (get_current_token())
 	{
 		token* current = consume_token();
@@ -757,7 +833,8 @@ void gen_binary()
 			case 0: 
 			case 1: uint32_t bin_instr = 0; 
 				bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-				write_file(bin_instr);
+				//write_file(bin_instr);
+				add_instr_struct(bin_instr, false);
 				token* t = consume_token();
 				if (!expect(t, TOKEN_NEWLINE)) error_unexpected_token(TOKEN_NEWLINE, t);
 				break;
@@ -784,7 +861,7 @@ void gen_binary()
 			default : exit(1);
 		}		
 	}
-
+	write_all();
 	free_reg_hashset();
 	free_keyword_hashset();
 }

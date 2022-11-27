@@ -188,16 +188,18 @@ static void exec(int flag)
 			case 7: cond_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				func = (instr >> 19) & 0x00000007;
 				offset = instr & 0x0007ffff;
+				offset = (offset >> 18) ? offset | 0xfff80000 : offset;
+				int32_t extracted_offset = (int32_t)offset;
 				switch (func)
 				{
 					case 0 : jmp_flag = (reg[cond_reg] == 0);
-						 pc = (jmp_flag) ? pc + offset : pc;
+						 pc = (jmp_flag) ? pc + extracted_offset : pc;
 						 break;
 					case 1 : jmp_flag = (reg[cond_reg] < 0);
-						 pc = (jmp_flag) ? pc + offset : pc;
+						 pc = (jmp_flag) ? pc + extracted_offset : pc;
 						 break;
 					case 2 : jmp_flag = (reg[cond_reg] > 0);
-						 pc = (jmp_flag) ? pc + offset : pc;
+						 pc = (jmp_flag) ? pc + extracted_offset : pc;
 						 break;
 				}	
 				break;

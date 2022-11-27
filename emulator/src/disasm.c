@@ -46,6 +46,7 @@ void disasm_instr(uint32_t instr)
 			break;
 		case 7: uint8_t func_3 = (instr >> 19) & 0x00000007;
 			uint32_t offset = instr & 0x0007ffff;
+			offset = (offset >> 18) ? offset | 0xfff80000 : offset;
 			switch (func_3)
 			{
 				case 0: printf("%s\t%%%s, %d", MNEMONICS[12], REG_STRINGS[op1_reg], offset);
