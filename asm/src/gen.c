@@ -154,11 +154,11 @@ static void add_instr_struct(uint32_t encoding, bool jmp_flag)
 static void update_addrs()
 {
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
-	{
+	{	
 		if (instr_list[i]->jmp_tag)
 		{
 			// correct jmp
-			if ((instr_list[i]->encoding >> OPCODE_SHIFT_VAL) == 6 && (instr_list[i]->encoding & 0x003fffff) < cur_addr)
+			if ((instr_list[i]->instr_addr) <= cur_addr && (instr_list[i]->encoding & 0x003fffff) > instr_list[i]->instr_addr)
 			{
 				uint32_t new_val = (instr_list[i]->encoding & 0x003fffff) + 4;
 				instr_list[i]->encoding = (instr_list[i]->encoding & 0xffc00000) | new_val;
@@ -649,7 +649,7 @@ static void gen_jump(struct keyword_node* knode)
 	bool scaling = false;
 	
 	// no scaling
-	if (get_current_token() && get_current_token()->type == TOKEN_DOLLAR)
+	if ((get_current_token() && (get_current_token()->type == TOKEN_DOLLAR || get_current_token()->type == TOKEN_IDNT)))
 	{
 		parse_num(&bin_instr, ADDR_22);	
 	}

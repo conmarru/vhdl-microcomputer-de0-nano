@@ -144,7 +144,6 @@ static void exec(int flag)
 			}
 		}
 		instr = (mem[pc] << 24) | (mem[pc+1] << 16) | (mem[pc+2] << 8) | mem[pc+3];
-
 		switch (instr >> OPCODE_SHIFT_VAL)
 		{
 			case 0: break;
@@ -182,7 +181,8 @@ static void exec(int flag)
 				if (immediate >> 16) immediate |= 0xffff8000;
 				reg[dest_reg] = reg[op1_reg] + immediate;
 				break;
-			case 6: pc = reg[29];
+			case 6: op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				pc = reg[29];
 				jmp_flag = true;
 				break;
 			case 7: cond_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -215,6 +215,7 @@ static void exec(int flag)
 				mem[reg[29]+1] = (uint8_t) ((reg[src_reg] & 0x00ff0000) >> 16);
 				mem[reg[29]+2] = (uint8_t) ((reg[src_reg] & 0x0000ff00) >> 8);
 				mem[reg[29]+3] = (uint8_t) reg[src_reg] & 0x000000ff;
+				printf("%x\n", reg[29]);
 				break;
 			case 10: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				 op1_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -297,7 +298,7 @@ int main(int argc, char** args)
 		}
 		if (flags & 0x02)
 		{
-			print_mem(0, 0x00000100, false, true);
+			print_mem(0, 0x00000404, false, true);
 		}
 	}
 	munmap(buf, fsize);
