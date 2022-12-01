@@ -7,6 +7,7 @@
 #include "../headers/scan.h"
 #include "../headers/def.h"
 #include "../headers/utils.h"
+#include "../headers/regs.h"
 
 #define KEYWORD_HASHSET_LEN 20
 #define REG_NUM 32
@@ -523,6 +524,10 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 
 	parse_newline();
 
+	add_instr_struct(bin_instr, false);
+
+	sim_instr(bin_instr);
+
 	//write_file(bin_instr);
 }
 
@@ -541,6 +546,8 @@ static void gen_move_instr(struct keyword_node* knode)
 
 	add_instr_struct(bin_instr, false);
 
+	sim_instr(bin_instr);
+
 	//write_file(bin_instr);
 }
 
@@ -558,6 +565,8 @@ static void gen_loadi(struct keyword_node* knode)
 	parse_newline();	
 
 	add_instr_struct(bin_instr, false);
+
+	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 
@@ -582,6 +591,8 @@ static void gen_addi(struct keyword_node* knode)
 	
 	add_instr_struct(bin_instr, false);
 
+	sim_instr(bin_instr);
+
 	//write_file(bin_instr);
 }
 
@@ -599,6 +610,8 @@ static void gen_not(struct keyword_node* knode)
 	parse_newline();
 
 	add_instr_struct(bin_instr, false);
+
+	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 }
@@ -638,6 +651,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 	add_instr_struct(bin_instr, jmp_tag);
 	update_addrs();
 	cur_addr += 4;
+	sim_instr(bin_instr);
 	//write_file(bin_instr);
 }
 
@@ -739,6 +753,8 @@ static void gen_load(struct keyword_node* knode)
 
 	add_instr_struct(bin_instr, false);
 
+	sim_instr(bin_instr);
+
 	//write_file(bin_instr);
 }
 
@@ -774,6 +790,8 @@ static void gen_store(struct keyword_node* knode)
 	parse_newline();
 
 	add_instr_struct(bin_instr, false);
+
+	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 }

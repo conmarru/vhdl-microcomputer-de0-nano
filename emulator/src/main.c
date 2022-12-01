@@ -215,7 +215,6 @@ static void exec(int flag)
 				mem[reg[29]+1] = (uint8_t) ((reg[src_reg] & 0x00ff0000) >> 16);
 				mem[reg[29]+2] = (uint8_t) ((reg[src_reg] & 0x0000ff00) >> 8);
 				mem[reg[29]+3] = (uint8_t) reg[src_reg] & 0x000000ff;
-				printf("%x\n", reg[29]);
 				break;
 			case 10: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				 op1_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
