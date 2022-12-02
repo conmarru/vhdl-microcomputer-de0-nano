@@ -8,6 +8,7 @@
 #include "../headers/def.h"
 #include "../headers/utils.h"
 #include "../headers/regs.h"
+#include "../headers/lbl.h"
 
 #define KEYWORD_HASHSET_LEN 20
 #define REG_NUM 32
@@ -152,6 +153,7 @@ static void add_instr_struct(uint32_t encoding, bool jmp_flag)
 	instr_list[instr_list_ptr++] = new_instr_struct(encoding, jmp_flag, cur_addr);
 }
 
+// fix branch shit
 static void update_addrs()
 {
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
@@ -159,11 +161,22 @@ static void update_addrs()
 		if (instr_list[i]->jmp_tag)
 		{
 			// correct jmp
-			if ((instr_list[i]->instr_addr) <= cur_addr && (instr_list[i]->encoding & 0x003fffff) > instr_list[i]->instr_addr)
+			if ((instr_list[i]->encoding >> OPCODE_SHIFT_VAL) == 3 && (instr_list[i]->instr_addr) <= cur_addr && (instr_list[i]->encoding & 0x003fffff) > cur_addr)
 			{
 				uint32_t new_val = (instr_list[i]->encoding & 0x003fffff) + 4;
 				instr_list[i]->encoding = (instr_list[i]->encoding & 0xffc00000) | new_val;
 			}	
+			else if (instr_list[i]->encoding >> OPCODE_SHIFT_VAL == 7)
+			{
+				int32_t offset = (instr_list[i]->encoding & 0x0003ffff);
+				if (offset >> 18) offset |= 0xfffc0000;
+				uint32_t target_addr = instr_list[i]->instr_addr + offset;
+				if (instr_list[i]->instr_addr < cur_addr && target_addr > cur_addr)
+				{
+					offset += 4;
+				}
+				instr_list[i]->encoding = (instr_list[i]->encoding & 0xfffc0000) | offset;
+			}
 		}
 	}
 }
@@ -434,7 +447,7 @@ static void parse_comma()
 	free_token(t);
 }
 
-static void parse_newline()
+static void parse_newline(bool lbl)
 {
 	token* t = consume_token();
 	if (!expect(t, TOKEN_NEWLINE))
@@ -442,7 +455,7 @@ static void parse_newline()
 		error_unexpected_token(TOKEN_NEWLINE, t);
 	}
 	free_token(t);	
-	cur_addr = cur_addr + 4;
+	if (!lbl) cur_addr = cur_addr + 4;
 	while (get_current_token() && get_current_token()->type == TOKEN_NEWLINE)
 	{
 		consume_token();
@@ -459,7 +472,7 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		label* lbl = get_label(t->value);
 		if (!lbl)
 		{
-			printf("ERROR: Referenced undefinied label\n");
+			printf("ERROR: Referenced undefined label\n");
 			exit(1);
 		}
 		immediate_val = lbl->addr;
@@ -490,7 +503,7 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		case IMM_17: immediate_val &= 0x00003fff;
 			     *bin_instr |= immediate_val;
 			     break;
-		case OFFSET_19: if (label_flag) 
+		case OFFSET_19: if (label_flag)
 				{
 					int dif = immediate_val - cur_addr;
 					immediate_val = (dif < 0) ? immediate_val - cur_addr + 4 : immediate_val - cur_addr;
@@ -512,17 +525,17 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= knode->func;
 
-	parse_reg(&bin_instr, REG_OP1);	
+	parse_reg(&bin_instr, REG_OP1);
 
 	parse_comma();
 
 	parse_reg(&bin_instr, REG_OP2);
-	
+
 	parse_comma();
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -535,14 +548,14 @@ static void gen_move_instr(struct keyword_node* knode)
 {
 	uint32_t bin_instr = 0;
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-	
+
 	parse_reg(&bin_instr, REG_OP1);
-	
+
 	parse_comma();
 
 	parse_reg(&bin_instr, REG_DEST);
-	
-	parse_newline();	
+
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -555,14 +568,14 @@ static void gen_loadi(struct keyword_node* knode)
 {
 	uint32_t bin_instr = 0;
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-		
+
 	parse_num(&bin_instr, IMM_22);
 
 	parse_comma();
 
-	parse_reg(&bin_instr, REG_DEST);	
+	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline();	
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -587,8 +600,8 @@ static void gen_addi(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline();
-	
+	parse_newline(false);
+
 	add_instr_struct(bin_instr, false);
 
 	sim_instr(bin_instr);
@@ -602,12 +615,12 @@ static void gen_not(struct keyword_node* knode)
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 
 	parse_reg(&bin_instr, REG_OP1);
-	
+
 	parse_comma();
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -615,7 +628,7 @@ static void gen_not(struct keyword_node* knode)
 
 	//write_file(bin_instr);
 }
-
+	
 static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 {
 	uint32_t bin_instr = 0;
@@ -649,6 +662,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 	free(dyn_instr);
 	dyn_instr_counter++;
 	add_instr_struct(bin_instr, jmp_tag);
+	update_lbls(cur_addr);
 	update_addrs();
 	cur_addr += 4;
 	sim_instr(bin_instr);
@@ -694,10 +708,10 @@ static void gen_jump(struct keyword_node* knode)
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= ADDR_REG << DEST_REG_SHIFT_VAL;
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
-
+	
 	//write_file(bin_instr);
 }
 
@@ -713,7 +727,7 @@ static void gen_branches(struct keyword_node* knode)
 
 	parse_num(&bin_instr, OFFSET_19);
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, true);
 
@@ -749,7 +763,7 @@ static void gen_load(struct keyword_node* knode)
 	bin_instr |= dest_reg << DEST_REG_SHIFT_VAL;
 	bin_instr |= ADDR_REG << OP1_REG_SHIFT_VAL;
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -787,7 +801,7 @@ static void gen_store(struct keyword_node* knode)
 	bin_instr |= ADDR_REG << OP1_REG_SHIFT_VAL;
 	bin_instr |= src_reg << DEST_REG_SHIFT_VAL;
 
-	parse_newline();
+	parse_newline(false);
 
 	add_instr_struct(bin_instr, false);
 
@@ -814,12 +828,14 @@ void gen_pseudo_sub()
 
 	parse_reg(&bin_instr, REG_DEST);
 	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
-	
+
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false);
 
-	parse_newline();
+	parse_newline(false);
 }
 
 void gen_binary()
@@ -839,7 +855,7 @@ void gen_binary()
 		{
 			if (current->type == TOKEN_IDNT && get_label(current->value))
 			{
-				parse_newline(current);	
+				parse_newline(true);	
 				continue;
 			}
 			else if (current->type == TOKEN_IDNT) printf("Invalid instruction found at line %d\n", current->line_num);
@@ -852,9 +868,8 @@ void gen_binary()
 			case 1: uint32_t bin_instr = 0; 
 				bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 				//write_file(bin_instr);
-				add_instr_struct(bin_instr, false);
-				token* t = consume_token();
-				if (!expect(t, TOKEN_NEWLINE)) error_unexpected_token(TOKEN_NEWLINE, t);
+				add_instr_struct(bin_instr, false);	
+				parse_newline(false);
 				break;
 			case 2: gen_move_instr(knode);
 				break;
