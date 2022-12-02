@@ -116,16 +116,16 @@ static void scan()
 	{
 		switch (input[pointer])
 		{
-			case '%' : append_token(new_token(NULL, 0, TOKEN_PERCENT, VAL_NUM, effective_line));
+			case '%' : append_token(new_token(NULL, 0, TOKEN_PERCENT, VAL_NUM, line));
 				   pointer++;
 				   break;
-			case '$' : append_token(new_token(NULL, 0, TOKEN_DOLLAR, VAL_NUM, effective_line));
+			case '$' : append_token(new_token(NULL, 0, TOKEN_DOLLAR, VAL_NUM, line));
 				   pointer++;
 				   break;
-			case ',' : append_token(new_token(NULL, 0, TOKEN_COMMA, VAL_NUM, effective_line));
+			case ',' : append_token(new_token(NULL, 0, TOKEN_COMMA, VAL_NUM, line));
 				   pointer++;
 				   break;
-			case '\n' : append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, effective_line));
+			case '\n' : append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, line));
 				    pointer++;
 				    line++;
 				    effective_line = (!lbl_flag) ? effective_line + 1 : effective_line;
@@ -149,21 +149,21 @@ static void scan()
 				   }
 				   else 
 				   {
-					   printf("ERROR: Invalid identifier at line %d\n", effective_line);
+					   printf("ERROR: Invalid identifier at line %d\n", line);
 					   exit(1);
 				   }
 				   break;
 			default : if (isalpha(input[pointer]))
 				  {
 				  	char* val = scan_identifier(&pointer);
-					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, effective_line));
+					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
 					break;
 				  }
 				  else if (input[pointer] == '0' && input[pointer+1] == 'x')
 				  {
 					  pointer += 2;
 					  int val = scan_hexnum(&pointer);
-					  append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, effective_line));
+					  append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					  break;
 				  }
 				  else if (is_digit(input[pointer]) || input[pointer] == '-')
@@ -176,7 +176,7 @@ static void scan()
 						
 					}
 					int val = scan_num(&pointer, sign_flag);
-					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, effective_line));
+					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					break;
 				  } 
 				  else

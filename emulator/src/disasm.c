@@ -38,8 +38,8 @@ void disasm_instr(uint32_t instr)
 					break;
 			}
 			break;
-		case 5: immediate = instr & 0x00007fff;
-			if (immediate >> 16) immediate |= 0xffff8000;
+		case 5: immediate = instr & 0x0001ffff;
+			if (immediate >> 16) immediate |= 0xfffe0000;
 			printf("%s\t%%%s, $%d, %%%s", MNEMONICS[opcode], REG_STRINGS[op1_reg], immediate, REG_STRINGS[dest_reg]);
 			break;
 		case 6: printf("%s\t%%%s", MNEMONICS[11], REG_STRINGS[29]);
@@ -49,17 +49,17 @@ void disasm_instr(uint32_t instr)
 			offset = (offset >> 18) ? offset | 0xfff80000 : offset;
 			switch (func_3)
 			{
-				case 0: printf("%s\t%%%s, %d", MNEMONICS[12], REG_STRINGS[op1_reg], offset);
+				case 0: printf("%s\t%%%s, %d", MNEMONICS[12], REG_STRINGS[dest_reg], offset);
 					break;
-				case 1: printf("%s\t%%%s, %d", MNEMONICS[13], REG_STRINGS[op1_reg], offset);
+				case 1: printf("%s\t%%%s, %d", MNEMONICS[13], REG_STRINGS[dest_reg], offset);
 					break;
-				case 2: printf("%s\t%%%s, %d", MNEMONICS[14], REG_STRINGS[op1_reg], offset);
+				case 2: printf("%s\t%%%s, %d", MNEMONICS[14], REG_STRINGS[dest_reg], offset);
 					break;
 			}
 			break;
-		case 8: printf("%s\t%%%s, %%%s", MNEMONICS[15], REG_STRINGS[29], REG_STRINGS[dest_reg]);
+		case 8: printf("%s\t%%%s, %%%s", MNEMONICS[15], REG_STRINGS[op1_reg], REG_STRINGS[dest_reg]);
 			break;	
-		case 9: printf("%s\t%%%s, %%%s", MNEMONICS[16], REG_STRINGS[dest_reg], REG_STRINGS[29]);
+		case 9: printf("%s\t%%%s, %%%s", MNEMONICS[16], REG_STRINGS[op1_reg], REG_STRINGS[dest_reg]);
 			break;
 		case 10: printf("%s\t%%%s, %%%s", MNEMONICS[10], REG_STRINGS[op1_reg], REG_STRINGS[dest_reg]);
 			 break;

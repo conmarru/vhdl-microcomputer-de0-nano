@@ -1,3 +1,3 @@
 #!/bin/sh
 
-../emulator/emu -i output -I
+../emulator/emu -i $1 -I
