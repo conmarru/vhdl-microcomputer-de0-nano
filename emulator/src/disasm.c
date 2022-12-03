@@ -42,7 +42,7 @@ void disasm_instr(uint32_t instr)
 			if (immediate >> 16) immediate |= 0xfffe0000;
 			printf("%s\t%%%s, $%d, %%%s", MNEMONICS[opcode], REG_STRINGS[op1_reg], immediate, REG_STRINGS[dest_reg]);
 			break;
-		case 6: printf("%s\t%%%s", MNEMONICS[11], REG_STRINGS[29]);
+		case 6: printf("%s\t%%%s", MNEMONICS[11], REG_STRINGS[dest_reg]);
 			break;
 		case 7: uint8_t func_3 = (instr >> 19) & 0x00000007;
 			uint32_t offset = instr & 0x0007ffff;

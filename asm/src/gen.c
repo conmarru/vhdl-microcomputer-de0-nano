@@ -43,7 +43,8 @@ typedef enum {
 	DYN_INSTR_SHL,
 	DYN_INSTR_NOT,
 	DYN_INSTR_LOAD,
-	DYN_INSTR_STORE
+	DYN_INSTR_STORE,
+	DYN_INSTR_JMP
 } dyn_instr_type;
 
 struct dyn_instr_struct {
@@ -343,6 +344,8 @@ static void init_keyword_hashset()
 	add_keyword("sub", 32, 0);
 	add_keyword("push", 33, 0);
 	add_keyword("pop", 34, 0);
+	add_keyword("call", 35, 0);
+	add_keyword("ret", 36, 0);
 }
 
 static token* consume_token()
@@ -520,6 +523,8 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		case ADDR_18: immediate_val &= 0x0003ffff;
 			      *bin_instr |= immediate_val;
 			      break;
+		default: *bin_instr |= immediate_val;
+			 break;
 	}
 	free_token(t);
 }
@@ -671,7 +676,11 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 				      bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
 				      bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				      break;
+		case DYN_INSTR_JMP: bin_instr |= 6 << OPCODE_SHIFT_VAL;
+				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				    break;
 	}
+
 	free(dyn_instr);
 	dyn_instr_counter++;
 	add_instr_struct(bin_instr, jmp_tag);
@@ -889,6 +898,29 @@ void gen_pseudo_pop()
 	parse_newline(false);
 }
 
+void gen_pseudo_call()
+{
+	uint32_t addr = 0;
+	parse_num(&addr, IMM_22);
+
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, cur_addr+20), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, 29, 0, STACK_POINTER_REG, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -4), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, addr+8), true);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false);
+
+	parse_newline(false);
+}
+
+void gen_pseudo_ret()
+{
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false);
+
+	parse_newline(false);
+}
+
 void gen_binary()
 {
 	init_keyword_hashset();
@@ -945,6 +977,10 @@ void gen_binary()
 			case 33: gen_pseudo_push();
 				 break;
 			case 34: gen_pseudo_pop();
+				 break;
+			case 35: gen_pseudo_call();
+				 break;
+			case 36: gen_pseudo_ret();
 				 break;
 			default : exit(1);
 		}		

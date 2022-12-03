@@ -181,8 +181,8 @@ static void exec(int flag)
 				if (immediate >> 16) immediate |= 0xfffe0000;
 				reg[dest_reg] = reg[op1_reg] + immediate;
 				break;
-			case 6: op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				pc = reg[29];
+			case 6: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				pc = reg[dest_reg];
 				jmp_flag = true;
 				break;
 			case 7: cond_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
