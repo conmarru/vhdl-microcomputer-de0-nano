@@ -1,0 +1,5 @@
+loadi	$2, %r0
+shl	%r0, %r0
+shr	%r0, %r0
+shlb	%r0, %r0
+shrb	%r0, %r0

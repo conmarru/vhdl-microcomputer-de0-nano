@@ -9,8 +9,10 @@ ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
 ADDI (00101|<destination:5>|<operand1:5>|<immediate:17>) 
 
 Shift Operationen
-SHR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
-SHL (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
+SHR (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00000)
+SHL (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00001)
+SHRB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00010)
+SHLB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00011)
 
 Logische Operationen
 AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)

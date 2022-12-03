@@ -165,13 +165,9 @@ static void exec(int flag)
 				{
 					case 0: reg[dest_reg] = reg[op1_reg] + reg[op2_reg];
 						break;
-					case 1: reg[dest_reg] = reg[op1_reg] >> reg[op2_reg];
+					case 1: reg[dest_reg] = reg[op1_reg] & reg[op2_reg];
 						break;
-					case 2: reg[dest_reg] = reg[op1_reg] << reg[op2_reg];
-						break;
-					case 3: reg[dest_reg] = reg[op1_reg] & reg[op2_reg];
-						break;
-					case 4: reg[dest_reg] = reg[op1_reg] | reg[op2_reg];
+					case 2: reg[dest_reg] = reg[op1_reg] | reg[op2_reg];
 						break;
 				}
 				break;
@@ -223,6 +219,20 @@ static void exec(int flag)
 				 op1_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				 reg[dest_reg] = ~reg[op1_reg];
 				 break;
+			case 11: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				 op1_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				 func = instr & EXTRACT_MASK;
+				 switch (func)
+				 {
+					 case 0: reg[dest_reg] = reg[op1_reg] >> 1;
+						 break;
+					 case 1: reg[dest_reg] = reg[op1_reg] << 1;
+						 break;
+					 case 2: reg[dest_reg] = reg[op1_reg] >> 8;
+						 break;
+					 case 3: reg[dest_reg] = reg[op1_reg] << 8;
+						 break;
+				 }
 		}
 		pc = (jmp_flag) ? pc : pc + 4;
 		jmp_flag = false;	
