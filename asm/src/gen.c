@@ -9,6 +9,7 @@
 #include "../headers/utils.h"
 #include "../headers/regs.h"
 #include "../headers/lbl.h"
+#include "../headers/eval.h"
 
 #define KEYWORD_HASHSET_LEN 20
 #define REG_NUM 32
@@ -157,7 +158,6 @@ static void add_instr_struct(uint32_t encoding, bool jmp_flag)
 	instr_list[instr_list_ptr++] = new_instr_struct(encoding, jmp_flag, cur_addr);
 }
 
-// fix branch shit
 static void update_addrs()
 {
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
@@ -350,49 +350,6 @@ static void init_keyword_hashset()
 	add_keyword("ret", 36, 0);
 }
 
-static token* consume_token()
-{
-	if (!head.next) return NULL;	
-	struct token_stream_node* node = head.next;
-	head.next = node->next;
-	if (node->next) node->next->prev = &head;
-	token* t = node->tkn; 
-	free(node);
-
-	return t;
-}
-
-static token* get_current_token()
-{
-	return (head.next) ? head.next->tkn : NULL;
-}
-
-static bool expect(token* t, token_type ttype)
-{
-	if (t)
-	{
-		return (t->type == ttype);
-	}
-	else
-	{
-		return false; 
-	}
-}
-
-static void error_unexpected_token(token_type expected, token* current)
-{
-	if (current)
-	{
-		printf("Error: Expected %s, Parsed %s at line %d\n", TOKEN_TYPE_NAMES[expected], TOKEN_TYPE_NAMES[current->type], current->line_num);
-		free(current);
-	}
-	else
-	{
-		printf("Error: Expected %s, Parsed NULL\n", TOKEN_TYPE_NAMES[expected]);
-	}
-	exit(1);
-}
-
 static void write_file(uint32_t instr)
 {
 	uint8_t p1 = instr >> 24;
@@ -476,6 +433,7 @@ static void parse_num(uint32_t* bin_instr, int bits)
 {
 	uint32_t immediate_val;
 	bool label_flag = false;
+	bool sign_flag = false;
 	token* t = consume_token();
 	if (t->type == TOKEN_IDNT)
 	{
@@ -488,6 +446,17 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		immediate_val = lbl->addr;
 		label_flag = true;
 	}
+	else if (t->type == TOKEN_LPAREN)
+	{
+		struct ast_node* root = parse_expr();
+		immediate_val = eval(root);
+		t = consume_token();
+		if (!expect(t, TOKEN_RPAREN))
+		{
+			error_unexpected_token(TOKEN_RPAREN, t);
+		}
+		// TODO: free ast
+	}
 	else
 	{
 
@@ -498,12 +467,18 @@ static void parse_num(uint32_t* bin_instr, int bits)
 		free_token(t);
 
 		t = consume_token();
+		if (check_ttype(t, TOKEN_MINUS))
+		{
+			sign_flag = true;
+			t = consume_token();
+		}
+
 		if (!expect(t, TOKEN_NUM))
 		{
 			error_unexpected_token(TOKEN_NUM, t);
 		}
 
-		immediate_val = t->num_value;
+		immediate_val = (sign_flag) ? -t->num_value : t->num_value;
 	}
 	switch (bits)
 	{

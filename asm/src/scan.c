@@ -7,7 +7,7 @@
 #include "../headers/utils.h"
 #include "../headers/lbl.h"
 
-char* TOKEN_TYPE_NAMES[] = {"Identifier", "Number", "Percent", "Dollar", "Comma", "Newline"};
+char* TOKEN_TYPE_NAMES[] = {"Identifier", "Number", "Percent", "Dollar", "Comma", "Newline", "LParen", "RParen", "Plus", "Star", "Minus", "Slash"};
 static const int HEX_DIGITVALS[6] = { 10, 11, 12, 13, 14, 15 };
 
 struct token_stream_node head = {NULL, &head, NULL};
@@ -90,6 +90,55 @@ static int scan_num(int* pointer, bool sign_flag)
 	return (!sign_flag) ? val : -val;
 }
 
+token* consume_token()
+{
+	if (!head.next) return NULL;	
+	struct token_stream_node* node = head.next;
+	head.next = node->next;
+	if (node->next) node->next->prev = &head;
+	token* t = node->tkn; 
+	free(node);
+
+	return t;
+}
+
+token* peek()
+{
+	if (!head.next) return NULL;
+	return head.next->tkn;
+}
+
+token* get_current_token()
+{
+	return (head.next) ? head.next->tkn : NULL;
+}
+
+bool expect(token* t, token_type ttype)
+{
+	if (t)
+	{
+		return (t->type == ttype);
+	}
+	else
+	{
+		return false; 
+	}
+}
+
+void error_unexpected_token(token_type expected, token* current)
+{
+	if (current)
+	{
+		printf("Error: Expected %s, Parsed %s at line %d\n", TOKEN_TYPE_NAMES[expected], TOKEN_TYPE_NAMES[current->type], current->line_num);
+		free(current);
+	}
+	else
+	{
+		printf("Error: Expected %s, Parsed NULL\n", TOKEN_TYPE_NAMES[expected]);
+	}
+	exit(1);
+}
+
 bool is_hexdigit(char c)
 {
 	return (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f');
@@ -123,6 +172,24 @@ static void scan()
 				   pointer++;
 				   break;
 			case ',' : append_token(new_token(NULL, 0, TOKEN_COMMA, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case '+' : append_token(new_token(NULL, 0, TOKEN_PLUS, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case '-' : append_token(new_token(NULL, 0, TOKEN_MINUS, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case '*' : append_token(new_token(NULL, 0, TOKEN_STAR, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case '/' : append_token(new_token(NULL, 0, TOKEN_SLASH, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case '(' : append_token(new_token(NULL, 0, TOKEN_LPAREN, VAL_NUM, line));
+				   pointer++;
+				   break;
+			case ')' : append_token(new_token(NULL, 0, TOKEN_RPAREN, VAL_NUM, line));
 				   pointer++;
 				   break;
 			case '\n' : append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, line));
@@ -168,7 +235,7 @@ static void scan()
 				  }
 				  else if (is_digit(input[pointer]) || input[pointer] == '-')
 				  {
-					bool sign_flag = false;
+					bool sign_flag = false; // sign_flag now obsolete, TODO: clean up 
 					if (input[pointer] == '-')
 					{
 						sign_flag = true;
@@ -195,6 +262,15 @@ void init_scanner(char* buf, int length)
 	strcpy(input, buf);
 	init_label_hashset();
 	scan();
+}
+
+bool check_ttype(token* t, token_type ttype)
+{
+	if (t)
+	{
+		return t->type == ttype;
+	}
+	return false;
 }
 
 void free_token(token* t)
