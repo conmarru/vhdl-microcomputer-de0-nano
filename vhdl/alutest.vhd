@@ -20,6 +20,7 @@ architecture testbench of aluTest is
     signal C: signed(31 downto 0);
 
     constant op_add : signed(4 downto 0) := "00000";
+    constant op_mul : signed(4 downto 0) := "00110";
 
     constant op_and : signed(4 downto 0) := "00011";
     constant op_or  : signed(4 downto 0) := "00100";
@@ -27,6 +28,8 @@ architecture testbench of aluTest is
 
     constant op_shr : signed(4 downto 0) := "00001";
     constant op_shl : signed(4 downto 0) := "00010";
+    constant op_sr8 : signed(4 downto 0) := "00111";
+    constant op_sl8 : signed(4 downto 0) := "01000";
 
 begin
     dlI: Alu
@@ -34,14 +37,19 @@ begin
 
     stiP: process is
     begin
-        A <= (others => '0');
+        A <= (0 => '1', others => '0');
         B <= (others => '1');
         opcode <= op_add;
         wait for 20 ms;
 
-        A <= to_signed(8, 32);
-        B <= to_signed(7, 32);
-        opcode <= op_add;
+        A <= to_signed(0, 32);
+        B <= to_signed(0, 32);
+        opcode <= op_and;
+        wait for 20 ms;
+
+        A <= to_signed(0, 32);
+        B <= to_signed(1, 32);
+        opcode <= op_and;
         wait for 20 ms;
 
         A <= to_signed(1, 32);
@@ -65,9 +73,26 @@ begin
         wait for 20 ms;
 
         A <= to_signed(1, 32);
+        B <= to_signed(1, 32);
+        opcode <= op_or;
+        wait for 20 ms;
+
+        A <= to_signed(255, 32);
+        opcode <= op_not;
+        wait for 20 ms;
+
+        A <= to_signed(255, 32);
+        opcode <= op_not;
+        wait for 20 ms;
+
+        A <= (others => '1');
         opcode <= op_not;
         wait for 20 ms;
         
+        A <= (others => '0');
+        opcode <= op_not;
+        wait for 20 ms;
+
         A <= (others => '1');
         opcode <= op_shl;
         wait for 20 ms;
@@ -75,7 +100,25 @@ begin
         A <= (others => '1');
         opcode <= op_shr;
         wait for 20 ms;
-        wait;
+       
+        -- A <= to_signed(2, 32);
+        -- B <= to_signed(2**15, 32);
+        -- opcode <= op_mul;
+        -- wait for 20 ms;
 
+        -- A <= to_signed(2, 32);
+        -- B <= to_signed(8, 32);
+        -- opcode <= op_mul;
+        -- wait for 20 ms;
+        
+        A <= (others => '1');
+        opcode <= op_sr8;
+        wait for 20 ms;
+
+        A <= (others => '1');
+        opcode <= op_sl8;
+        wait for 20 ms;
+        wait;
+        
     end process stiP;
 end architecture testbench;

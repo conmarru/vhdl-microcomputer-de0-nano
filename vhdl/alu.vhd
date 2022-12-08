@@ -19,6 +19,9 @@ architecture behave of alu is
 
     constant op_shr : signed(4 downto 0) := "00001";
     constant op_shl : signed(4 downto 0) := "00010";
+    constant op_sr8 : signed(4 downto 0) := "00111";
+    constant op_sl8 : signed(4 downto 0) := "01000";
+    -- constant op_mul : signed(4 downto 0) := "00110"; zu anspruchsvoll / macht Probleme
 
 
 begin
@@ -29,10 +32,11 @@ begin
         when  op_or     => C <= A or B;
         when  op_not    => C <= not A;
         when  op_add    => C <= A + B;
-        --when  op_shr    => C <= "00000000"& A(31 downto 8);-- shr B;
-        --when  op_shl    => C <= "00000000"& A(23 downto 0);-- shl B;
+        --when  op_mul    => C <= A(15 downto 0) * B(15 downto 0); zu anspruchsvoll / macht Probleme
         when op_shr     => C <= A srl 1;
         when op_shl     => C <= A sll 1;
+        when op_sr8     => C <= "00000000"& A(31 downto 8); --shr Byte;
+        when op_sl8     => C <= A(23 downto 0) &"00000000"; --shl Byte;
 
         when others     => C <= (others=>'-');
 
