@@ -522,9 +522,9 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -542,9 +542,9 @@ static void gen_move_instr(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -562,9 +562,9 @@ static void gen_loadi(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -587,9 +587,9 @@ static void gen_addi(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -607,16 +607,16 @@ static void gen_not(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 }
 	
-static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
+static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag)
 {
 	uint32_t bin_instr = 0;
 	switch (dyn_instr->ditype)
@@ -665,9 +665,12 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag)
 	free(dyn_instr);
 	dyn_instr_counter++;
 	add_instr_struct(bin_instr, jmp_tag);
-	update_lbls(cur_addr);
-	update_addrs();
-	cur_addr += 4;
+	if (!first_flag) 
+	{
+		update_lbls(cur_addr);
+		update_addrs();
+		cur_addr += 4;
+	}
 	sim_instr(bin_instr);
 	//write_file(bin_instr);
 }
@@ -699,28 +702,28 @@ static void gen_jump(struct keyword_node* knode)
 	uint32_t address = bin_instr;
 	bin_instr = 0;
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address), true);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address), true, false);
 
 	if (scaling) 
 	{	
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= ADDR_REG << DEST_REG_SHIFT_VAL;
 
+	add_instr_struct(bin_instr, false);
+
 	parse_newline(false);
 
-	add_instr_struct(bin_instr, false);
-	
 	//write_file(bin_instr);
 }
 
@@ -736,9 +739,9 @@ static void gen_branches(struct keyword_node* knode)
 
 	parse_num(&bin_instr, OFFSET_19);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, true);
+
+	parse_newline(false);
 
 	//write_file(bin_instr);
 }
@@ -768,23 +771,23 @@ static void gen_load(struct keyword_node* knode)
 	uint32_t dest_reg = bin_instr >> DEST_REG_SHIFT_VAL;
 	bin_instr = 0;
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false, false);
 	if (scaling)
 	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;	
 	bin_instr |= dest_reg << DEST_REG_SHIFT_VAL;
 	bin_instr |= ADDR_REG << OP1_REG_SHIFT_VAL;
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -816,23 +819,23 @@ static void gen_store(struct keyword_node* knode)
 	uint32_t addr = bin_instr;
 	bin_instr = 0;
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false, false);
 	if (scaling)
 	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 	bin_instr |= ADDR_REG << DEST_REG_SHIFT_VAL;
 	bin_instr |= src_reg << OP1_REG_SHIFT_VAL;
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 
@@ -851,9 +854,9 @@ void gen_shift(struct keyword_node* knode)
 
 	parse_reg(&bin_instr, REG_DEST);
 
-	parse_newline(false);
-
 	add_instr_struct(bin_instr, false);
+
+	parse_newline(false);
 
 	sim_instr(bin_instr);
 }
@@ -877,11 +880,11 @@ void gen_pseudo_sub()
 	parse_reg(&bin_instr, REG_DEST);
 	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, reg_op1, reg_op2, reg_dest, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, reg_op2, 0, reg_op2, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, reg_op2, 0, reg_op2, 1), false, true);
 
 	parse_newline(false);
 }
@@ -891,8 +894,8 @@ void gen_pseudo_push()
 	uint32_t bin_instr = 0;
 	parse_reg(&bin_instr, REG_OP1);
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, bin_instr >> OP1_REG_SHIFT_VAL, 0, STACK_POINTER_REG, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -4), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, bin_instr >> OP1_REG_SHIFT_VAL, 0, STACK_POINTER_REG, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -4), false, true);
 
 	parse_newline(false);
 }
@@ -902,8 +905,8 @@ void gen_pseudo_pop()
 	uint32_t bin_instr = 0;
 	parse_reg(&bin_instr, REG_OP1);
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, bin_instr >> OP1_REG_SHIFT_VAL, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, bin_instr >> OP1_REG_SHIFT_VAL, 0), false, true);
 
 	parse_newline(false);
 }
@@ -913,20 +916,20 @@ void gen_pseudo_call()
 	uint32_t addr = 0;
 	parse_num(&addr, IMM_22);
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, cur_addr+20), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, 29, 0, STACK_POINTER_REG, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -4), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, addr+8), true);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, cur_addr+20), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, 29, 0, STACK_POINTER_REG, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -4), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, addr+12), true, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, true);
 
 	parse_newline(false);
 }
 
 void gen_pseudo_ret()
 {
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, true);
 
 	parse_newline(false);
 }
