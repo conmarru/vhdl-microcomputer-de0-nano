@@ -28,7 +28,7 @@ eval.o: $(SRC_DIR)/eval.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/eval.c
 
 test : 
-	./asm test.txt
+	./run-tests.sh
 
 clean: 
 	rm *.o; rm asm
