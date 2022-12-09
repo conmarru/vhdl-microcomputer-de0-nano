@@ -201,7 +201,6 @@ static void exec(int flag)
 				break;
 			case 8: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				printf("%d, %d\n", dest_reg, op1_reg);
 				int32_t b1 = ((int32_t)mem[reg[op1_reg]]) << 24;
 				int32_t b2 = ((int32_t)mem[reg[op1_reg]+1]) << 16;
 				int32_t b3 = ((int32_t)mem[reg[op1_reg]+2]) << 8;
