@@ -45,7 +45,11 @@ typedef enum {
 	DYN_INSTR_NOT,
 	DYN_INSTR_LOAD,
 	DYN_INSTR_STORE,
-	DYN_INSTR_JMP
+	DYN_INSTR_JMP,
+	DYN_INSTR_BRE,
+	DYN_INSTR_AND,
+	DYN_INSTR_SHR,
+	DYN_INSTR_MOVE
 } dyn_instr_type;
 
 struct dyn_instr_struct {
@@ -348,6 +352,7 @@ static void init_keyword_hashset()
 	add_keyword("pop", 34, 0);
 	add_keyword("call", 35, 0);
 	add_keyword("ret", 36, 0);
+	add_keyword("mul", 37, 0);
 }
 
 static void write_file(uint32_t instr)
@@ -660,6 +665,26 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 		case DYN_INSTR_JMP: bin_instr |= 6 << OPCODE_SHIFT_VAL;
 				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				    break;
+		case DYN_INSTR_BRE: bin_instr |= 7 << OPCODE_SHIFT_VAL;
+				    bin_instr |= 0;
+				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				    bin_instr |= 0x0007ffff & dyn_instr->num_val;
+				    break;
+		case DYN_INSTR_AND: bin_instr |= 4 << OPCODE_SHIFT_VAL;
+				    bin_instr |= 1;
+				     bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_op2 << OP2_REG_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				     break;
+		case DYN_INSTR_SHR: bin_instr |= 11 << OPCODE_SHIFT_VAL;
+				    bin_instr |= 0;
+				    bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
+				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				    break;
+		case DYN_INSTR_MOVE: bin_instr |= 2 << OPCODE_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
+				     bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
+				     break;
 	}
 
 	free(dyn_instr);
@@ -842,7 +867,7 @@ static void gen_store(struct keyword_node* knode)
 	//write_file(bin_instr);
 }
 
-void gen_shift(struct keyword_node* knode)
+static void gen_shift(struct keyword_node* knode)
 {
 	uint32_t bin_instr = 0;
 	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
@@ -861,7 +886,7 @@ void gen_shift(struct keyword_node* knode)
 	sim_instr(bin_instr);
 }
 
-void gen_pseudo_sub()
+static void gen_pseudo_sub()
 {
 	uint32_t bin_instr = 0;
 
@@ -889,7 +914,7 @@ void gen_pseudo_sub()
 	parse_newline(false);
 }
 
-void gen_pseudo_push()
+static void gen_pseudo_push()
 {
 	uint32_t bin_instr = 0;
 	parse_reg(&bin_instr, REG_OP1);
@@ -900,7 +925,7 @@ void gen_pseudo_push()
 	parse_newline(false);
 }
 
-void gen_pseudo_pop()
+static void gen_pseudo_pop()
 {
 	uint32_t bin_instr = 0;
 	parse_reg(&bin_instr, REG_OP1);
@@ -911,7 +936,7 @@ void gen_pseudo_pop()
 	parse_newline(false);
 }
 
-void gen_pseudo_call()
+static void gen_pseudo_call()
 {
 	uint32_t addr = 0;
 	parse_num(&addr, IMM_22);
@@ -925,13 +950,48 @@ void gen_pseudo_call()
 	parse_newline(false);
 }
 
-void gen_pseudo_ret()
+static void gen_pseudo_ret()
 {
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 4), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, true);
 
 	parse_newline(false);
+}
+
+static void gen_pseudo_mul()
+{	
+	uint32_t bin_instr = 0;
+	uint32_t start_addr = cur_addr;
+
+	parse_reg(&bin_instr, REG_OP1);
+	uint32_t reg_op1 = bin_instr >> OP1_REG_SHIFT_VAL;
+	bin_instr = 0;
+
+	parse_comma();
+
+	parse_reg(&bin_instr, REG_OP2);
+	uint32_t reg_op2 = bin_instr >> OP2_REG_SHIFT_VAL;
+	bin_instr = 0;
+
+	parse_comma();
+
+	parse_reg(&bin_instr, REG_DEST);
+	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
+
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 26, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 28, 1), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, reg_op2, 32), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, reg_op2, 28, 27, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 27, 8), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, reg_op1, 26, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHR, reg_op2, 0, reg_op2, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, reg_op1, 0, reg_op1, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, start_addr+8), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, 26, 0, reg_dest, 0), false, true);
+
+	parse_newline(false);	
 }
 
 void gen_binary()
@@ -997,7 +1057,10 @@ void gen_binary()
 				 break;
 			case 36: gen_pseudo_ret();
 				 break;
-			default : exit(1);
+			case 37: gen_pseudo_mul();
+				 break;
+			default : printf("ERROR: Couldn't generate instruction code\n");
+				  exit(1);
 		}		
 	}
 	write_all();
