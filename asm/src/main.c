@@ -4,27 +4,69 @@
 #include <stdbool.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <getopt.h>
 #include "../headers/def.h"
 #include "../headers/scan.h"
 #include "../headers/gen.h"
 
+#define MAX_FILENAME 100
+
 FILE* input_file = NULL;
 FILE* output_file = NULL;
 
+void parse_args(int argc, char** args, char* filename_in, char* filename_out)
+{
+	int c = 0;
+	opterr = 0;
+	while (1)
+	{
+		static struct option long_options[] = {
+			{"input", required_argument, NULL, 'i'},
+			{"output", required_argument, NULL, 'o'},
+			{NULL, 0, NULL, 0}
+		};
+
+		int option_index = 0;
+		c = getopt_long(argc, args, "i:o:", long_options, &option_index);
+		
+		if (c == -1)
+		{
+			return;
+		}
+
+		switch (c)
+		{
+			case 'i': memcpy(filename_in, optarg, MAX_FILENAME);
+				  break;
+			case 'o': memcpy(filename_out, optarg, MAX_FILENAME);
+				  break;
+			case '?': printf("usage: ./asm -i <input_file> [ -o <output_file> ]\n");
+				  exit(1);
+		}
+		
+	}
+}
+
 int main(int argc, char** args)
 {
-	if (argc != 2)
-	{
-		return 1;
-	}
-	input_file = fopen(args[1], "r");
-	output_file = fopen("output", "wb");	
+	char* input_file_name = (char*)calloc(MAX_FILENAME+1, sizeof(char));
+	char* output_file_name = (char*)calloc(MAX_FILENAME+1, sizeof(char));
+	parse_args(argc, args, input_file_name, output_file_name);
+	input_file = fopen(input_file_name, "r");
+	if (output_file_name[0] != 0x00) output_file = fopen(output_file_name, "wb");	
+	else output_file = fopen("output", "wb");
+	free(input_file_name);
+	free(output_file_name);
 	if (!output_file)
 	{
 		printf("ERROR: Couldn't create output file\n");
 		exit(1);
 	}
-	if (input_file == NULL) return 1;
+	if (input_file == NULL)
+	{
+		printf("ERROR: Couldn't open input file\n");
+		exit(1);
+	}
 	int ifd = fileno(input_file);
 	int fsize = lseek(ifd, 0, SEEK_END);
 
