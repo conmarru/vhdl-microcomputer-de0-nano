@@ -643,7 +643,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 		case DYN_INSTR_SHL: bin_instr |= 11 << OPCODE_SHIFT_VAL;
 				    bin_instr |= 1;
 				    bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
-				    bin_instr |= dyn_instr->reg_op2 << OP2_REG_SHIFT_VAL;
+				    bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				    break;
 		case DYN_INSTR_SHLB: bin_instr |= 11 << OPCODE_SHIFT_VAL;
 				     bin_instr |= 3;
@@ -979,15 +979,18 @@ static void gen_pseudo_mul()
 	parse_reg(&bin_instr, REG_DEST);
 	uint32_t reg_dest = bin_instr >> DEST_REG_SHIFT_VAL;
 
+	
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, reg_op1, 0, 25, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, reg_op2, 0, 24, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 26, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 28, 1), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, reg_op2, 32), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, reg_op2, 28, 27, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 24, 32), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, 24, 28, 27, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 27, 8), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, reg_op1, 26, 0), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHR, reg_op2, 0, reg_op2, 0), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, reg_op1, 0, reg_op1, 0), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, start_addr+8), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, 25, 26, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHR, 24, 0, 24, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, 25, 0, 25, 0), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, start_addr+12), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, 26, 0, reg_dest, 0), false, true);
 
