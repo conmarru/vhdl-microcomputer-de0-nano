@@ -281,3 +281,14 @@ void free_token(token* t)
 	}
 	free(t);
 }
+
+void free_token_stream()
+{
+	while (head.next)
+	{
+		struct token_stream_node* node = head.next;
+		head.next = node->next;
+		if (node->tkn) free_token(node->tkn);
+		free(node);
+	}
+}

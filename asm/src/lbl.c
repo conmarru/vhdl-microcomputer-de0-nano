@@ -83,4 +83,32 @@ void update_lbls(uint32_t cur_addr)
 	}
 }
 
+static void free_lbl(label* lbl)
+{
+	if (lbl->name) free(lbl->name);
+	free(lbl);
+
+}
+
+static void free_lbl_node(struct label_node* node)
+{
+	if (node->lbl) free_lbl(node->lbl);
+	free(node);
+}
+
+void free_lbl_hashset()
+{
+	for (int i = 0; i < LABEL_HASHSET_SIZE; i++)
+	{
+		struct label_node* head = label_hashset[i];
+		while (head->next)
+		{
+			struct label_node* node = head->next;
+			head->next = node->next;
+			free_lbl_node(node);
+		}
+		free_lbl_node(head);
+	}
+}
+
 

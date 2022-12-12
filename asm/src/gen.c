@@ -162,6 +162,14 @@ static void add_instr_struct(uint32_t encoding, bool jmp_flag)
 	instr_list[instr_list_ptr++] = new_instr_struct(encoding, jmp_flag, cur_addr);
 }
 
+static void free_instr_structs()
+{
+	for (unsigned int i = 0; i <= instr_list_ptr; i++)
+	{
+		if (instr_list[i]) free(instr_list[i]);
+	}
+}
+
 static void update_addrs()
 {
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
@@ -1069,4 +1077,6 @@ void gen_binary()
 	write_all();
 	free_reg_hashset();
 	free_keyword_hashset();
+	free_lbl_hashset();
+	free_instr_structs();
 }

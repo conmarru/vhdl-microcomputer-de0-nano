@@ -44,3 +44,4 @@ token* get_current_token();
 token* peek();
 bool expect(token* t, token_type ttype);
 void error_unexpected_token(token_type expected, token* current);
+void free_token_stream();

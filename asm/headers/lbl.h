@@ -17,3 +17,4 @@ label* new_label(char* name, int line);
 void add_label(label* lbl);
 label* get_label();
 void update_lbls(uint32_t cur_addr);
+void free_lbl_hashset();

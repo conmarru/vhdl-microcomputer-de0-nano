@@ -79,6 +79,7 @@ int main(int argc, char** args)
 	init_scanner(input, fsize);
 	gen_binary();
 	free(input);
+	free_token_stream();
 
 	return 0;
 }
