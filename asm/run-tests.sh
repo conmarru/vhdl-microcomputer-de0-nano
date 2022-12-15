@@ -11,7 +11,7 @@ do
 	then 
 		printf "[ \033[31m!! \033[0m] Test #%d failed\n" $i
 	else
-		diff temp_res refs/out$i > /dev/null
+		diff -w temp_res refs/out$i > /dev/null
 		[ $? -eq 0 ] && printf "[ \033[32mOK \033[0m] Test #%d succeeded\n" $i
 		[ $? -ne 0 ] && printf "[ \033[31m!! \033[0m] Test #%d failed\n" $i
 	fi

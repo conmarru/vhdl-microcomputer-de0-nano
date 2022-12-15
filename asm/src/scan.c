@@ -192,11 +192,18 @@ static void scan()
 			case ')' : append_token(new_token(NULL, 0, TOKEN_RPAREN, VAL_NUM, line));
 				   pointer++;
 				   break;
+			case ';' : pointer++;
+				   while (input[pointer] != 0x00 && input[pointer] != '\n')
+				   {
+					line++;
+					pointer++;
+				   }
+				   break;
 			case '\n' : append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, line));
 				    pointer++;
 				    line++;
 				    effective_line = (!lbl_flag) ? effective_line + 1 : effective_line;
-				    while (input[pointer] == '\n')
+				    while (input[pointer] != 0x00 && input[pointer] == '\n')
 				    {
 					line++;
 					pointer++;
