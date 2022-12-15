@@ -195,7 +195,6 @@ static void scan()
 			case ';' : pointer++;
 				   while (input[pointer] != 0x00 && input[pointer] != '\n')
 				   {
-					line++;
 					pointer++;
 				   }
 				   break;
