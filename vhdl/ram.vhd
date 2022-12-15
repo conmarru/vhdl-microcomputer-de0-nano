@@ -22,8 +22,8 @@ architecture BlockRAM of RAM is
       process begin
         wait until rising_edge(CLK);
         if (Write='1') then
-          memory(to_integer(unsigned(A))) <= Din;
+          memory(to_integer(unsigned(Addr))) <= Din;
         end if;
-        Dout <= memory(to_integer(unsigned(A)));
+        Dout <= memory(to_integer(unsigned(Addr)));
       end process;
     end BlockRAM;
