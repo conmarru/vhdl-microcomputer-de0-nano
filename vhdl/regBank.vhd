@@ -1,10 +1,10 @@
 entity regBank is
     Port ( clk   : in  STD_LOGIC;
-    Addr    : in  signed (4 downto 0);
+    Addr1, Addr2    : in  signed (4 downto 0);
     WriteAddr : in signed(4 downto 0);
     Write : in  STD_LOGIC;
     Din   : in  signed (31 downto 0);
-    Dout  : out signed (31 downto 0)
+    Dout1, Dout2 : out signed (31 downto 0)
     );
 end regBank;
 
@@ -13,10 +13,12 @@ architecture behavior of regBank is
     signal bank : bankArr;   
     begin
       process begin
-        wait until rising_edge(CLK);
+        if rising_edge(clk) then
         if (Write='1') then
           bank(to_integer(unsigned(WriteAddr))) <= Din;
         end if;
-        Dout <= bank(to_integer(unsigned(Addr)));
+        Dout1 <= bank(to_integer(unsigned(Addr1)));
+        Dout2 <= bank(to_integer(unsigned(Addr2)));
+        end if;
       end process;
     end behavior;

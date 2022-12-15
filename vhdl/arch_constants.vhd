@@ -1,3 +1,7 @@
+library IEEE;
+use IEEE.STD_LOGIC_1164.ALL;
+use IEEE.NUMERIC_STD.ALL;
+
 package instructions is
     constant NOP : signed(4 downto 0) := "00000";
     constant HALT : signed(4 downto 0) := "00001";
@@ -14,3 +18,4 @@ package instructions is
 
     constant LOAD : signed(4 downto 0) := "01000";
     constant STORE : signed(4 downto 0) := "01001";
+end package instructions;

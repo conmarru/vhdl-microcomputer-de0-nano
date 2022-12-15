@@ -20,10 +20,11 @@ architecture BlockRAM of RAM is
     signal memory : speicher;   
     begin
       process begin
-        wait until rising_edge(CLK);
-        if (Write='1') then
+        if rising_edge(clk) then
+          if (Write='1') then
           memory(to_integer(unsigned(Addr))) <= Din;
         end if;
         Dout <= memory(to_integer(unsigned(Addr)));
+        end if;
       end process;
     end BlockRAM;

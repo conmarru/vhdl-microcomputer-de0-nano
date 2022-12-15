@@ -4,7 +4,7 @@ HLT (00001|00000|00000|00000|<unused:7>|00000)
 
 Arithmetische Operationen
 MOVE (00010|<destination:5>|<source:5>|00000|<unused:7>|00000)
-LOADI (00011|<destination:5>|<immediate:22>)
+LOADI (00011|<destination:5>|<unused:5>|<immediate:17>)
 ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
 ADDI (00101|<destination:5>|<operand1:5>|<immediate:17>) 
 

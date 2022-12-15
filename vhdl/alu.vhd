@@ -5,8 +5,9 @@ use ieee.numeric_std.all;
 
 entity alu is
     port (A, B: in signed(31 downto 0);
-    opcode : in signed(4 downto 0);
+    func : in signed(4 downto 0);
     C: out signed(31 downto 0) );
+    clk : in std_logic;
 end entity alu ;
 
 architecture behave of alu is
@@ -25,9 +26,10 @@ architecture behave of alu is
 
 
 begin
-    proc: process (A, B, opcode) is
+    proc: process (A, B, func) is
     begin
-        case opcode is
+        if rising_edge(clk) then
+        case func is
         when  op_and    => C <= A and B;
         when  op_or     => C <= A or B;
         when  op_not    => C <= not A;
@@ -41,5 +43,6 @@ begin
         when others     => C <= (others=>'-');
 
         end case;
+        end if;
     end process proc;
 end architecture behave;
