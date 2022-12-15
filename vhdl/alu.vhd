@@ -4,10 +4,12 @@ use ieee.numeric_std.all;
 
 
 entity alu is
-    port (A, B: in signed(31 downto 0);
+    port (
+    --clk : in std_logic;    
+    A, B: in signed(31 downto 0);
     func : in signed(4 downto 0);
-    C: out signed(31 downto 0) );
-    clk : in std_logic;
+    C: out signed(31 downto 0) 
+    );
 end entity alu ;
 
 architecture behave of alu is
@@ -28,7 +30,7 @@ architecture behave of alu is
 begin
     proc: process (A, B, func) is
     begin
-        if rising_edge(clk) then
+        --if rising_edge(clk) then
         case func is
         when  op_and    => C <= A and B;
         when  op_or     => C <= A or B;
@@ -43,6 +45,6 @@ begin
         when others     => C <= (others=>'-');
 
         end case;
-        end if;
+        --end if;
     end process proc;
 end architecture behave;
