@@ -43,9 +43,8 @@ architecture behavior of extract_info is
 begin
 extract_P: process (clk, instruction, next_pc_in) is
 begin
-    if rising_edge(clk) then
         next_pc_out <= next_pc_in;
-        opcode <= instruction(31 downto 27);
+        opcode_out <= instruction(31 downto 27);
         dest_addr <= instruction(26 downto 22);
         op1_addr <= instruction(21 downto 17);
         op2_addr <= instruction(16 downto 12);
@@ -80,8 +79,6 @@ begin
                 memory_read <= '0';
                 memory_write <= '0';
             end if;
-
-        end if;
     end process extract_P;
 
 end architecture behavior;
