@@ -20,26 +20,6 @@ entity extract_info is
 end extract_info;
 
 architecture behavior of extract_info is
-    component pre_exec_reg is
-        port(
-            clk : in std_logic;
-            next_pc_in, val_a_in, val_b_in : in signed(31 downto 0);
-            opcode_in, dest_addr_in, func_in : in signed(4 downto 0);
-            imm_in : in signed(16 downto 0);
-            use_imm_in : in std_logic;
-            use_jmp_in : in std_logic;
-            reg_write_in : in std_logic;
-            memory_read_in, memory_write_in : in std_logic;
-            next_pc_out, val_a_out, val_b_out : out signed(31 downto 0);
-            opcode_out, dest_addr_out, func_out : out signed(4 downto 0);
-            imm_out : out signed(31 downto 0);
-            use_imm_out : out std_logic;
-            use_jmp_out : out std_logic;
-            reg_write_out : out std_logic;
-            memory_read_out, memory_write_out : out std_logic
-        );
-    end component pre_exec_reg;
-    
 begin
 extract_P: process (clk, instruction, next_pc_in) is
 begin

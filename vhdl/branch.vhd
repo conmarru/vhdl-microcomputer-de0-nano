@@ -4,10 +4,10 @@ use ieee.numeric_std.all;
 
 entity BRANCH is
     port (
-        condition, program_counter : in signed(31 downto 0);
+        condition : in signed(31 downto 0);
         cond_func : in signed(2 downto 0);
-        offset : in signed(18 downto 0);
-        output_address : out signed(31 downto 0)
+        offset : in signed(16 downto 0);
+        do_branch : out std_logic
     );
 end entity BRANCH;
 
@@ -19,23 +19,23 @@ begin
         case cond_func is
             when "100" => 
             if condition = ZERO then 
-                output_address <= program_counter + offset;
+            do_branch <= '1';
             else
-                output_address <= program_counter + 1;
+            do_branch <= '0';
             end if;
             when "010" =>
             if condition < ZERO then
-                output_address <= program_counter + offset;
+                do_branch <= '1';
             else
-                output_address <= program_counter + 1;
+                do_branch <= '0';
             end if;
             when "001" =>
             if condition > ZERO then
-                output_address <= program_counter + offset;
+                do_branch <= '1';
             else
-                output_address <= program_counter + 1;
+                do_branch <= '0';
             end if;
-            when others => output_address <= program_counter + 1;
+            when others => do_branch <= '0';
         end case;
     end process branch_P;
 end architecture behavior;
