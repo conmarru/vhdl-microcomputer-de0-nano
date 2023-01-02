@@ -1,3 +1,3 @@
 #!/bin/sh
 
-../emulator/emu -i $1 -I
+../emulator/emu -i $1 -I --no-pipelining

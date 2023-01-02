@@ -15,19 +15,19 @@ SHRB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00010)
 SHLB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00011)
 
 Logische Operationen
-AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
-OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
+AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
+OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
 NOT (01010|<destination:5>|<operand1:5>|00000|<unused:7>|00000)
 
 Branches
 JMP (00110|<jmpreg:5>|<unused:22>)
-BRE (branch equal zero) (00111|<condreg:5>|<offset:17>|<func:5>)
-BRL (branch less zero) (00111|<condreg:5>|<offset:17>|<func:5>)
-BRG (branch greater zero) (00111|<condreg:5>|<offset:17>|<func:5>)
+BRE (branch equal zero) (00111|<condreg:5>|<offset:17>|00000)
+BRL (branch less zero) (00111|<condreg:5>|<offset:17>|00001)
+BRG (branch greater zero) (00111|<condreg:5>|<offset:17>|00010)
 
 Speicheroperationen
-LOAD (01000|<destination:5>|<scalereg:5>|<address:18>) 
-STORE (01001|<source:5>|<scalereg:5>|<address:18>) 
+LOAD (01000|<destination:5>|<addrreg:5>|<unused:17>) 
+STORE (01001|<sourcereg:5>|<addrreg:5>|<unused:17>) 
 
 Zur Skalierung:
 

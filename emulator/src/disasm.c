@@ -20,8 +20,8 @@ void disasm_instr(uint32_t instr)
 			break;
 		case 2: printf("%s\t%%%s, %%%s", MNEMONICS[opcode], REG_STRINGS[op1_reg], REG_STRINGS[dest_reg]);
 			break;
-		case 3: immediate = instr & 0x003fffff;
-			if (immediate >> 21) immediate |= 0xffc00000;
+		case 3: immediate = instr & 0x0001ffff;
+			if (immediate >> 16) immediate |= 0xfffe0000;
 			printf("%s\t$%d, %%%s", MNEMONICS[opcode], immediate, REG_STRINGS[dest_reg]);
 			break;
 		case 4: switch (func)
@@ -40,10 +40,9 @@ void disasm_instr(uint32_t instr)
 			break;
 		case 6: printf("%s\t%%%s", MNEMONICS[11], REG_STRINGS[dest_reg]);
 			break;
-		case 7: uint8_t func_3 = (instr >> 19) & 0x00000007;
-			uint32_t offset = instr & 0x0007ffff;
-			offset = (offset >> 18) ? offset | 0xfff80000 : offset;
-			switch (func_3)
+		case 7: uint32_t offset = (instr & 0x003fffe0) >> 5;
+			offset = (offset >> 16) ? offset | 0xfff80000 : offset;
+			switch (func)
 			{
 				case 0: printf("%s\t%%%s, %d", MNEMONICS[12], REG_STRINGS[dest_reg], offset);
 					break;

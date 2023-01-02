@@ -30,7 +30,7 @@ label* new_label(char* name, int line)
 	label* new = (label*)malloc(sizeof(label));
 
 	new->name = name;
-	new->addr = line * 4;
+	new->addr = line;
 
 	return new;
 }
@@ -75,7 +75,7 @@ void update_lbls(uint32_t cur_addr)
 		{
 			if (node->lbl->addr > cur_addr)
 			{
-				node->lbl->addr += 4;
+				node->lbl->addr += 1;
 				//printf("%s, %d\n", node->lbl->name, node->lbl->addr);
 			}
 			node = node->next;

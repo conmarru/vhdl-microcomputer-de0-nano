@@ -31,4 +31,4 @@ test :
 	./run-tests.sh
 
 clean: 
-	rm *.o; rm asm
+	rm -f *.o; rm -f asm
