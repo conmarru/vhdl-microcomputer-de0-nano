@@ -32,7 +32,7 @@ architecture testbench of aluTest is
     constant op_sl8 : signed(4 downto 0) := "01000";
 
 begin
-    dlI: Alu
+  dlI: entity work.alu
     port map(A, B, opcode, C);
 
     stiP: process is

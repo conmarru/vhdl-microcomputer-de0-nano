@@ -6,7 +6,6 @@ entity BRANCH is
     port (
         condition : in signed(31 downto 0);
         cond_func : in signed(2 downto 0);
-        offset : in signed(16 downto 0);
         do_branch : out std_logic
     );
 end entity BRANCH;
@@ -14,7 +13,7 @@ end entity BRANCH;
 architecture behavior of BRANCH is
 constant ZERO : signed(31 downto 0) := (others => '0');
 begin
-    branch_P: process (condition, cond_func, offset) is
+    branch_P: process (condition, cond_func) is
     begin
         case cond_func is
             when "100" => 
