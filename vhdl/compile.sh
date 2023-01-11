@@ -1,2 +1,2 @@
-ghdl -a $1.vhd
-ghdl -e $1
+ghdl -a --workdir=work $1.vhd 
+ghdl -e --workdir=work $1 
