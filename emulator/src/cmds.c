@@ -90,7 +90,7 @@ void print_mem(int32_t* mem, uint32_t start_addr, uint32_t end_addr, bool disasm
 		if (disasm_flag)
 		{
 			if (mflag && i == maddr) printf(" [ ");
-			else printf("%5s[ ", "");
+			else printf("     [ ");
 			uint32_t instr = ((int32_t)mem[i]);
 			disasm_instr(instr);
 			printf(" ]\n");
