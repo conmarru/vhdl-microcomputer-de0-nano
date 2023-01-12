@@ -13,6 +13,7 @@
 
 FILE* input_file = NULL;
 FILE* output_file = NULL;
+uint8_t cli_flags = 0;
 
 void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 {
@@ -23,11 +24,12 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 		static struct option long_options[] = {
 			{"input", required_argument, NULL, 'i'},
 			{"output", required_argument, NULL, 'o'},
+			{"no-nops", no_argument, NULL, 'n'},
 			{NULL, 0, NULL, 0}
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:o:", long_options, &option_index);
+		c = getopt_long(argc, args, "i:o:n", long_options, &option_index);
 		
 		if (c == -1)
 		{
@@ -40,7 +42,11 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 				  break;
 			case 'o': memcpy(filename_out, optarg, MAX_FILENAME);
 				  break;
-			case '?': printf("usage: ./asm -i <input_file> [ -o <output_file> ]\n");
+			case 'n': cli_flags |= NO_NOPS_FLAG;
+				  break;
+			case '?': printf("usage: ./asm -i <input_file> [ flags ]\n");
+				  printf("flags:\t-o, --output <output_file>\n");
+				  printf("\t-n, --no-nops\n");
 				  exit(1);
 		}
 		

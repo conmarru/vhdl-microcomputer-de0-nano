@@ -18,11 +18,7 @@
 #define OP1_REG_SHIFT_VAL 17
 #define OP2_REG_SHIFT_VAL 12
 #define BR_FUNC_SHIFT_VAL 19
-#define IMM_22 22 // TODO
-#define IMM_17 17 // TODO
-#define OFFSET_19 19 // TODO
-#define ADDR_18 18 // TODO
-#define ADDR_22 22 // TODO
+#define IMM_17 17
 
 static const uint8_t STACK_POINTER_REG = 30;
 static const uint8_t ADDR_REG = 29;
@@ -49,7 +45,8 @@ typedef enum {
 	DYN_INSTR_BRE,
 	DYN_INSTR_AND,
 	DYN_INSTR_SHR,
-	DYN_INSTR_MOVE
+	DYN_INSTR_MOVE,
+	DYN_INSTR_NOP
 } dyn_instr_type;
 
 struct dyn_instr_struct {
@@ -686,6 +683,8 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 				     bin_instr |= dyn_instr->reg_op1 << OP1_REG_SHIFT_VAL;
 				     bin_instr |= dyn_instr->reg_dest << DEST_REG_SHIFT_VAL;
 				     break;
+		case DYN_INSTR_NOP: bin_instr = 0;
+				    break;
 	}
 
 	free(dyn_instr);
@@ -699,6 +698,14 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 	}
 	sim_instr(bin_instr);
 	//write_file(bin_instr);
+}
+
+static void insert_nops(unsigned int amount)
+{
+	for (unsigned int i = 0; i < amount; i++)
+	{
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOP, 0, 0, 0, 0), false, false);
+	}
 }
 
 // r29,r28 reserved for jump addresses and scaling
@@ -734,7 +741,10 @@ static void gen_jump(struct keyword_node* knode)
 	bin_instr = 0;
 	
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, address), true, false);
-
+	if (!(cli_flags & NO_NOPS_FLAG))
+	{
+		insert_nops(4);	
+	}
 	if (scaling) 
 	{	
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
@@ -745,6 +755,12 @@ static void gen_jump(struct keyword_node* knode)
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+
+		if (!(cli_flags & NO_NOPS_FLAG))
+		{
+			insert_nops(4);	
+		}
+
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
@@ -752,6 +768,11 @@ static void gen_jump(struct keyword_node* knode)
 	bin_instr |= ADDR_REG << DEST_REG_SHIFT_VAL;
 
 	add_instr_struct(bin_instr, false);
+
+	if (!(cli_flags & NO_NOPS_FLAG))
+	{
+		insert_nops(3);	
+	}
 
 	parse_newline(false);
 
@@ -803,12 +824,20 @@ static void gen_load(struct keyword_node* knode)
 	bin_instr = 0;
 
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false, false);
+	if (!(cli_flags & NO_NOPS_FLAG))
+	{
+		insert_nops(4);	
+	}
 	if (scaling)
 	{
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		if (!(cli_flags & NO_NOPS_FLAG))
+		{
+			insert_nops(4);	
+		}
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
@@ -851,12 +880,20 @@ static void gen_store(struct keyword_node* knode)
 	bin_instr = 0;
 
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, addr), false, false);
+	if (!(cli_flags & NO_NOPS_FLAG))
+	{
+		insert_nops(4);	
+	}
 	if (scaling)
 	{
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
+		if (!(cli_flags & NO_NOPS_FLAG))
+		{
+			insert_nops(4);
+		}
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 

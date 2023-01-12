@@ -5,7 +5,7 @@ i=0
 for file in $test_dir; 
 do
 	i=$(($i+1))
-	./asm -i $file
+	./asm -i $file --no-nops
 	timeout 1s ./emulate-nointeractive.sh output > temp_res
 	if [ $? -eq 124 ]; 
 	then 
