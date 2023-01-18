@@ -11,3 +11,14 @@ Entscheidungen bzgl. ISA:
 Entscheidungen bzgl. VHDL:
 - Alle Datentypen sind wegen Vereinfachung IEEE signed Bitvektoren.
  -> Damit sind alle normalen Bitvektor Operationen verfügbar, arithmetische Operationen sind definiert und Type Casting wird vermieden
+
+ TODO:
+ Wegen kleiner Fehlplanung muss das  Destinationegister aus der Registerbank gelesen werden für Branch und Jump.
+ ALU braucht den Opcode, um bei einem Branch Befehl eine Addition auszuführen
+ Der immediate steht nicht immer an der gleichen Stelle im Opcode
+ Der Programcounter muss doch ein Register sein und am Anfang kein Increment von "hinten" machen, sondern selbst mitzählen, da man sonst looped
+ Zusätzlich muss der Programcounter bei jump bzw. branch für 3 Zyklen eingefroren werden
+ ALU hat evtl. alte Kodierung für shift operationen und prüft generell nicht gegen den Opcode
+ Bei bestimmten Operationen muss die ALU operand1 "durchreichen"
+
+ Ich glaube kein Programm darf mit einem Jump beginnen haha

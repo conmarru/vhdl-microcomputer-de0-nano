@@ -4,18 +4,21 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity pre_mem_reg is
     port(
+        -- control
+        reset : in std_logic
         clk : in std_logic;
-        next_pc_in, res_in : in signed(31 downto 0);
+        -- in
+        next_pc_in, res_in, val_d_in : in signed(31 downto 0);
         dest_addr_in : in signed(4 downto 0);
         use_jmp_in : in std_logic;
         reg_write_in : in std_logic;
         memory_read_in, memory_write_in : in std_logic;
-        next_pc_out, res_out : out signed(31 downto 0);
+        -- out
+        next_pc_out, res_out, val_d_out : out signed(31 downto 0);
         dest_addr_out : out signed(4 downto 0);
         use_jmp_out : out std_logic;
         reg_write_out : out std_logic;
         memory_read_out, memory_write_out : out std_logic;
-        reset : in std_logic
     );
 end entity pre_mem_reg;
 
@@ -25,8 +28,9 @@ architecture behavior of pre_mem_reg is
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                next_pc_out <= to_signed(0, 32);
+                next_pc_out <= to_signed(1, 32);
                 res_out <= (others =>'0');
+                val_d_out <= (others =>'0');
                 dest_addr_out <= (others => '0');
                 use_jmp_out <= '0';
                 reg_write_out <= '0';
@@ -35,6 +39,7 @@ architecture behavior of pre_mem_reg is
             else 
                 next_pc_out <= next_pc_in;
                 res_out <= res_in;
+                val_d_out <= val_d_in;
                 dest_addr_out <= dest_addr_in;
                 use_jmp_out <= use_jmp_in;
                 reg_write_out <= reg_write_in;

@@ -4,22 +4,25 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity pre_exec_reg is
     port(
+        -- control
+        reset : in std_logic
         clk : in std_logic;
-        next_pc_in, val_a_in, val_b_in : in signed(31 downto 0);
+        -- in
+        next_pc_in, val_a_in, val_b_in, val_d_in : in signed(31 downto 0);
         opcode_in, dest_addr_in, func_in : in signed(4 downto 0);
         imm_in : in signed(31 downto 0);
         use_imm_in : in std_logic;
         use_jmp_in : in std_logic;
         reg_write_in : in std_logic;
         memory_read_in, memory_write_in : in std_logic;
-        next_pc_out, val_a_out, val_b_out : out signed(31 downto 0);
+        -- out
+        next_pc_out, val_a_out, val_b_out, val_d_out : out signed(31 downto 0);
         opcode_out, dest_addr_out, func_out : out signed(4 downto 0);
         imm_out : out signed(31 downto 0);
         use_imm_out : out std_logic;
         use_jmp_out : out std_logic;
         reg_write_out : out std_logic;
         memory_read_out, memory_write_out : out std_logic;
-        reset : in std_logic
     );
 end entity pre_exec_reg;
 
@@ -29,9 +32,10 @@ architecture behavior of pre_exec_reg is
     begin
         if rising_edge(clk) then
             if reset = '1' then
-                next_pc_out <= to_signed(1, 32);
+                next_pc_out <= to_signed(2, 32);
                 val_a_out <= (others =>'0');
                 val_b_out <= (others => '0');
+                val_d_out <= (others => '0');
                 opcode_out <= (others => '0');
                 dest_addr_out <= (others => '0');
                 func_out <= (others => '0');
@@ -45,6 +49,7 @@ architecture behavior of pre_exec_reg is
                 next_pc_out <= next_pc_in;
                 val_a_out <= val_a_in;
                 val_b_out <= val_b_in;
+                val_d_out <= val_d_in;
                 opcode_out <= opcode_in;
                 dest_addr_out <= dest_addr_in;
                 func_out <= func_in;
