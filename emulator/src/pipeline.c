@@ -9,6 +9,7 @@
 #include "../headers/exec.h"
 #include "../headers/mem.h"
 #include "../headers/wrback.h"
+#include "../headers/utils.h"
 
 static char user_input[MAX_CMD_LEN+1] = { 0x00 };
 
@@ -17,6 +18,7 @@ static void init_pipeline(unsigned int mem_size, uint8_t* binary_data, int fsize
 	alloc_instr_mem(mem_size);
 	alloc_data_mem(mem_size);	
 	load_program(instr_mem.mem_array, binary_data, fsize, mem_size);
+	pc_str.next_pc_out = 4;
 }
 
 static void free_mem()
@@ -58,7 +60,7 @@ void run(unsigned int mem_size, uint8_t* binary_data, int fsize)
 					printf("\t\texecute stage:");
 					printf("\t\tmemory stage:");
 					printf("\t\twrite-back stage:\n");
-					printf("PC: %-10d%10sD_next_pc: %-10d%3sE_next_pc: %-10d%3sM_next_pc: %-10d%3sW_dest: %d\n", pc, "", D_next_pc, "", E_next_pc, "", M_next_pc, "", W_dest);
+					printf("PC: %-10d%10sD_next_pc: %-10d%3sE_next_pc: %-10d%3sM_next_pc: %-10d%3sW_dest: %d\n", pc_str.pc_out, "", D_next_pc, "", E_next_pc, "", M_next_pc, "", W_dest);
 					printf("%24sD_opcode: %-2d%12sE_opcode: %-2d%12sM_dest: %-2d%14sW_res: %d\n", "", D_opcode, "", E_opcode, "", M_dest, "", W_res);
 					printf("%24sD_dest: %-2d%14sE_dest: %-2d%14sM_res: %-10d%7sW_valM: %d\n", "", D_dest, "", E_dest, "", M_res, "", W_valM);
 					printf("%24sD_op1: %-10d%7sE_valA: %-10d%6sM_valA: %-10d%6sW_sig_MR: %d\n", "", D_op1, "", E_valA, "", M_valA, "", W_sig_MR);
@@ -71,15 +73,28 @@ void run(unsigned int mem_size, uint8_t* binary_data, int fsize)
 					printf("%24sD_sig_MR: %d%13sE_sig_MR: %d\n", "", D_sig_MR, "", E_sig_MR);
 					printf("%24sD_sig_MW: %d%13sE_sig_MW: %d\n", "", D_sig_MW, "", E_sig_MW);
 					printf("%24sD_sig_WR: %d%13sE_sig_WR: %d\n", "", D_sig_WR, "", E_sig_WR);
+					printf("%24s          %14sE_valD: %d\n", "", "", E_valD);
 					printf("\n");
 					int32_t pc_start = 0;
-					if (pc-2 < 0) pc_start = 0;
-					else pc_start = pc-2;
-					print_mem(instr_mem.mem_array, pc_start, pc+3, true, true, true, pc);
+					if (pc_str.pc_out-2 < 0) pc_start = 0;
+					else pc_start = pc_str.pc_out-2;
+					print_mem(instr_mem.mem_array, pc_start, pc_str.pc_out+3, true, true, true, pc_str.pc_out);
 				}
 				else if (!strcmp(user_args[1], "-r"))
 				{
-					reg_dump(regfile.reg_array, REG_STRINGS, pc);
+					reg_dump(regfile.reg_array, REG_STRINGS, pc_str.pc_out);
+				}
+				else if (!strcmp(user_args[1], "-x"))
+				{
+					uint32_t maddr = strtohex(user_args[2]);				 
+					if (err_val == 1)
+					{
+						printf("ERROR: invalid address\n");
+					}
+					else
+					{
+						print_mem(data_mem.mem_array, maddr, maddr + 1, false, false, false, 0);
+					}
 				}
 			}
 			else if (!strcmp(user_args[0], CMDS[4]) || !strcmp(user_args[0], CMDS[5]))

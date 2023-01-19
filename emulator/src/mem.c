@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdint.h>
+#include "../headers/mem.h"
 #include "../headers/defs.h"
 #include "../headers/utils.h"
 #include "../headers/fetch.h"
@@ -23,16 +24,7 @@ static int tmp_W_valM;
 static int tmp_W_sig_MR;
 static int tmp_W_sig_WR;
 
-struct data_mem_struct {
-	int32_t addr_in;
-	int read_in;
-	int write_in;
-	int32_t data_in;
-	int32_t out;
-	int32_t* mem_array;
-};
-
-static struct data_mem_struct data_mem;
+struct data_mem_struct data_mem;
 
 void alloc_data_mem(unsigned int size)
 {
@@ -58,7 +50,8 @@ void free_data_mem()
 
 void memory_update_pipeline_regs()
 {
-	update_pc(tmp_F_next_pc);
+	pc_str.next_pc_in = tmp_F_next_pc;
+	update_pc(&pc_str);
 	W_dest = tmp_W_dest;
 	W_res = tmp_W_res;
 	W_valM = tmp_W_valM;
@@ -72,6 +65,8 @@ void memory()
 	data_mem.read_in = M_sig_MR;
 	data_mem.write_in = M_sig_MW;
 	data_mem.data_in = M_valD;
+	pc_str.used_jump_in = M_sig_J;
+	pc_str.used_branch_in = M_sig_B;
 	access_data_mem(&data_mem);
 	tmp_F_next_pc = multiplex(multiplex(M_next_pc, M_res, M_sig_B), M_valD, M_sig_J);
 	tmp_W_res = M_res;

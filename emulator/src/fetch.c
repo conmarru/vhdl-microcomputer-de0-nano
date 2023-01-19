@@ -1,5 +1,4 @@
 #include <stdlib.h>
-#include <stdio.h>
 #include <string.h>
 #include <stdint.h>
 #include "../headers/defs.h"
@@ -8,10 +7,7 @@
 
 #define LAST_FIELD_MASK 0x0000001f
 
-int32_t pc = 0;
-
-// has to be incremented by 4 due to pipeline
-int32_t next_pc;
+// TODO: hlt
 
 static int32_t tmp_D_next_pc;
 static int8_t tmp_D_opcode;
@@ -45,15 +41,16 @@ struct extract_fields_struct {
 
 struct instr_mem_struct instr_mem;
 struct extract_fields_struct extract_fields;
+struct pc_struct pc_str;
 
 static int32_t read_mem(struct instr_mem_struct* mem, uint32_t addr)
 {
 	return mem->mem_array[(uint32_t)addr];
 }
 
-static void read_instr_mem(struct instr_mem_struct* mem, struct extract_fields_struct* extr_fields)
+static void read_instr_mem(struct instr_mem_struct* mem, struct extract_fields_struct* extr_fields, struct pc_struct* pc_strct)
 {
-	mem->addr_in = pc;
+	mem->addr_in = pc_strct->pc_out;
 	extr_fields->instr_in = read_mem(mem, mem->addr_in);
 }
 
@@ -139,8 +136,8 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
 			break;
-		case 9: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+		case 9: extr_fields->dest_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
+			extr_fields->op1_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_B_out = 0;
 			extr_fields->sig_I_out = 0;
 			extr_fields->sig_J_out = 0;
@@ -170,9 +167,28 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 	}
 }
 
-void update_pc(int32_t new_pc)
+void update_pc(struct pc_struct* pc_strct)
 {
-	pc = new_pc;
+	//pc = new_pc;
+	if (pc_strct->used_jump_in || pc_strct->used_branch_in)
+	{
+		pc_strct->jmp_counter = 3;
+		pc_strct->pc_out = pc_strct->next_pc_in;
+		pc_strct->pc_temp = pc_strct->next_pc_in + 1;
+		pc_strct->next_pc_out = pc_strct->next_pc_in + 4;
+	}
+	else if (pc_strct->jmp_counter > 0)
+	{
+		pc_strct->jmp_counter--;
+		pc_strct->pc_out = pc_strct->pc_temp;
+		pc_strct->next_pc_out = pc_strct->pc_temp + 4;
+		pc_strct->pc_temp = pc_strct->pc_temp + 1;
+	}
+	else
+	{
+		pc_strct->pc_out = pc_strct->next_pc_in;
+		pc_strct->next_pc_out = pc_strct->next_pc_out + 1;
+	}
 }
 
 void alloc_instr_mem(unsigned int size)
@@ -204,10 +220,9 @@ void fetch_update_pipeline_regs()
 
 void fetch()
 {
-	read_instr_mem(&instr_mem, &extract_fields);
+	read_instr_mem(&instr_mem, &extract_fields, &pc_str);
 	extract_field_info(&extract_fields);
-	next_pc = pc + 4;
-	tmp_D_next_pc = next_pc;
+	tmp_D_next_pc = pc_str.next_pc_out;
 	tmp_D_opcode = extract_fields.opcode_out;
         tmp_D_dest = extract_fields.dest_out;
         tmp_D_op1 = extract_fields.op1_out;
