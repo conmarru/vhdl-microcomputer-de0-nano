@@ -33,23 +33,23 @@ begin
     proc: process (A, B, func, opcode) is
     begin
         --if rising_edge(clk) then
-        case opcode
         
-        case func is
-        when  func_and    => C <= A and B;
-        when  func_or     => C <= A or B;
-        when  func_not    => C <= not A;
-        when  func_add    => C <= A + B;
-        --when  func_mul    => C <= A(15 downto 0) * B(15 downto 0); zu anspruchsvoll / macht Probleme
-        when func_shr     => C <= A srl 1;
-        when func_shl     => C <= A sll 1;
-        when func_sr8     => C <= "00000000"& A(31 downto 8); --shr Byte;
-        when func_sl8     => C <= A(23 downto 0) &"00000000"; --shl Byte;
-
-        when others     => C <= (others=>'-');
-
-        end case;
-        end case;
-        --end if;
+        if opcode = BRANCH or opcode = ADDI then
+            C <= A + B;
+        elsif opcode = MOVE then
+            C <= A;
+        else
+            case func is
+                when  func_and    => C <= A and B;
+                when  func_or     => C <= A or B;
+                when  func_not    => C <= not A;
+                when  func_add    => C <= A + B;
+                when func_shr     => C <= A srl 1;
+                when func_shl     => C <= A sll 1;
+                when func_sr8     => C <= "00000000"& A(31 downto 8); --shr Byte;
+                when func_sl8     => C <= A(23 downto 0) &"00000000"; --shl Byte;
+                when others     => C <= (others=>'-');
+            end case;
+        end if;
     end process proc;
 end architecture behave;

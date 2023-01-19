@@ -9,15 +9,15 @@ ADD (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00000)
 ADDI (00101|<destination:5>|<operand1:5>|<immediate:17>) 
 
 Shift Operationen
-SHR (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00000)
-SHL (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00001)
-SHRB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00010)
-SHLB (01011|<destination:5>|<operand1:5>|00000|<unused:7>|00011)
+SHR (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00001)
+SHL (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00010)
+SHRB (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00111)
+SHLB (00100|<destination:5>|<operand1:5>|00000|<unused:7>|01000)
 
 Logische Operationen
 AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
 OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
-NOT (01010|<destination:5>|<operand1:5>|00000|<unused:7>|00000)
+NOT (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00101)
 
 Branches
 JMP (00110|<jmpreg:5>|<unused:22>)
