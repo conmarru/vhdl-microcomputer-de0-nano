@@ -7,7 +7,6 @@
 #include "../headers/scan.h"
 #include "../headers/def.h"
 #include "../headers/utils.h"
-#include "../headers/regs.h"
 #include "../headers/lbl.h"
 #include "../headers/eval.h"
 
@@ -529,8 +528,6 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
-
 	//write_file(bin_instr);
 }
 
@@ -549,8 +546,6 @@ static void gen_move_instr(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
-
 	//write_file(bin_instr);
 }
 
@@ -568,8 +563,6 @@ static void gen_loadi(struct keyword_node* knode)
 	add_instr_struct(bin_instr, false);
 
 	parse_newline(false);
-
-	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 
@@ -594,8 +587,6 @@ static void gen_addi(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
-
 	//write_file(bin_instr);
 }
 
@@ -613,8 +604,6 @@ static void gen_not(struct keyword_node* knode)
 	add_instr_struct(bin_instr, false);
 
 	parse_newline(false);
-
-	sim_instr(bin_instr);
 
 	//write_file(bin_instr);
 }
@@ -696,7 +685,6 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 		update_addrs();
 		cur_addr += 1;
 	}
-	sim_instr(bin_instr);
 	//write_file(bin_instr);
 }
 
@@ -849,8 +837,6 @@ static void gen_load(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
-
 	//write_file(bin_instr);
 }
 
@@ -905,8 +891,6 @@ static void gen_store(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
-
 	//write_file(bin_instr);
 }
 
@@ -926,7 +910,6 @@ static void gen_shift(struct keyword_node* knode)
 
 	parse_newline(false);
 
-	sim_instr(bin_instr);
 }
 
 static void gen_pseudo_sub()
