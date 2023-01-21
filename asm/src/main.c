@@ -7,6 +7,7 @@
 #include <getopt.h>
 #include "../headers/def.h"
 #include "../headers/scan.h"
+#include "../headers/parser.h"
 #include "../headers/gen.h"
 
 #define MAX_FILENAME 100
@@ -83,9 +84,11 @@ int main(int argc, char** args)
 	input[fsize] = 0x00;
 	munmap(buf, fsize);
 	init_scanner(input, fsize);
-	gen_binary();
+	parse();
+	encode_instr();
 	free(input);
 	free_token_stream();
+	free_instr_structs();
 
 	return 0;
 }

@@ -2,9 +2,10 @@ CFLAGS = -fno-common -O3 -Wall -Wextra
 
 SRC_DIR = src
 HEADER_DIR = header
+TARGETS = main.o scan.o gen.o utils.o eval.o lbl.o parser.o
 
-asm: main.o scan.o gen.o utils.o eval.o lbl.o
-	gcc main.o scan.o gen.o utils.o lbl.o eval.o $(CFLAGS) -o $@
+asm: $(TARGETS)
+	gcc $(TARGETS) $(CFLAGS) -o $@
 
 main.o: $(SRC_DIR)/main.c 
 	gcc -c $(CFLAGS) $(SRC_DIR)/main.c
@@ -24,7 +25,10 @@ lbl.o: $(SRC_DIR)/lbl.c
 eval.o: $(SRC_DIR)/eval.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/eval.c
 
-test : 
+parser.o: $(SRC_DIR)/parser.c
+	gcc -c $(CFLAGS) $(SRC_DIR)/parser.c
+
+test: 
 	./run-tests.sh
 
 clean: 

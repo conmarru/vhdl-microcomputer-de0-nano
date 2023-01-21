@@ -4,8 +4,6 @@
 #include "../headers/scan.h"
 #include "../headers/eval.h"
 
-// TODO: negative Zahlen
-
 static struct ast_node* new_ast_node(token_type type, struct ast_node* left, struct ast_node* right, int32_t val, bool unary)
 {
 	struct ast_node* new = (struct ast_node*)malloc(sizeof(struct ast_node));

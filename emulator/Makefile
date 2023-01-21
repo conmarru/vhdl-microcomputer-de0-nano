@@ -16,7 +16,7 @@ disasm.o: $(SRC_DIR)/disasm.c
 cmds.o: $(SRC_DIR)/cmds.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/cmds.c
 
-utils.o : $(SRC_DIR)/utils.c
+utils.o: $(SRC_DIR)/utils.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/utils.c
 
 fetch.o: $(SRC_DIR)/fetch.c
