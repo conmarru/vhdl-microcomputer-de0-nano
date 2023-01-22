@@ -52,14 +52,9 @@ void encode_instr()
 				encoding |= instr_list[i]->func;
 				break;
 			case 8:
-			case 9:
-			case 10: encoding |= instr_list[i]->dest << DEST_REG_SHIFT_VAL;
-				 encoding |= instr_list[i]->op1 << OP1_REG_SHIFT_VAL;
-				 break;	 
-			case 11: encoding |= instr_list[i]->dest << DEST_REG_SHIFT_VAL;
-				 encoding |= instr_list[i]->op1 << OP1_REG_SHIFT_VAL;
-				 encoding |= instr_list[i]->func;
-				 break;
+			case 9:	encoding |= instr_list[i]->dest << DEST_REG_SHIFT_VAL;
+				encoding |= instr_list[i]->op1 << OP1_REG_SHIFT_VAL;
+				break;
 		}
 
 		write_file(encoding);

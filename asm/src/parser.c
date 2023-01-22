@@ -323,13 +323,13 @@ static void init_keyword_hashset()
 	add_keyword("move", 2, 0);
 	add_keyword("loadi", 3, 0);
 	add_keyword("add", 4, 0);
-	add_keyword("shr", 11, 0);
-	add_keyword("shl", 11, 1);
-	add_keyword("shrb", 11, 2);
-	add_keyword("shlb", 11, 3);
-	add_keyword("and", 4, 1);
-	add_keyword("or", 4, 2);
-	add_keyword("not", 10, 0);
+	add_keyword("shr", 4, 1);
+	add_keyword("shl", 4, 2);
+	add_keyword("shrb", 4, 7);
+	add_keyword("shlb", 4, 8);
+	add_keyword("and", 4, 3);
+	add_keyword("or", 4, 4);
+	add_keyword("not", 4, 5);
 	add_keyword("addi", 5, 0);
 	add_keyword("bre", 7, 0);
 	add_keyword("brl", 7, 1);
@@ -470,15 +470,18 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 	uint32_t bin_instr = 0;
 	uint8_t dest;
 	uint8_t op1;
-	uint8_t op2;
+	uint8_t op2 = 0;
 
 	op1 = parse_reg();
 
 	parse_comma();
 
-	op2 = parse_reg();
+	if (knode->func == 0 || knode->func == 3 || knode->func == 4)
+	{
+		op2 = parse_reg();
 
-	parse_comma();
+		parse_comma();
+	}
 
 	dest = parse_reg();
 
@@ -550,26 +553,6 @@ static void gen_addi(struct keyword_node* knode)
 
 }
 
-static void gen_not(struct keyword_node* knode)
-{
-	uint32_t bin_instr = 0;
-	uint8_t dest;
-	uint8_t op1;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-
-	op1 = parse_reg();
-
-	parse_comma();
-
-	dest = parse_reg();
-
-	add_instr_struct(bin_instr, false, knode->opcode, dest, op1, 0, 0, 0);
-
-	parse_newline(false);
-
-}
-	
 static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag)
 {
 	uint32_t bin_instr = 0;
@@ -597,19 +580,20 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 				      dest = dyn_instr->reg_dest;
 				      immediate = dyn_instr->num_val;
 				      break;
-		case DYN_INSTR_SHL: opcode = 11;
+		case DYN_INSTR_SHL: opcode = 4;
 				    dest = dyn_instr->reg_dest;
 				    op1 = dyn_instr->reg_op1;
-				    func = 1;
+				    func = 2;
 				    break;
-		case DYN_INSTR_SHLB: opcode = 11;
+		case DYN_INSTR_SHLB: opcode = 4;
 				     dest = dyn_instr->reg_dest;
 				     op1 = dyn_instr->reg_op1;
-				     func = 3;
+				     func = 8;
 				     break;
-		case DYN_INSTR_NOT: opcode = 10;
+		case DYN_INSTR_NOT: opcode = 4;
 				    dest = dyn_instr->reg_dest;
 				    op1 = dyn_instr->reg_op1;
+				    func = 5;
 				    break;
 		case DYN_INSTR_LOAD: opcode = 8;
 				     dest = dyn_instr->reg_dest;
@@ -630,12 +614,12 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 				    dest = dyn_instr->reg_dest;
 				    op1 = dyn_instr->reg_op1;
 				    op2 = dyn_instr->reg_op2;
-				    func = 1;
+				    func = 3;
 				    break;
-		case DYN_INSTR_SHR: opcode = 11;
+		case DYN_INSTR_SHR: opcode = 4;
 				    dest = dyn_instr->reg_dest;
 				    op1 = dyn_instr->reg_op1;
-				    func = 0;
+				    func = 1;
 				    break;
 		case DYN_INSTR_MOVE: opcode = 2;
 				     dest = dyn_instr->reg_dest;
@@ -838,28 +822,6 @@ static void gen_store(struct keyword_node* knode)
 
 }
 
-static void gen_shift(struct keyword_node* knode)
-{
-	uint32_t bin_instr = 0;
-
-	uint8_t dest;
-	uint8_t op1;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-	bin_instr |= knode->func;
-
-	op1 = parse_reg();
-	
-	parse_comma();
-
-	dest = parse_reg();
-
-	add_instr_struct(bin_instr, false, knode->opcode, dest, op1, 0, 0, 0);
-
-	parse_newline(false);
-
-}
-
 static void gen_pseudo_sub()
 {
 	uint8_t reg_op1 = parse_reg();
@@ -1002,10 +964,6 @@ void parse()
 				break;
 			case 9: gen_store(knode);
 				break;
-			case 10: gen_not(knode);
-				 break;
-			case 11: gen_shift(knode);
-				 break;
 			case 32: gen_pseudo_sub();
 				 break;
 			case 33: gen_pseudo_push();
