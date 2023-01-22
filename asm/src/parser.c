@@ -73,12 +73,11 @@ static unsigned int instr_list_len = 50;
 unsigned int instr_list_ptr = 0;
 struct instr_struct** instr_list = NULL;
 
-static struct instr_struct* new_instr_struct(int32_t encoding, bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func)
+static struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func)
 {
 	struct instr_struct* new = (struct instr_struct*)malloc(sizeof(struct instr_struct));
 
 	new->jmp_tag = jmp_tag;
-	new->encoding = encoding;
 	new->instr_addr = instr_addr;
 	new->opcode = opcode;
 	new->dest = dest;
@@ -142,13 +141,13 @@ static void free_reg_hashset()
 	}
 }
 
-static void add_instr_struct(uint32_t encoding, bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func)
+static void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func)
 {
 	if (instr_list_ptr == instr_list_len-1)
 	{
 		instr_list = realloc(instr_list, instr_list_len*2);
 	}
-	instr_list[instr_list_ptr++] = new_instr_struct(encoding, jmp_flag, cur_addr, opcode, dest, op1, op2, immediate, func);
+	instr_list[instr_list_ptr++] = new_instr_struct(jmp_flag, cur_addr, opcode, dest, op1, op2, immediate, func);
 }
 
 void free_instr_structs()
@@ -467,7 +466,6 @@ static int32_t parse_num(bool branch)
 
 static void gen_opcode4_instr(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	uint8_t dest;
 	uint8_t op1;
 	uint8_t op2 = 0;
@@ -485,18 +483,15 @@ static void gen_opcode4_instr(struct keyword_node* knode)
 
 	dest = parse_reg();
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest, op1, op2, 0, knode->func);
+	add_instr_struct(false, knode->opcode, dest, op1, op2, 0, knode->func);
 
 	parse_newline(false);
 }
 
 static void gen_move_instr(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	uint8_t dest;
 	uint8_t op1;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 
 	op1 = parse_reg();
 
@@ -504,18 +499,15 @@ static void gen_move_instr(struct keyword_node* knode)
 
 	dest = parse_reg();
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest, op1, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, dest, op1, 0, 0, 0);
 
 	parse_newline(false);
 }
 
 static void gen_loadi(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	int32_t immediate;
 	uint8_t dest;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 
 	immediate = parse_num(false);
 
@@ -523,19 +515,16 @@ static void gen_loadi(struct keyword_node* knode)
 
 	dest = parse_reg();
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest, 0, 0, immediate, 0);
+	add_instr_struct(false, knode->opcode, dest, 0, 0, immediate, 0);
 
 	parse_newline(false);
 }
 
 static void gen_addi(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	int32_t immediate;
 	uint8_t dest;
 	uint8_t op1;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
 
 	immediate = parse_num(false);
 
@@ -547,7 +536,7 @@ static void gen_addi(struct keyword_node* knode)
 
 	dest = parse_reg();
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest, op1, 0, immediate, 0);
+	add_instr_struct(false, knode->opcode, dest, op1, 0, immediate, 0);
 
 	parse_newline(false);
 
@@ -555,7 +544,6 @@ static void gen_addi(struct keyword_node* knode)
 
 static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag)
 {
-	uint32_t bin_instr = 0;
 	uint8_t opcode = 0;
 	uint8_t dest = 0;
 	uint8_t op1 = 0;
@@ -631,7 +619,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 
 	free(dyn_instr);
 	dyn_instr_counter++;
-	add_instr_struct(bin_instr, jmp_tag, opcode, dest, op1, op2, immediate, func);
+	add_instr_struct(jmp_tag, opcode, dest, op1, op2, immediate, func);
 	if (!first_flag) 
 	{
 		update_lbls(cur_addr);
@@ -651,7 +639,6 @@ static void insert_nops(unsigned int amount)
 // r29,r28 reserved for jump addresses and scaling
 static void gen_jump(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	uint32_t scale_reg = 0;
 	uint32_t immediate = 0;
 	uint32_t dest_reg = ADDR_REG;
@@ -701,7 +688,7 @@ static void gen_jump(struct keyword_node* knode)
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest_reg, 0, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, dest_reg, 0, 0, 0, 0);
 
 	if (!(cli_flags & NO_NOPS_FLAG))
 	{
@@ -714,12 +701,8 @@ static void gen_jump(struct keyword_node* knode)
 
 static void gen_branches(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;
 	uint8_t dest;
 	int32_t immediate;
-
-	bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-	bin_instr |= knode->func;
 
 	dest = parse_reg();
 
@@ -727,7 +710,7 @@ static void gen_branches(struct keyword_node* knode)
 
 	immediate = parse_num(true);
 
-	add_instr_struct(bin_instr, true, knode->opcode, dest, 0, 0, immediate, knode->func);
+	add_instr_struct(true, knode->opcode, dest, 0, 0, immediate, knode->func);
 
 	parse_newline(false);
 
@@ -735,7 +718,6 @@ static void gen_branches(struct keyword_node* knode)
 
 static void gen_load(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;	
 	uint32_t scale_reg = 0;
 	uint32_t immediate = 0;
 	uint32_t dest_reg;
@@ -772,14 +754,13 @@ static void gen_load(struct keyword_node* knode)
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
-	add_instr_struct(bin_instr, false, knode->opcode, dest_reg, ADDR_REG, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, dest_reg, ADDR_REG, 0, 0, 0);
 
 	parse_newline(false);
 }
 
 static void gen_store(struct keyword_node* knode)
 {
-	uint32_t bin_instr = 0;	
 	bool scaling = false;
 	uint32_t scale_reg = 0;
 	uint32_t src_reg = 0;
@@ -816,7 +797,7 @@ static void gen_store(struct keyword_node* knode)
 		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
 	}
 
-	add_instr_struct(bin_instr, false, knode->opcode, ADDR_REG, src_reg, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, ADDR_REG, src_reg, 0, 0, 0);
 
 	parse_newline(false);
 
@@ -943,9 +924,8 @@ void parse()
 		switch (knode->opcode)
 		{
 			case 0: 
-			case 1: uint32_t bin_instr = 0; 
-				bin_instr |= knode->opcode << OPCODE_SHIFT_VAL;
-				add_instr_struct(bin_instr, false, knode->opcode, 0, 0, 0, 0, 0);	
+			case 1: 
+				add_instr_struct(false, knode->opcode, 0, 0, 0, 0, 0);	
 				parse_newline(false);
 				break;
 			case 2: gen_move_instr(knode);

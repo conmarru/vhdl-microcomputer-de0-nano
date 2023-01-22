@@ -1,6 +1,5 @@
 struct instr_struct {
 	bool jmp_tag;
-	uint32_t encoding;
 	uint32_t instr_addr;
 	uint8_t opcode;
 	uint8_t dest;
