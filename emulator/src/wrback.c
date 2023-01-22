@@ -15,4 +15,5 @@ void write_back()
 	regfile.w_in = W_dest;
 	regfile.w_val = multiplex(W_res, W_valM, W_sig_MR);
 	access_reg_file(&regfile);
+	regfile.sig_w = 0;
 }

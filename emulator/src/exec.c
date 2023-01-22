@@ -1,6 +1,5 @@
 #include <stdlib.h>
 #include <stdint.h>
-#include <stdio.h>
 #include "../headers/defs.h"
 #include "../headers/utils.h"
 #include "../headers/mem.h"
@@ -53,30 +52,26 @@ static void exec_alu(struct alu_struct* alu_strct)
 					{
 						case 0: alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
 							break;
-						case 1: alu_strct->out = alu_strct->op2_in & alu_strct->op2_in;
+						case 1: alu_strct->out = alu_strct->op1_in >> 1;
 							break;
-						case 2: alu_strct->out = alu_strct->op1_in | alu_strct->op2_in;
+						case 2: alu_strct->out = alu_strct->op1_in << 1;
+							break;
+						case 3: alu_strct->out = alu_strct->op1_in & alu_strct->op2_in;
+							break;
+						case 4: alu_strct->out = alu_strct->op1_in | alu_strct->op2_in;
+							break;
+						case 5: alu_strct->out = ~alu_strct->op1_in;
+							break;
+						case 7: alu_strct->out = alu_strct->op1_in >> 8;
+							break;
+						case 8: alu_strct->out = alu_strct->op1_in << 8;
 							break;
 					}
 					break;
 		case ADDI_OPCODE: alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
 				  break;
 		case BRANCH_OPCODE: alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
-				    break;
-		case NOT_OPCODE: alu_strct->out = ~alu_strct->op1_in;
-				 break;
-		case SHIFT_OPCODE: switch (alu_strct->func_in)
-				   {
-					   case 0: alu_strct->out = alu_strct->op1_in >> 1;
-						   break;
-					   case 1: alu_strct->out = alu_strct->op1_in << 1;
-						   break;
-					   case 2: alu_strct->out = alu_strct->op1_in >> 8;
-						   break;
-					   case 3: alu_strct->out = alu_strct->op1_in << 8;
-						   break;
-				   }
-				   break;
+				    break;	
 	}
 }
 
@@ -113,6 +108,7 @@ void execute()
 	alu.op1_in = multiplex(E_valA, E_next_pc, E_sig_B);
 	alu.op2_in = multiplex(E_valB, E_imm, E_sig_I);
 	alu.opcode_in = E_opcode;
+	alu.func_in = E_func;
 	exec_alu(&alu);
 
 	tmp_M_next_pc = E_next_pc;
