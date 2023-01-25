@@ -117,7 +117,7 @@ void execute()
 	tmp_M_valA = E_valA;
 	tmp_M_valD = E_valD;
 	tmp_M_sig_J = E_sig_J;
-	tmp_M_sig_B = branch_taken(E_valA, E_func, E_sig_B);
+	tmp_M_sig_B = branch_taken(E_valD, E_func, E_sig_B);
 	tmp_M_sig_MW = E_sig_MW;
 	tmp_M_sig_MR = E_sig_MR;
 	tmp_M_sig_WR = E_sig_WR;

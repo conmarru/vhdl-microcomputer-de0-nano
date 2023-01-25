@@ -140,10 +140,13 @@ static void exec(int flag)
 				switch (func)
 				{
 					case 0 : pc = (reg[cond_reg] == 0) ? pc + extracted_offset : pc;
+						 jmp_flag = reg[cond_reg] == 0;
 						 break;
 					case 1 : pc = (reg[cond_reg] < 0) ? pc + extracted_offset : pc;
+						 jmp_flag = reg[cond_reg] < 0;
 						 break;
 					case 2 : pc = (reg[cond_reg] > 0) ? pc + extracted_offset : pc;
+						 jmp_flag = reg[cond_reg] > 0;
 						 break;
 				}	
 				break;

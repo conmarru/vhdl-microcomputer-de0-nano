@@ -1,8 +1,8 @@
-CFLAGS = -fno-common -O3 -Wall -Wextra 
+CFLAGS = -fno-common -O3 -Wall -Wextra
 
 SRC_DIR = src
 HEADER_DIR = header
-TARGETS = main.o scan.o gen.o utils.o eval.o lbl.o parser.o
+TARGETS = main.o scan.o gen.o utils.o eval.o lbl.o parser.o instr.o
 
 asm: $(TARGETS)
 	gcc $(TARGETS) $(CFLAGS) -o $@
@@ -27,6 +27,9 @@ eval.o: $(SRC_DIR)/eval.c
 
 parser.o: $(SRC_DIR)/parser.c
 	gcc -c $(CFLAGS) $(SRC_DIR)/parser.c
+
+instr.o: $(SRC_DIR)/instr.c
+	gcc -c $(CFLAGS) $(SRC_DIR)/instr.c
 
 test: 
 	./run-tests.sh

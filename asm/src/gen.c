@@ -7,7 +7,7 @@
 #include "../headers/def.h"
 #include "../headers/utils.h"
 #include "../headers/parser.h"
-#include "../headers/gen.h"
+#include "../headers/instr.h"
 
 static void write_file(uint32_t instr)
 {
@@ -60,5 +60,3 @@ void encode_instr()
 		write_file(encoding);
 	}
 }
-
-

@@ -279,6 +279,15 @@ bool check_ttype(token* t, token_type ttype)
 	return false;
 }
 
+bool check_curttype(token_type ttype)
+{
+	if (get_current_token())
+	{
+		return get_current_token()->type == ttype;
+	}
+	return false;
+}
+
 void free_token(token* t)
 {
 	if (t->type == TOKEN_IDNT)

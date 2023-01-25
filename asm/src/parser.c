@@ -9,44 +9,10 @@
 #include "../headers/utils.h"
 #include "../headers/lbl.h"
 #include "../headers/eval.h"
-#include "../headers/gen.h"
+#include "../headers/instr.h"
 
 static const uint8_t STACK_POINTER_REG = 30;
 static const uint8_t ADDR_REG = 29;
-
-static uint32_t cur_addr = 0;
-static int dyn_instr_counter = 0;
-
-typedef enum {
-	REG_OP1,
-	REG_OP2,
-	REG_DEST
-} reg_type;
-
-typedef enum {
-	DYN_INSTR_ADD,
-	DYN_INSTR_ADDI,
-	DYN_INSTR_LOADI,
-	DYN_INSTR_SHL,
-	DYN_INSTR_SHLB,
-	DYN_INSTR_NOT,
-	DYN_INSTR_LOAD,
-	DYN_INSTR_STORE,
-	DYN_INSTR_JMP,
-	DYN_INSTR_BRE,
-	DYN_INSTR_AND,
-	DYN_INSTR_SHR,
-	DYN_INSTR_MOVE,
-	DYN_INSTR_NOP
-} dyn_instr_type;
-
-struct dyn_instr_struct {
-	dyn_instr_type ditype;
-	uint8_t reg_op1;
-	uint8_t reg_op2;
-	uint8_t reg_dest;
-	int32_t num_val;
-};
 
 struct keyword_node {
 	struct keyword_node* next;
@@ -65,42 +31,8 @@ struct reg_struct_node {
 	struct reg_struct* reg;	
 };
 
-
 static struct keyword_node* keyword_hashset[KEYWORD_HASHSET_LEN] = { NULL };
 static struct reg_struct_node* reg_hashset[REG_NUM] = { NULL };
-
-static unsigned int instr_list_len = 50;
-unsigned int instr_list_ptr = 0;
-struct instr_struct** instr_list = NULL;
-
-static struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func)
-{
-	struct instr_struct* new = (struct instr_struct*)malloc(sizeof(struct instr_struct));
-
-	new->jmp_tag = jmp_tag;
-	new->instr_addr = instr_addr;
-	new->opcode = opcode;
-	new->dest = dest;
-	new->op1 = op1;
-	new->op2 = op2;
-	new->immediate = immediate;
-	new->func = func;
-
-	return new;
-}
-
-static struct dyn_instr_struct* new_dyn_instr_struct(dyn_instr_type ditype, uint8_t op1, uint8_t op2, uint8_t dest, int32_t num)
-{
-	struct dyn_instr_struct* new = (struct dyn_instr_struct*)malloc(sizeof(struct dyn_instr_struct));
-	
-	new->ditype = ditype;
-	new->reg_op1 = op1;
-	new->reg_op2 = op2;
-	new->reg_dest = dest;
-	new->num_val = num;
-
-	return new;
-}
 
 static struct reg_struct* new_reg_struct(char* name, uint8_t encoding)
 {
@@ -138,47 +70,6 @@ static void free_reg_hashset()
 			free_reg_struct_node(node);	
 		}
 		free_reg_struct_node(head);
-	}
-}
-
-static void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func)
-{
-	if (instr_list_ptr == instr_list_len-1)
-	{
-		instr_list = realloc(instr_list, instr_list_len*2);
-	}
-	instr_list[instr_list_ptr++] = new_instr_struct(jmp_flag, cur_addr, opcode, dest, op1, op2, immediate, func);
-}
-
-void free_instr_structs()
-{
-	for (unsigned int i = 0; i <= instr_list_ptr; i++)
-	{
-		if (instr_list[i]) free(instr_list[i]);
-	}
-}
-
-static void update_addrs()
-{
-	for (unsigned int i = 0; i < instr_list_ptr; i++)
-	{	
-		if (instr_list[i]->jmp_tag)
-		{
-			if (instr_list[i]->opcode == 3 && (instr_list[i]->instr_addr) <= cur_addr && instr_list[i]->immediate > cur_addr)
-			{
-				instr_list[i]->immediate++;
-			}	
-			else if (instr_list[i]->opcode == 7)
-			{
-				int32_t offset = instr_list[i]->immediate; 
-				uint32_t target_addr = instr_list[i]->instr_addr + offset + 1;
-				if (instr_list[i]->instr_addr < cur_addr && target_addr > cur_addr)
-				{
-					offset += 1;
-					instr_list[i]->immediate++;
-				}
-			}
-		}
 	}
 }
 
@@ -455,7 +346,7 @@ static int32_t parse_num(bool branch)
 		if (label_flag)
 		{
 			int dif = immediate_val - cur_addr;
-			immediate_val = (dif < 0) ? immediate_val - cur_addr : immediate_val - cur_addr - 1;
+			immediate_val = (dif < 0) ? immediate_val - cur_addr + 1: immediate_val - cur_addr;
 		}
 	}
 	free_token(t);
@@ -542,158 +433,27 @@ static void gen_addi(struct keyword_node* knode)
 
 }
 
-static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag)
-{
-	uint8_t opcode = 0;
-	uint8_t dest = 0;
-	uint8_t op1 = 0;
-	uint8_t op2 = 0;
-	int32_t immediate = 0;
-	uint8_t func = 0;
-
-	switch (dyn_instr->ditype)
-	{
-		case DYN_INSTR_ADD : opcode = 4;
-				     dest = dyn_instr->reg_dest;
-				     op1 = dyn_instr->reg_op1;
-				     op2 = dyn_instr->reg_op2;
-				     func = 0;
-				     break;
-		case DYN_INSTR_ADDI: opcode = 5;
-				     dest = dyn_instr->reg_dest;
-				     op1 = dyn_instr->reg_op1;
-				     immediate = dyn_instr->num_val;
-				     break;
-		case DYN_INSTR_LOADI: opcode = 3;
-				      dest = dyn_instr->reg_dest;
-				      immediate = dyn_instr->num_val;
-				      break;
-		case DYN_INSTR_SHL: opcode = 4;
-				    dest = dyn_instr->reg_dest;
-				    op1 = dyn_instr->reg_op1;
-				    func = 2;
-				    break;
-		case DYN_INSTR_SHLB: opcode = 4;
-				     dest = dyn_instr->reg_dest;
-				     op1 = dyn_instr->reg_op1;
-				     func = 8;
-				     break;
-		case DYN_INSTR_NOT: opcode = 4;
-				    dest = dyn_instr->reg_dest;
-				    op1 = dyn_instr->reg_op1;
-				    func = 5;
-				    break;
-		case DYN_INSTR_LOAD: opcode = 8;
-				     dest = dyn_instr->reg_dest;
-				     op1 = dyn_instr->reg_op1;
-				     break;
-		case DYN_INSTR_STORE: opcode = 9;
-				      dest = dyn_instr->reg_dest;
-				      op1 = dyn_instr->reg_op1;
-				      break;
-		case DYN_INSTR_JMP: opcode = 6;
-				    dest = dyn_instr->reg_dest;
-				    break;
-		case DYN_INSTR_BRE: opcode = 7;
-				    dest = dyn_instr->reg_dest;
-				    immediate = dyn_instr->num_val;
-				    break;
-		case DYN_INSTR_AND: opcode = 4;
-				    dest = dyn_instr->reg_dest;
-				    op1 = dyn_instr->reg_op1;
-				    op2 = dyn_instr->reg_op2;
-				    func = 3;
-				    break;
-		case DYN_INSTR_SHR: opcode = 4;
-				    dest = dyn_instr->reg_dest;
-				    op1 = dyn_instr->reg_op1;
-				    func = 1;
-				    break;
-		case DYN_INSTR_MOVE: opcode = 2;
-				     dest = dyn_instr->reg_dest;
-				     op1 = dyn_instr->reg_op1;
-				     break;
-		case DYN_INSTR_NOP: opcode = 0;
-				    break;
-	}
-
-	free(dyn_instr);
-	dyn_instr_counter++;
-	add_instr_struct(jmp_tag, opcode, dest, op1, op2, immediate, func);
-	if (!first_flag) 
-	{
-		update_lbls(cur_addr);
-		update_addrs();
-		cur_addr += 1;
-	}
-}
-
-static void insert_nops(unsigned int amount)
-{
-	for (unsigned int i = 0; i < amount; i++)
-	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOP, 0, 0, 0, 0), false, false);
-	}
-}
-
-// r29,r28 reserved for jump addresses and scaling
+// uses r29 if destination specified as immediate
 static void gen_jump(struct keyword_node* knode)
 {
-	uint32_t scale_reg = 0;
 	uint32_t immediate = 0;
 	uint32_t dest_reg = ADDR_REG;
-	bool scaling = false;
+	bool imm = false;
 
 	token* t = get_current_token();
 	if (check_ttype(t, TOKEN_PERCENT))
 	{
 		dest_reg = parse_reg();	
 	}
-	// no scaling
-	else if ((get_current_token() && (get_current_token()->type == TOKEN_DOLLAR || get_current_token()->type == TOKEN_IDNT)))
+	else if (check_curttype(TOKEN_DOLLAR) || check_curttype(TOKEN_IDNT))
 	{
 		immediate = parse_num(false);	
-	}
-	else
-	{
-		scaling = true;
-		scale_reg = parse_reg();
-
-		parse_comma();
-
-		immediate = parse_num(false);
-	}
+		imm = true;
+	}	
 	
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), true, false);
-	if (!(cli_flags & NO_NOPS_FLAG))
-	{
-		insert_nops(4);	
-	}
-	if (scaling) 
-	{	
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-
-		if (!(cli_flags & NO_NOPS_FLAG))
-		{
-			insert_nops(4);	
-		}
-
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
-	}
+	if (imm) gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), true, false);		
 
 	add_instr_struct(false, knode->opcode, dest_reg, 0, 0, 0, 0);
-
-	if (!(cli_flags & NO_NOPS_FLAG))
-	{
-		insert_nops(3);	
-	}
 
 	parse_newline(false);
 
@@ -718,86 +478,56 @@ static void gen_branches(struct keyword_node* knode)
 
 static void gen_load(struct keyword_node* knode)
 {
-	uint32_t scale_reg = 0;
 	uint32_t immediate = 0;
 	uint32_t dest_reg;
-	bool scaling = false;
+	uint32_t src_reg = ADDR_REG;
+	bool imm = false;
 
-	if (get_current_token() && get_current_token()->type == TOKEN_PERCENT)
+	if (check_curttype(TOKEN_DOLLAR))
 	{
-		scaling = true;
-		scale_reg = parse_reg();
-		parse_comma();
+		imm = true;
+		immediate = parse_num(false);
 	}
-
-	immediate = parse_num(false);
+	else
+	{
+		src_reg = parse_reg();	 
+	}
 
 	parse_comma();
 
 	dest_reg = parse_reg();
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), false, false);
-	if (!(cli_flags & NO_NOPS_FLAG))
-	{
-		insert_nops(4);	
-	}
-	if (scaling)
-	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		if (!(cli_flags & NO_NOPS_FLAG))
-		{
-			insert_nops(4);	
-		}
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
-	}
+	if (imm) gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), false, false);	
 
-	add_instr_struct(false, knode->opcode, dest_reg, ADDR_REG, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, dest_reg, src_reg, 0, 0, 0);
 
 	parse_newline(false);
 }
 
 static void gen_store(struct keyword_node* knode)
 {
-	bool scaling = false;
-	uint32_t scale_reg = 0;
+	bool imm = false;
 	uint32_t src_reg = 0;
+	uint32_t dest_reg = ADDR_REG;
 	uint32_t immediate = 0;
 
 	src_reg = parse_reg();
 
 	parse_comma();
 	
-	if (get_current_token() && get_current_token()->type == TOKEN_PERCENT)
+	if (check_curttype(TOKEN_DOLLAR))
 	{
-		scaling = true;
-		scale_reg = parse_reg();
-		parse_comma();
+		imm = true;
+		immediate = parse_num(false);
+	}
+	else
+	{
+		dest_reg = parse_reg();
 	}
 
-	immediate = parse_num(false);
+	if (imm) gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), false, false);	
 
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, immediate), false, false);
-	if (!(cli_flags & NO_NOPS_FLAG))
-	{
-		insert_nops(4);	
-	}
-	if (scaling)
-	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHLB, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, scale_reg, 0, scale_reg, 0), false, false);
-		if (!(cli_flags & NO_NOPS_FLAG))
-		{
-			insert_nops(4);
-		}
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, scale_reg, ADDR_REG, ADDR_REG, 0), false, false);
-	}
-
-	add_instr_struct(false, knode->opcode, ADDR_REG, src_reg, 0, 0, 0);
+	add_instr_struct(false, knode->opcode, dest_reg, src_reg, 0, 0, 0);
 
 	parse_newline(false);
 
@@ -884,7 +614,7 @@ static void gen_pseudo_mul()
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, reg_op2, 0, 24, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 26, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 28, 1), false, false);
-	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 24, 7), false, false);
+	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 24, 8), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, 24, 28, 27, 0), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 27, 8), false, false);
 	gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, 25, 26, 0), false, false);
@@ -960,6 +690,12 @@ void parse()
 				  exit(1);
 		}		
 	}
+
+	if (!(cli_flags & NO_NOPS_FLAG))
+	{
+		gen_nops();
+	}
+
 	free_reg_hashset();
 	free_keyword_hashset();
 	free_lbl_hashset();
