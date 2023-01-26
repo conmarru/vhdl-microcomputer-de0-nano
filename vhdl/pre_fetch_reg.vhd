@@ -8,14 +8,14 @@ entity pre_fetch_reg is
     port(
         clk : in std_logic;
         next_pc_in, instruction : in signed(31 downto 0);
+        reset : in std_logic;
         next_pc_out : out signed(31 downto 0);
         opcode_out, addr_a_out, addr_b_out, addr_dest_out, func_out : out signed(4 downto 0);
         imm_out : out signed(31 downto 0);
         use_imm_out : out std_logic;
         use_jmp_out : out std_logic;
         reg_write_out : out std_logic;
-        memory_read_out, memory_write_out : out std_logic;
-        reset : in std_logic
+        memory_read_out, memory_write_out : out std_logic
     );
 end entity pre_fetch_reg;
 

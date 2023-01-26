@@ -21,9 +21,9 @@ NOT (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00101)
 
 Branches
 JMP (00110|<jmpreg:5>|<unused:22>)
-BRE (branch equal zero) (00111|<condreg:5>|<offset:17>|00000)
-BRL (branch less zero) (00111|<condreg:5>|<offset:17>|00001)
-BRG (branch greater zero) (00111|<condreg:5>|<offset:17>|00010)
+BRE (branch equal zero) (00111|<condreg:5>|<offset:17>|00100)
+BRL (branch less zero) (00111|<condreg:5>|<offset:17>|00010)
+BRG (branch greater zero) (00111|<condreg:5>|<offset:17>|00001)
 
 Speicheroperationen
 LOAD (01000|<destination:5>|<addrreg:5>|<unused:17>) 

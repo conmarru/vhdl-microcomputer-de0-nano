@@ -5,7 +5,7 @@ use IEEE.NUMERIC_STD.ALL;
 entity pre_exec_reg is
     port(
         -- control
-        reset : in std_logic
+        reset : in std_logic;
         clk : in std_logic;
         -- in
         next_pc_in, val_a_in, val_b_in, val_d_in : in signed(31 downto 0);
@@ -22,7 +22,7 @@ entity pre_exec_reg is
         use_imm_out : out std_logic;
         use_jmp_out : out std_logic;
         reg_write_out : out std_logic;
-        memory_read_out, memory_write_out : out std_logic;
+        memory_read_out, memory_write_out : out std_logic
     );
 end entity pre_exec_reg;
 
