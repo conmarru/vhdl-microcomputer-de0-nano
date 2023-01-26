@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
+#include <stdio.h>
 #include "../headers/defs.h"
 #include "../headers/decode.h"
 #include "../headers/fetch.h"
@@ -23,6 +24,8 @@ static int tmp_D_sig_MR;
 static int tmp_D_sig_MW;
 static int tmp_D_sig_WR; 
 
+static unsigned int instr_mem_size;
+
 struct extract_fields_struct {
 	int32_t instr_in;
 	int8_t opcode_out; // opcode
@@ -44,7 +47,12 @@ struct extract_fields_struct extract_fields;
 struct pc_struct pc_str;
 
 static int32_t read_mem(struct instr_mem_struct* mem, uint32_t addr)
-{
+{	
+	if (addr >= instr_mem_size)
+	{
+		printf("ERROR: Invalid memory access. Referenced address exceeded the bounds of memory\n");
+		exit(1);
+	}
 	return mem->mem_array[(uint32_t)addr];
 }
 
@@ -69,7 +77,8 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 0;
 			break; 
-		case 1: break; // TODO: hlt
+		case 1: if (flags & 32) exit(0);
+			break; // TODO: hlt
 		case 2: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_I_out = 0;
@@ -174,6 +183,7 @@ void update_pc(struct pc_struct* pc_strct)
 
 void alloc_instr_mem(unsigned int size)
 {
+	instr_mem_size = size;
 	instr_mem.mem_array = (int32_t*)malloc(sizeof(int32_t)*size);
 }
 

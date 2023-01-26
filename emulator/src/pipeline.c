@@ -49,7 +49,7 @@ void run(unsigned int mem_size, uint8_t* binary_data, int fsize)
 			}
 			if (!strcmp(user_args[0], CMDS[0]) || !strcmp(user_args[0], CMDS[1]))
 			{
-				break_cond = true;
+				break_cond = true;	
 			}
 			else if (!strcmp(user_args[0], CMDS[2]) || !strcmp(user_args[0], CMDS[3]))
 			{

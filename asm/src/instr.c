@@ -76,7 +76,7 @@ static void update_addrs(bool use_addr, uint32_t index)
 			else if (instr_list[i]->opcode == 7)
 			{
 				int32_t offset = instr_list[i]->immediate; 
-				uint32_t target_addr = instr_list[i]->instr_addr + offset + 1;
+				uint32_t target_addr = instr_list[i]->instr_addr + offset;
 				if (instr_list[i]->instr_addr < ucur_addr && target_addr > ucur_addr)
 				{
 					offset += 1;
@@ -190,10 +190,10 @@ static void insert_nop_at_index(unsigned int index)
 
 	unsigned int rpointer = instr_list_ptr;
 
-	while (rpointer >= index)
+	while (rpointer >= index+1)
 	{
-		instr_list[rpointer-1]->instr_addr++;
 		instr_list[rpointer] = instr_list[rpointer-1];
+		instr_list[rpointer]->instr_addr++;
 		rpointer--;
 	}
 
@@ -226,12 +226,12 @@ static void gen_nops_arith(uint8_t dest, uint8_t op1, uint8_t op2, uint32_t inde
 	{
 		for (int j = 0; j < ref_count[op]; j++)
 		{
-			insert_nop_at_index(index+j);
+			insert_nop_at_index(index);
 		}
 	}
 	else
 	{
-		ref_count[dest] = 5;
+		ref_count[dest] = 5; // 5, since it gets decremented instantly the next iteration
 	}
 }
 
@@ -244,7 +244,7 @@ void gen_nops()
 		{
 			case 2: gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, 0, i, true);
 				break;
-			case 3: ref_count[instr_list[i]->dest] = 5; // 5, since it gets decremented instantly the next iteration
+			case 3: ref_count[instr_list[i]->dest] = 5;
 				break;
 			case 4: gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, instr_list[i]->op2, i, false);
 				break;
@@ -260,7 +260,6 @@ void gen_nops()
 					for (int j = 0; j < JMP_NOPS_NUM; j++)
 					{
 						insert_nop_at_index(i);		
-						i++;
 					}
 				}
 				break;
@@ -274,12 +273,28 @@ void gen_nops()
 					for (int j = 0; j < JMP_NOPS_NUM; j++)
 					{
 						insert_nop_at_index(i);		
-						i++;
 					}
 				}
 				break;
 			case 9: ref_count[instr_list[i]->dest] = 5;
 				break;
 		}
+	}
+	//debug_print_instr_list(false, 0, 0);
+}
+
+void debug_print_instr_list(bool filter, int opcode, int func)
+{
+	for (unsigned int i = 0; i < instr_list_ptr; i++)
+	{
+		if (filter)
+		{	
+			if (instr_list[i]->opcode == opcode && instr_list[i]->func == func) printf("i: %d, opcode: %d, op1: %d, op2: %d, dest: %d, imm: %d, func: %d, addr: %d\n", i, instr_list[i]->opcode, instr_list[i]->op1, instr_list[i]->op2, instr_list[i]->dest, instr_list[i]->immediate, instr_list[i]->func, instr_list[i]->instr_addr);
+		}
+		else
+		{
+			printf("i: %d, opcode: %d, op1: %d, op2: %d, dest: %d, imm: %d, func: %d, addr: %d\n", i, instr_list[i]->opcode, instr_list[i]->op1, instr_list[i]->op2, instr_list[i]->dest, instr_list[i]->immediate, instr_list[i]->func, instr_list[i]->instr_addr);
+		}
+
 	}
 }

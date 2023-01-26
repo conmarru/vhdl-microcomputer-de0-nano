@@ -46,3 +46,4 @@ struct dyn_instr_struct* new_dyn_instr_struct(dyn_instr_type ditype, uint8_t op1
 void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag);
 void insert_nops(unsigned int amount);
 void gen_nops();
+void debug_print_instr_list(bool filter, int opcode, int func);

@@ -21,6 +21,18 @@ uint8_t flags = 0;
 
 int err_val = 0;
 
+static void print_usage_info()
+{
+	printf("usage: ./emu -i <filename> [flags]\n");
+	printf("flags:\t-r, --regdump\n");
+	printf("\t-m, --memdump\n");
+	printf("\t-I, --interactive\n");
+	printf("\t-n, --no-pipelining\n");
+	printf("\t-s, --mem-size <amount>\n");
+	printf("\t-H, --term-on-hlt\n");
+	printf("\t-h, --help\n");
+}
+
 static void parse_cli_args(int argc, char** args, char* filename, char* mem_size)
 {
 	int c = 0; 
@@ -34,11 +46,13 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 			{"interactive", no_argument, NULL, 'I'},
 			{"no-pipelining", no_argument, NULL, 'n'},
 			{"mem-size", required_argument, NULL, 's'},
+			{"term-on-hlt", no_argument, NULL, 'H'},
+			{"help", no_argument, NULL, 'h'},
 			{NULL, 0, NULL, 0}
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:rmIns:", long_options, &option_index);
+		c = getopt_long(argc, args, "i:rmIns:Hh", long_options, &option_index);
 
 		if (c == -1)
 		{
@@ -60,12 +74,11 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 			case 's' : memcpy(mem_size, optarg, SIZEBUF_LEN);
 				   flags |= 16;
 				   break;
-			case '?' : printf("usage:./main -i <filename> [flags]\n");
-				   printf("flags:\t-r, --regdump\n");
-				   printf("\t-m, --memdump\n");
-				   printf("\t-I, --interactive\n");
-				   printf("\t-n, --no-pipelining\n");
-				   printf("\t-s, --mem-size <amount>\n");
+			case 'H' : flags |= 32;
+				   break;
+			case 'h' : print_usage_info();
+				   exit(0);
+			case '?' : print_usage_info(); 
 				   exit(1);
 		}
 	}
