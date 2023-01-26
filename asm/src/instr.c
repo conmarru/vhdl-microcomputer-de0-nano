@@ -276,6 +276,15 @@ void gen_nops()
 					}
 				}
 				break;
+			case 8:	if (ref_count[instr_list[i]->op1])
+				{
+					insert_nop_at_index(i);
+				}
+				else
+				{
+					ref_count[instr_list[i]->dest] = 5;
+				}
+				break;
 			case 9: ref_count[instr_list[i]->dest] = 5;
 				break;
 		}
