@@ -20,6 +20,7 @@ struct pc_struct {
 extern int32_t pc;
 extern struct instr_mem_struct instr_mem;
 extern struct pc_struct pc_str;
+extern bool hlt_flag;
 
 void fetch_update_pipeline_regs();
 void update_pc(struct pc_struct* pc_strct);

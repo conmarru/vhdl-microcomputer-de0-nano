@@ -2,11 +2,14 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 #include "../headers/defs.h"
 #include "../headers/decode.h"
 #include "../headers/fetch.h"
 
 #define LAST_FIELD_MASK 0x0000001f
+
+bool hlt_flag = false;
 
 // TODO: hlt
 
@@ -77,7 +80,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 0;
 			break; 
-		case 1: if (flags & 32) exit(0);
+		case 1: if (flags & 32) hlt_flag = true;
 			break; // TODO: hlt
 		case 2: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;

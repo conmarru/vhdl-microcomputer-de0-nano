@@ -14,7 +14,7 @@ struct instr_struct** instr_list = NULL;
 
 static int ref_count[REG_NUM] = { 0 };
 
-struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func)
+struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func, bool jnop_tag)
 {
 	struct instr_struct* new = (struct instr_struct*)malloc(sizeof(struct instr_struct));
 
@@ -26,6 +26,7 @@ struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t
 	new->op2 = op2;
 	new->immediate = immediate;
 	new->func = func;
+	new->jnop_tag = jnop_tag;
 
 	return new;
 }
@@ -38,14 +39,14 @@ void free_instr_structs()
 	}
 }
 
-void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func)
+void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func, bool jnop_tag)
 {
 	if (instr_list_ptr == instr_list_len-1)
 	{
 		instr_list = realloc(instr_list, sizeof(struct instr_struct*)*instr_list_len*2);
 		instr_list_len = instr_list_len*2;
 	}
-	instr_list[instr_list_ptr++] = new_instr_struct(jmp_flag, cur_addr, opcode, dest, op1, op2, immediate, func);
+	instr_list[instr_list_ptr++] = new_instr_struct(jmp_flag, cur_addr, opcode, dest, op1, op2, immediate, func, jnop_tag);
 }
 
 struct dyn_instr_struct* new_dyn_instr_struct(dyn_instr_type ditype, uint8_t op1, uint8_t op2, uint8_t dest, int32_t num)
@@ -67,7 +68,7 @@ static void update_addrs(bool use_addr, uint32_t index)
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
 	{	
 
-		if (instr_list[i]->jmp_tag)
+		if (instr_list[i]->jmp_tag || (instr_list[i]->jnop_tag && !use_addr))
 		{
 			if (instr_list[i]->opcode == 3 && instr_list[i]->immediate > ucur_addr)
 			{
@@ -87,7 +88,7 @@ static void update_addrs(bool use_addr, uint32_t index)
 	}
 }
 
-void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag)
+void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag, bool jnop_tag)
 {
 	uint8_t opcode = 0;
 	uint8_t dest = 0;
@@ -163,7 +164,7 @@ void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool fi
 	}
 
 	free(dyn_instr);
-	add_instr_struct(jmp_tag, opcode, dest, op1, op2, immediate, func);
+	add_instr_struct(jmp_tag, opcode, dest, op1, op2, immediate, func, jnop_tag);
 	if (!first_flag) 
 	{
 		update_lbls(cur_addr);
@@ -176,7 +177,7 @@ void insert_nops(unsigned int amount)
 {
 	for (unsigned int i = 0; i < amount; i++)
 	{
-		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOP, 0, 0, 0, 0), false, false);
+		gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOP, 0, 0, 0, 0), false, false, false);
 	}
 }
 
@@ -197,7 +198,7 @@ static void insert_nop_at_index(unsigned int index)
 		rpointer--;
 	}
 
-	instr_list[index] = new_instr_struct(false, index, 0, 0, 0, 0, 0, 0);
+	instr_list[index] = new_instr_struct(false, index, 0, 0, 0, 0, 0, 0, false);
 	instr_list_ptr++;
 	update_addrs(false, index);	
 }
@@ -237,6 +238,8 @@ static void gen_nops_arith(uint8_t dest, uint8_t op1, uint8_t op2, uint32_t inde
 
 void gen_nops()
 {
+	printf("BEFORE:\n");
+	debug_print_instr_list(false, 0, 0);
 	for (uint32_t i = 0; i < instr_list_ptr; i++)
 	{
 		decr_ref_count();
@@ -285,11 +288,19 @@ void gen_nops()
 					ref_count[instr_list[i]->dest] = 5;
 				}
 				break;
-			case 9: ref_count[instr_list[i]->dest] = 5;
+			case 9: if (ref_count[instr_list[i]->op1])
+				{
+					insert_nop_at_index(i);
+				}
+				else
+				{
+					ref_count[instr_list[i]->dest] = 5;
+				}
 				break;
 		}
 	}
-	//debug_print_instr_list(false, 0, 0);
+	printf("AFTER:\n");
+	debug_print_instr_list(false, 0, 0);
 }
 
 void debug_print_instr_list(bool filter, int opcode, int func)

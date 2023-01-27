@@ -7,6 +7,7 @@ struct instr_struct {
 	uint8_t op2;
 	uint32_t immediate;
 	uint8_t func;
+	bool jnop_tag;
 };
 
 typedef enum {
@@ -39,11 +40,11 @@ extern unsigned int instr_list_len;
 extern unsigned int instr_list_ptr;
 extern struct instr_struct** instr_list;
 
-struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func);
+struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, uint32_t immediate, uint8_t func, bool jnop_tag);
 void free_instr_structs();
-void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func);
+void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func, bool jnop_tag);
 struct dyn_instr_struct* new_dyn_instr_struct(dyn_instr_type ditype, uint8_t op1, uint8_t op2, uint8_t dest, int32_t num);
-void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag);
+void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, bool first_flag, bool jnop_tag);
 void insert_nops(unsigned int amount);
 void gen_nops();
 void debug_print_instr_list(bool filter, int opcode, int func);

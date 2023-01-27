@@ -14,7 +14,7 @@
 
 #define MAX_FILENAME 200
 #define SIZEBUF_LEN 10
-#define DEFAULT_MEM_SIZE 1024
+#define DEFAULT_MEM_SIZE 2056
 
 const uint32_t EXTRACT_MASK = 0x0000001f;
 uint8_t flags = 0;
