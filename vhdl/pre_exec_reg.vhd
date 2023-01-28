@@ -30,36 +30,35 @@ architecture behavior of pre_exec_reg is
     begin 
     pre_exec_P: process (clk, reset) is
     begin
+        if reset = '1' then
+            val_a_out <= (others =>'0');
+            next_pc_out <= to_signed(2, 32);
+            val_b_out <= (others => '0');
+            val_d_out <= (others => '0');
+            opcode_out <= (others => '0');
+            dest_addr_out <= (others => '0');
+            func_out <= (others => '0');
+            imm_out <= (others => '0');
+            use_imm_out <= '0';
+            use_jmp_out <= '0';
+            reg_write_out <= '0';
+            memory_read_out <= '0';
+            memory_write_out <= '0';
+        end if;
         if rising_edge(clk) then
-            if reset = '1' then
-                next_pc_out <= to_signed(2, 32);
-                val_a_out <= (others =>'0');
-                val_b_out <= (others => '0');
-                val_d_out <= (others => '0');
-                opcode_out <= (others => '0');
-                dest_addr_out <= (others => '0');
-                func_out <= (others => '0');
-                imm_out <= (others => '0');
-                use_imm_out <= '0';
-                use_jmp_out <= '0';
-                reg_write_out <= '0';
-                memory_read_out <= '0';
-                memory_write_out <= '0';
-            else 
-                next_pc_out <= next_pc_in;
-                val_a_out <= val_a_in;
-                val_b_out <= val_b_in;
-                val_d_out <= val_d_in;
-                opcode_out <= opcode_in;
-                dest_addr_out <= dest_addr_in;
-                func_out <= func_in;
-                imm_out <= imm_in;
-                use_imm_out <= use_imm_in;
-                use_jmp_out <= use_jmp_in;
-                reg_write_out <= reg_write_in;
-                memory_read_out <= memory_read_in;
-                memory_write_out <= memory_write_in;
-            end if;
+            next_pc_out <= next_pc_in;
+            val_a_out <= val_a_in;
+            val_b_out <= val_b_in;
+            val_d_out <= val_d_in;
+            opcode_out <= opcode_in;
+            dest_addr_out <= dest_addr_in;
+            func_out <= func_in;
+            imm_out <= imm_in;
+            use_imm_out <= use_imm_in;
+            use_jmp_out <= use_jmp_in;
+            reg_write_out <= reg_write_in;
+            memory_read_out <= memory_read_in;
+            memory_write_out <= memory_write_in;
         end if;
     end process pre_exec_P;
 end architecture behavior;

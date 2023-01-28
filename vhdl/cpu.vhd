@@ -73,12 +73,14 @@ architecture cpu_go_fast of cpu is
             next_pc_in, res_in, val_d_in : in signed(31 downto 0);
             dest_addr_in : in signed(4 downto 0);
             use_jmp_in : in std_logic;
+            use_branch_in : in std_logic;
             reg_write_in : in std_logic;
             memory_read_in, memory_write_in : in std_logic;
             -- out
             next_pc_out, res_out, val_d_out : out signed(31 downto 0);
             dest_addr_out : out signed(4 downto 0);
             use_jmp_out : out std_logic;
+            use_branch_out : out std_logic;
             reg_write_out : out std_logic;
             memory_read_out, memory_write_out : out std_logic
         );
@@ -172,7 +174,7 @@ architecture cpu_go_fast of cpu is
     signal e_memory_write : std_logic;
     
     signal m_next_pc : signed(31 downto 0);
-    signal m_in : signed(31 downto 0);
+    signal m_res : signed(31 downto 0);
     signal m_val_d : signed(31 downto 0);
     signal m_dest_addr : signed(4 downto 0);
     signal m_used_jmp : std_logic;
@@ -195,6 +197,8 @@ architecture cpu_go_fast of cpu is
     
     signal mem_val : signed(31 downto 0);
 
+    signal branch_use_branch : std_logic;
+
     signal pc_pc : signed(31 downto 0);
     signal pc_next_pc : signed(31 downto 0);
 
@@ -205,17 +209,17 @@ begin
     instr_mem: entity work.ram
     port map(clk, pc_pc, nein, nein_aber_lang, instrmem_instr);
     mem: entity work.ram
-    port map(clk, m_dest_addr, m_memory_write, m_val_d, mem_val);
+    port map(clk, m_res, m_memory_write, m_val_d, mem_val);
 
     pc: entity work.program_counter
-    -- todo: fix nein, m_next_pc muss schon fallunterscheidungen machen
-    port map(reset, clk, m_used_jmp, m_used_branch, nein, m_next_pc);
+    -- todo: nein, m_next_pc muss schon fallunterscheidungen machen
+    port map(reset, clk, m_used_jmp, m_used_branch, nein, m_next_pc, pc_pc, pc_next_pc);
 
     alu_dings: entity work.alu
     port map(e_val_a, e_val_b, e_opcode, e_func, alu_res);
 
     branch_dings: entity work.branch
-    port map(e_val_d, e_func);
+    port map(e_val_d, e_func, branch_use_branch);
 
     pre_fetch_reg_dings: entity work.pre_fetch_reg
     port map(clk, pc_next_pc, instrmem_instr, reset, 
@@ -237,11 +241,17 @@ begin
 
     pre_mem_reg_dings: entity work.pre_mem_reg
     port map(reset, clk, e_next_pc, alu_res, e_val_d, e_dest_addr,
-        e_use_jmp, e_reg_write, e_memory_read, e_memory_write);
+        e_use_jmp, branch_use_branch, e_reg_write, e_memory_read, e_memory_write,
+        m_next_pc, m_res, m_val_d, m_dest_addr, m_used_jmp, m_used_branch,
+        m_reg_write, m_memory_read, m_memory_write);
     
 
     stiP: process is
     begin
+        wait for 20 ms;
+        clk <= '0';
+        reset <= '1';
+        wait for 20 ms;
         wait;
     end process stiP;
 end architecture cpu_go_fast;

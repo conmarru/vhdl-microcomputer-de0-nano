@@ -36,7 +36,9 @@ begin
         
         if opcode = BRANCH or opcode = ADDI then
             C <= A + B;
-        elsif opcode = MOVE then
+        elsif opcode = MOVE or opcode = LOAD then
+            C <= A;
+        elsif opcode = LOADI then
             C <= A;
         else
             case func is

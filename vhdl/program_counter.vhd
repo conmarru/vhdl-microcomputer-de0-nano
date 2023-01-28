@@ -30,7 +30,7 @@ architecture behavior of program_counter is
         end if;
         if reset = '1' then
             pc <= (others => '0');
-            next_pc_out <= to_signed(4, 32);
+            next_pc_out <= to_signed(5, 32);
             jmp_counter <= to_unsigned(0, 2);
         end if;
         if rising_edge(clk) then

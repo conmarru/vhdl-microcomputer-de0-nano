@@ -19,7 +19,7 @@ architecture BlockRAM of RAM is
     type speicher is array(0 to (2**Addrbreite)-1) of signed(Wortbreite-1 downto 0);
     signal memory : speicher;   
     begin
-      process begin
+      behav : process (clk, Addr) is begin
         if rising_edge(clk) then
           if (Write='1') then
           memory(to_integer(unsigned(Addr))) <= Din;
