@@ -76,7 +76,7 @@ void update_lbls(uint32_t cur_addr)
 			if (node->lbl->addr > cur_addr)
 			{
 				node->lbl->addr += 1;
-				//printf("%s, %d\n", node->lbl->name, node->lbl->addr);
+				printf("%s, %d\n", node->lbl->name, node->lbl->addr);
 			}
 			node = node->next;
 		}
@@ -110,5 +110,3 @@ void free_lbl_hashset()
 		free_lbl_node(head);
 	}
 }
-
-

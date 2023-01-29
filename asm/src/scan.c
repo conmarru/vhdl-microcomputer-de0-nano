@@ -212,7 +212,7 @@ static void scan()
 			case '\t' : 
 			case ' ' : pointer++;
 				   break;
-			case '.' : pointer++;
+			case '.' : pointer++; // maybe tokenize point as well
 				   if (isalpha(input[pointer]))
 				   {
 				   	char* name = scan_identifier(&pointer);

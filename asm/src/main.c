@@ -9,12 +9,23 @@
 #include "../headers/scan.h"
 #include "../headers/parser.h"
 #include "../headers/gen.h"
+#include "../headers/instr.h"
 
 #define MAX_FILENAME 100
 
 FILE* input_file = NULL;
 FILE* output_file = NULL;
 uint8_t cli_flags = 0;
+
+static void print_usage()
+{
+	printf("usage: ./asm -i <input_file> [ flags ]\n");
+	printf("flags:\t-o, --output <output_file>\n");
+	printf("\t-n, --no-nops\n");
+	printf("\t-b, --no-branch-adjustment\n");
+	printf("\t-d, --show-debug-info\n");
+	printf("\t-h, --help\n");
+}
 
 void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 {
@@ -26,11 +37,14 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 			{"input", required_argument, NULL, 'i'},
 			{"output", required_argument, NULL, 'o'},
 			{"no-nops", no_argument, NULL, 'n'},
+			{"no-branch-adjustment", no_argument, NULL, 'b'},
+			{"show-debug-info", no_argument, NULL, 'd'},
+			{"help", no_argument, NULL, 'h'},
 			{NULL, 0, NULL, 0}
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:o:n", long_options, &option_index);
+		c = getopt_long(argc, args, "i:o:nbdh", long_options, &option_index);
 		
 		if (c == -1)
 		{
@@ -45,9 +59,13 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 				  break;
 			case 'n': cli_flags |= NO_NOPS_FLAG;
 				  break;
-			case '?': printf("usage: ./asm -i <input_file> [ flags ]\n");
-				  printf("flags:\t-o, --output <output_file>\n");
-				  printf("\t-n, --no-nops\n");
+			case 'b': cli_flags |= NO_BR_ADJ_FLAG;
+				  break;
+			case 'd': cli_flags |= DEBUG_FLAG;
+				  break;
+			case 'h': print_usage();
+				  exit(0);
+			case '?': print_usage();
 				  exit(1);
 		}
 		
@@ -89,6 +107,9 @@ int main(int argc, char** args)
 	free(input);
 	free_token_stream();
 	free_instr_structs();
+	free_reg_hashset();
+	free_keyword_hashset();
+	//free_lbl_hashset(); //macht probleme, TODO: fix
 
 	return 0;
 }
