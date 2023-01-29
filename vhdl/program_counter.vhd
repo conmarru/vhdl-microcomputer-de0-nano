@@ -20,7 +20,7 @@ entity program_counter is
 end program_counter;
 
 architecture behavior of program_counter is
-    signal jmp_counter : unsigned(1 downto 0);
+    signal jmp_counter : unsigned(2 downto 0);
     signal pc_temp : signed(31 downto 0);
     begin
         process (clk, reset, halt) is 
@@ -30,16 +30,17 @@ architecture behavior of program_counter is
         end if;
         if reset = '1' then
             pc <= (others => '0');
-            next_pc_out <= to_signed(5, 32);
-            jmp_counter <= to_unsigned(0, 2);
+            next_pc_out <= to_signed(4, 32);
+            jmp_counter <= to_unsigned(4, 3);
+            pc_temp <= to_signed(1, 32);
         end if;
         if rising_edge(clk) then
           if used_jmp = '1' or used_branch = '1' then
-            jmp_counter <= to_unsigned(3, 2);
+            jmp_counter <= to_unsigned(3, 3);
             pc <= next_pc_in;
             pc_temp <= next_pc_in + to_signed(1, 32);
             next_pc_out <= next_pc_in + to_signed(4, 32);
-          elsif jmp_counter > to_unsigned(0, 2) then
+          elsif jmp_counter > to_unsigned(0, 3) then
             jmp_counter <= jmp_counter - 1;
             pc <= pc_temp;
             next_pc_out <= pc_temp + to_signed(4, 32);

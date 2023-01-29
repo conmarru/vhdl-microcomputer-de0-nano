@@ -39,7 +39,7 @@ begin
         elsif opcode = MOVE or opcode = LOAD then
             C <= A;
         elsif opcode = LOADI then
-            C <= A;
+            C <= B;
         else
             case func is
                 when  func_and    => C <= A and B;

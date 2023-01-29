@@ -66,7 +66,7 @@ architecture behavior of pre_fetch_reg is
             else
                 reg_write_out <= '1';
             end if;
-            if instruction(31 downto 27) = LOAD or instruction(31 downto 27) = LOADI then
+            if instruction(31 downto 27) = LOAD then
                 memory_read_out <= '1';
             else
                 memory_read_out <= '0';

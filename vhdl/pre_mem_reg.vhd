@@ -41,7 +41,7 @@ architecture behavior of pre_mem_reg is
         end if;
 
         if rising_edge(clk) then
-            if use_jmp_in = '0' then
+            if use_jmp_in = '1' then
                 next_pc_out <= val_d_in;
             elsif use_branch_in = '1' then
                 next_pc_out <= res_in;

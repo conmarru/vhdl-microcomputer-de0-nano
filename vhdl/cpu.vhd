@@ -88,15 +88,15 @@ architecture cpu_go_fast of cpu is
 
     component pre_wb_reg is
         port(
-            clk : in std_logic;
-            res_in, mem_val_in : in signed(31 downto 0);
-            dest_addr_in : in signed(4 downto 0);
-            reg_write_in : in std_logic;
-            memory_read_in : in std_logic;
-            res_out : out signed(31 downto 0);
-            dest_addr_out : out signed(4 downto 0);
-            reg_write_out : out std_logic;
-            reset : in std_logic
+        clk : in std_logic;
+        reset : in std_logic;
+        res_in, mem_val_in : in signed(31 downto 0);
+        dest_addr_in : in signed(4 downto 0);
+        reg_write_in : in std_logic;
+        memory_read_in : in std_logic;
+        res_out : out signed(31 downto 0);
+        dest_addr_out : out signed(4 downto 0);
+        reg_write_out : out std_logic
         );
     end component pre_wb_reg;
     
@@ -207,9 +207,9 @@ architecture cpu_go_fast of cpu is
 
 begin
     instr_mem: entity work.ram
-    port map(clk, pc_pc, nein, nein_aber_lang, instrmem_instr);
+    port map(clk, reset, pc_pc, nein, nein_aber_lang, instrmem_instr);
     mem: entity work.ram
-    port map(clk, m_res, m_memory_write, m_val_d, mem_val);
+    port map(clk, reset, m_res, m_memory_write, m_val_d, mem_val);
 
     pc: entity work.program_counter
     -- todo: nein, m_next_pc muss schon fallunterscheidungen machen
@@ -236,7 +236,7 @@ begin
         e_memory_write);
     
     reg_bank_dings: entity work.reg_bank
-    port map(clk, d_addr_a, d_addr_b, d_addr_dest, w_dest_addr, w_reg_write,
+    port map(clk, d_addr_a, d_addr_b, d_addr_dest, w_dest_addr, w_reg_write, w_res,
         reg_val_a, reg_val_b, reg_val_res);
 
     pre_mem_reg_dings: entity work.pre_mem_reg
@@ -244,6 +244,10 @@ begin
         e_use_jmp, branch_use_branch, e_reg_write, e_memory_read, e_memory_write,
         m_next_pc, m_res, m_val_d, m_dest_addr, m_used_jmp, m_used_branch,
         m_reg_write, m_memory_read, m_memory_write);
+
+    pre_wb_reg_dings: entity work.pre_wb_reg
+    port map(clk, reset, m_res, mem_val, m_dest_addr, m_reg_write, m_memory_read, 
+        w_res, w_dest_addr, w_reg_write);
     
 
     stiP: process is
@@ -251,7 +255,42 @@ begin
         wait for 20 ms;
         clk <= '0';
         reset <= '1';
+        wait for 1 ms;
+        reset <= '0';
         wait for 20 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+        clk <= '1';
+        wait for 1 ms;
+        clk <= '0';
+        wait for 1 ms;
+
         wait;
     end process stiP;
 end architecture cpu_go_fast;

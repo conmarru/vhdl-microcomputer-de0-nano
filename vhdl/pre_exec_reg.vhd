@@ -48,7 +48,11 @@ architecture behavior of pre_exec_reg is
         if rising_edge(clk) then
             next_pc_out <= next_pc_in;
             val_a_out <= val_a_in;
-            val_b_out <= val_b_in;
+            if use_imm_in = '1' then
+                val_b_out <= imm_in;
+            else
+                val_b_out <= val_b_in;
+            end if;
             val_d_out <= val_d_in;
             opcode_out <= opcode_in;
             dest_addr_out <= dest_addr_in;

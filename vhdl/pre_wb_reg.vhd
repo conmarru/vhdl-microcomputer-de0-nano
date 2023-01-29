@@ -5,14 +5,14 @@ use IEEE.NUMERIC_STD.ALL;
 entity pre_wb_reg is
     port(
         clk : in std_logic;
+        reset : in std_logic;
         res_in, mem_val_in : in signed(31 downto 0);
         dest_addr_in : in signed(4 downto 0);
         reg_write_in : in std_logic;
         memory_read_in : in std_logic;
         res_out : out signed(31 downto 0);
         dest_addr_out : out signed(4 downto 0);
-        reg_write_out : out std_logic;
-        reset : in std_logic
+        reg_write_out : out std_logic
     );
 end entity pre_wb_reg;
 
