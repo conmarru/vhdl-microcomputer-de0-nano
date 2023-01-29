@@ -29,12 +29,13 @@ static void free_mem()
 
 static void exec_pipelined(uint8_t flags)
 {	
+	int next_count = 0;
 	while (1)
 	{
 		if (flags & 0x04)
 		{
 			bool break_cond = false;	
-			while (!break_cond)
+			while (!break_cond && !next_count)
 			{
 				printf("> ");
 				char* r = fgets(user_input, MAX_CMD_LEN, stdin);	
@@ -49,6 +50,12 @@ static void exec_pipelined(uint8_t flags)
 				if (!strcmp(user_args[0], CMDS[0]) || !strcmp(user_args[0], CMDS[1]))
 				{
 					break_cond = true;	
+					int skip = 1;
+					if (argc == 2)
+					{
+						skip = strtouint(user_args[1]);	
+					}
+					next_count = skip;
 				}
 				else if (!strcmp(user_args[0], CMDS[2]) || !strcmp(user_args[0], CMDS[3]))
 				{
@@ -107,6 +114,7 @@ static void exec_pipelined(uint8_t flags)
 				}
 				free_userargs(user_args, argc);
 			}
+			next_count--;
 		}
 		fetch();
 		decode();

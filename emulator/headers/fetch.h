@@ -1,4 +1,5 @@
 #include <stdint.h>
+#include <stdbool.h>
 
 struct instr_mem_struct {
 	int32_t addr_in;
