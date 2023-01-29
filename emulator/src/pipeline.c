@@ -84,7 +84,7 @@ static void exec_pipelined(uint8_t flags)
 						int32_t pc_start = 0;
 						if (pc_str.pc_out-2 < 0) pc_start = 0;
 						else pc_start = pc_str.pc_out-2;
-						print_mem(instr_mem.mem_array, pc_start, pc_str.pc_out+3, true, true, true, pc_str.pc_out);
+						print_mem(instr_mem.mem_array, pc_start, pc_str.pc_out+3, true, true, true, pc_str.pc_out, true);
 					}
 					else if (!strcmp(user_args[1], "-r"))
 					{
@@ -99,7 +99,7 @@ static void exec_pipelined(uint8_t flags)
 						}
 						else
 						{
-							print_mem(data_mem.mem_array, maddr, maddr + 1, false, false, false, 0);
+							print_mem(data_mem.mem_array, maddr, maddr + 1, false, false, false, 0, true);
 						}
 					}
 				}
@@ -112,7 +112,7 @@ static void exec_pipelined(uint8_t flags)
 				{
 					printf("ERROR: Unknown command\n");
 				}
-				free_userargs(user_args, argc);
+				//free_userargs(user_args, argc);
 			}
 			next_count--;
 		}

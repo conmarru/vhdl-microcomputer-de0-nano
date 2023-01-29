@@ -55,7 +55,7 @@ static void exec(int flag)
 							 int32_t pc_start = 0;
 							 if ((int32_t)pc-2 < 0) pc_start = 0;
 							 else pc_start = pc-2;
-							 print_mem(mem, pc_start, pc+3, disasm_flag, true, true, pc);
+							 print_mem(mem, pc_start, pc+3, disasm_flag, true, true, pc, false);
 							 break;
 						case 3 : if (!strcmp(user_args[1], "-x"))
 							 {
@@ -66,7 +66,7 @@ static void exec(int flag)
 								}
 								else
 								{
-									print_mem(mem, maddr, maddr + 1, false, false, false, 0);
+									print_mem(mem, maddr, maddr + 1, false, false, false, 0, false);
 								}
 							 }
 					}
@@ -177,7 +177,7 @@ void seq_run(uint8_t* binary_data, int fsize, unsigned int mem_size)
 		}
 		if (flags & 0x02)
 		{
-			print_mem(mem, 0, 0x00000404, false, true, false, 0);
+			print_mem(mem, 0, 0x00000404, false, true, false, 0, true);
 		}
 	}
 }

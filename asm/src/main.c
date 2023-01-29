@@ -10,6 +10,7 @@
 #include "../headers/parser.h"
 #include "../headers/gen.h"
 #include "../headers/instr.h"
+#include "../headers/lbl.h"
 
 #define MAX_FILENAME 100
 
@@ -109,7 +110,7 @@ int main(int argc, char** args)
 	free_instr_structs();
 	free_reg_hashset();
 	free_keyword_hashset();
-	//free_lbl_hashset(); //macht probleme, TODO: fix
+	free_lbl_hashset();
 
 	return 0;
 }

@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <string.h>
 #include "../headers/fetch.h"
 #include "../headers/decode.h"
 #include "../headers/exec.h"
@@ -15,7 +16,7 @@ const char* REG_STRINGS[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r
 			      "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
 		              "r25", "r26", "r27", "r28", "r29", "r30", "r31" };
 
-
+// TODO: fix memory allocation bug
 char** parse_uinput(char* input, int* argc)
 {
 	if (!input) return NULL;
@@ -24,38 +25,31 @@ char** parse_uinput(char* input, int* argc)
 
 	unsigned int i = 0;	
 	unsigned int j = 0;
+	unsigned int k = 0;
 	unsigned int counter = 0;
-	char* arg = (char*)calloc(1, sizeof(char));
-	arg[0] = 0x00;
 
 	while (input[i] != 0x00)
 	{
-		if (input[i] == ' ')
+		j = i;
+		while (input[i] != ' ' && input[i] != 0x00)
 		{
-			arg = realloc(arg, ++j);
-			arg[j-1] = 0x00;
-			args[counter] = arg;
-			args = realloc(args, ++counter);	
-			args[counter] = NULL;
-			arg = (char*)calloc(1, sizeof(char));
-			j = 0;
-			while (input[i] == ' ')
-			{	
-				i++;
-			}
+			counter++;
+			i++;
 		}
-		else
+		char* arg = (char*)calloc(counter+1, sizeof(char));
+
+		while (k < counter)
 		{
-			arg = realloc(arg, ++j);
-			arg[j-1] = input[i++];	
-		}	
+			arg[k++] = input[j++];
+		}
+		arg[k] = 0x00;
+		args[*argc] = arg;
+		(*argc)++;
+		counter = 0;
+		k = 0;
+		if (input[i] == ' ') i++;
 	}
 
-	arg = realloc(arg, ++j);
-	arg[j-1] = 0x00;
-	args[counter++] = arg;
-
-	*argc = counter;
 	return args;
 }
 
@@ -70,9 +64,10 @@ void reg_dump(int32_t* regfile, const char** reg_idnts, int32_t pc_val)
 	}
 }
 
-void print_mem(int32_t* mem, uint32_t start_addr, uint32_t end_addr, bool disasm_flag, bool verbose_flag, bool mflag, uint32_t maddr)
+void print_mem(int32_t* mem, uint32_t start_addr, uint32_t end_addr, bool disasm_flag, bool verbose_flag, bool mflag, uint32_t maddr, bool imem)
 {
-	if (verbose_flag) printf("===================== Memory ======================\n");
+	if (verbose_flag && imem) printf("================= instruction memory ==================\n");
+	else if (verbose_flag && !imem) printf("================= data memory ==================\n");
 	for (uint32_t i = start_addr; i < end_addr; i++)
 	{
 		char* fstr;
@@ -115,7 +110,7 @@ void free_userargs(char** args, int argc)
 {
 	for (int i = 0; i < argc; i++)
 	{
-		free(args[i++]);		
+		if (args[i]) free(args[i]);		
 	}
 	free(args);
 }
