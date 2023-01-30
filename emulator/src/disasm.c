@@ -54,11 +54,11 @@ void disasm_instr(uint32_t instr)
 			offset = (offset >> 16) ? offset | 0xfff80000 : offset;
 			switch (func)
 			{
-				case 0: printf("%s %%%s, %d", MNEMONICS[12], REG_STRINGS[dest_reg], offset);
+				case BRE_FUNC: printf("%s %%%s, %d", MNEMONICS[12], REG_STRINGS[dest_reg], offset);
 					break;
-				case 1: printf("%s %%%s, %d", MNEMONICS[13], REG_STRINGS[dest_reg], offset);
+				case BRL_FUNC: printf("%s %%%s, %d", MNEMONICS[13], REG_STRINGS[dest_reg], offset);
 					break;
-				case 2: printf("%s %%%s, %d", MNEMONICS[14], REG_STRINGS[dest_reg], offset);
+				case BRG_FUNC: printf("%s %%%s, %d", MNEMONICS[14], REG_STRINGS[dest_reg], offset);
 					break;
 			}
 			break;

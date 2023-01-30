@@ -17,6 +17,7 @@
 FILE* input_file = NULL;
 FILE* output_file = NULL;
 uint8_t cli_flags = 0;
+static bool input_flag = false;
 
 static void print_usage()
 {
@@ -24,6 +25,7 @@ static void print_usage()
 	printf("flags:\t-o, --output <output_file>\n");
 	printf("\t-n, --no-nops\n");
 	printf("\t-b, --no-branch-adjustment\n");
+	printf("\t-l, --one-instr-line-format\n");
 	printf("\t-d, --show-debug-info\n");
 	printf("\t-h, --help\n");
 }
@@ -39,13 +41,14 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 			{"output", required_argument, NULL, 'o'},
 			{"no-nops", no_argument, NULL, 'n'},
 			{"no-branch-adjustment", no_argument, NULL, 'b'},
+			{"one-instr-line-format", no_argument, NULL, 'l'},
 			{"show-debug-info", no_argument, NULL, 'd'},
 			{"help", no_argument, NULL, 'h'},
 			{NULL, 0, NULL, 0}
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:o:nbdh", long_options, &option_index);
+		c = getopt_long(argc, args, "i:o:nbdhl", long_options, &option_index);
 		
 		if (c == -1)
 		{
@@ -55,6 +58,7 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 		switch (c)
 		{
 			case 'i': memcpy(filename_in, optarg, MAX_FILENAME);
+				  input_flag = true;
 				  break;
 			case 'o': memcpy(filename_out, optarg, MAX_FILENAME);
 				  break;
@@ -63,6 +67,8 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 			case 'b': cli_flags |= NO_BR_ADJ_FLAG;
 				  break;
 			case 'd': cli_flags |= DEBUG_FLAG;
+				  break;
+			case 'l': cli_flags |= ONE_LINE_FFLAG;
 				  break;
 			case 'h': print_usage();
 				  exit(0);
@@ -78,9 +84,20 @@ int main(int argc, char** args)
 	char* input_file_name = (char*)calloc(MAX_FILENAME+1, sizeof(char));
 	char* output_file_name = (char*)calloc(MAX_FILENAME+1, sizeof(char));
 	parse_args(argc, args, input_file_name, output_file_name);
+	if (!input_flag)
+	{
+		print_usage();
+		exit(1);
+	}
 	input_file = fopen(input_file_name, "r");
-	if (output_file_name[0] != 0x00) output_file = fopen(output_file_name, "wb");	
-	else output_file = fopen("output", "wb");
+	if (output_file_name[0] != 0x00) 
+	{
+		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen(output_file_name, "w") : fopen(output_file_name, "wb");
+	}	
+	else 
+	{
+		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen("output", "w") : fopen("output", "wb");
+	}
 	free(input_file_name);
 	free(output_file_name);
 	if (!output_file)

@@ -139,13 +139,13 @@ static void exec(int flag)
 				int32_t extracted_offset = (int32_t)offset;
 				switch (func)
 				{
-					case 0 : pc = (reg[cond_reg] == 0) ? pc + extracted_offset : pc;
+					case BRE_FUNC: pc = (reg[cond_reg] == 0) ? pc + extracted_offset : pc;
 						 jmp_flag = reg[cond_reg] == 0;
 						 break;
-					case 1 : pc = (reg[cond_reg] < 0) ? pc + extracted_offset : pc;
+					case BRL_FUNC: pc = (reg[cond_reg] < 0) ? pc + extracted_offset : pc;
 						 jmp_flag = reg[cond_reg] < 0;
 						 break;
-					case 2 : pc = (reg[cond_reg] > 0) ? pc + extracted_offset : pc;
+					case BRG_FUNC: pc = (reg[cond_reg] > 0) ? pc + extracted_offset : pc;
 						 jmp_flag = reg[cond_reg] > 0;
 						 break;
 				}	

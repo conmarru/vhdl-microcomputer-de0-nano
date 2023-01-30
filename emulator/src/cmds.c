@@ -23,6 +23,11 @@ char** parse_uinput(char* input, int* argc)
 	char** args = (char**)malloc(sizeof(char*)*1);	
 	args[0] = NULL;
 
+	if (input[0] == 0x00)
+	{
+		args[0] = (char*)calloc(1, sizeof(char));
+	}
+
 	unsigned int i = 0;	
 	unsigned int j = 0;
 	unsigned int k = 0;

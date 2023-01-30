@@ -81,9 +81,9 @@ static int branch_taken(int32_t cond, int8_t func, int b_sig)
 	{
 		switch (func)
 		{
-			case 0: return cond == 0;
-			case 1: return cond < 0;
-			case 2: return cond > 0;
+			case BRE_FUNC: return cond == 0;
+			case BRL_FUNC: return cond < 0;
+			case BRG_FUNC: return cond > 0;
 		}
 	}
 	return 0;

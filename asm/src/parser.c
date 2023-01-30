@@ -218,9 +218,9 @@ static void init_keyword_hashset()
 	add_keyword("or", 4, 4);
 	add_keyword("not", 4, 5);
 	add_keyword("addi", 5, 0);
-	add_keyword("bre", 7, 0);
-	add_keyword("brl", 7, 1);
-	add_keyword("brg", 7, 2);
+	add_keyword("bre", 7, 4);
+	add_keyword("brl", 7, 2);
+	add_keyword("brg", 7, 1);
 	
 	// instructions that decode into mutliple instructions
 	add_keyword("jmp", 6, 0);	
@@ -656,7 +656,6 @@ void parse()
 	}
 	
 	resolve_pseudo_instr();
-	//exit(0);
 
 	if (!(cli_flags & NO_NOPS_FLAG))
 	{

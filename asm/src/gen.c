@@ -15,10 +15,17 @@ static void write_file(uint32_t instr)
 	uint8_t p2 = instr >> 16;
 	uint8_t p3 = instr >> 8;
 	uint8_t p4 = instr;
-	fwrite(&p2, 1, 1, output_file);
-	fwrite(&p1, 1, 1, output_file);
-	fwrite(&p4, 1, 1, output_file);
-	fwrite(&p3, 1, 1, output_file);
+	if (!(cli_flags & ONE_LINE_FFLAG))
+	{
+		fwrite(&p2, 1, 1, output_file);
+		fwrite(&p1, 1, 1, output_file);
+		fwrite(&p4, 1, 1, output_file);
+		fwrite(&p3, 1, 1, output_file);
+	}
+	else
+	{
+		fprintf(output_file, "%d\n", instr);	
+	}
 }
 
 void encode_instr()

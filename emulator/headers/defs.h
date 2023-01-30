@@ -19,6 +19,9 @@
 #define SHIFT_OPCODE 11
 #define REG_NUM 32
 #define MAX_CMD_LEN 50
+#define BRE_FUNC 4
+#define BRL_FUNC 2
+#define BRG_FUNC 1
 
 extern const uint32_t EXTRACT_MASK;
 extern const char* REG_STRINGS[];

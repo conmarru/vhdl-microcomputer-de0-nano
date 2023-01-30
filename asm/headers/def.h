@@ -4,6 +4,7 @@
 #define NO_NOPS_FLAG 1
 #define NO_BR_ADJ_FLAG 2
 #define DEBUG_FLAG 4
+#define ONE_LINE_FFLAG 8
 #define KEYWORD_HASHSET_LEN 20
 #define REG_NUM 32
 #define OPCODE_SHIFT_VAL 27

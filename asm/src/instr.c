@@ -167,6 +167,7 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 		case DYN_INSTR_BRE: opcode = 7;
 				    dest = dyn_instr->reg_dest;
 				    immediate = dyn_instr->num_val;
+				    func = 4;
 				    break;
 		case DYN_INSTR_AND: opcode = 4;
 				    dest = dyn_instr->reg_dest;
