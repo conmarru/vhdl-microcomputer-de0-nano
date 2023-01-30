@@ -1,66 +1,66 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.NUMERIC_STD.ALL;
-USE work.instructions.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.all;
+use work.instructions.all;
 
-ENTITY pre_exec_reg IS
-    PORT (
+entity pre_exec_reg is
+    port (
         -- control
-        reset : IN STD_LOGIC;
-        clk : IN STD_LOGIC;
+        reset : in std_logic;
+        clk : in std_logic;
         -- in
-        pc_in, next_pc_in, val_a_in, val_b_in, val_d_in : IN signed(31 DOWNTO 0);
-        opcode_in, dest_addr_in, func_in : IN signed(4 DOWNTO 0);
-        imm_in : IN signed(31 DOWNTO 0);
-        use_imm_in : IN STD_LOGIC;
-        use_jmp_in : IN STD_LOGIC;
-        reg_write_in : IN STD_LOGIC;
-        memory_read_in, memory_write_in : IN STD_LOGIC;
-        halt_in : IN STD_LOGIC;
+        pc_in, next_pc_in, val_a_in, val_b_in, val_d_in : in signed(31 downto 0);
+        opcode_in, dest_addr_in, func_in : in signed(4 downto 0);
+        imm_in : in signed(31 downto 0);
+        use_imm_in : in std_logic;
+        use_jmp_in : in std_logic;
+        reg_write_in : in std_logic;
+        memory_read_in, memory_write_in : in std_logic;
+        halt_in : in std_logic;
         -- out
-        next_pc_out, val_a_out, val_b_out, val_d_out : OUT signed(31 DOWNTO 0);
-        opcode_out, dest_addr_out, func_out : OUT signed(4 DOWNTO 0);
-        imm_out : OUT signed(31 DOWNTO 0);
-        use_imm_out : OUT STD_LOGIC;
-        use_jmp_out : OUT STD_LOGIC;
-        reg_write_out : OUT STD_LOGIC;
-        memory_read_out, memory_write_out : OUT STD_LOGIC;
-        halt_out : OUT STD_LOGIC
+        next_pc_out, val_a_out, val_b_out, val_d_out : out signed(31 downto 0);
+        opcode_out, dest_addr_out, func_out : out signed(4 downto 0);
+        imm_out : out signed(31 downto 0);
+        use_imm_out : out std_logic;
+        use_jmp_out : out std_logic;
+        reg_write_out : out std_logic;
+        memory_read_out, memory_write_out : out std_logic;
+        halt_out : out std_logic
     );
-END ENTITY pre_exec_reg;
+end entity pre_exec_reg;
 
-ARCHITECTURE behavior OF pre_exec_reg IS
-BEGIN
-    pre_exec_P : PROCESS (clk, reset) IS
-    BEGIN
-        IF reset = '1' THEN
-            val_a_out <= (OTHERS => '0');
+architecture behavior of pre_exec_reg is
+begin
+    pre_exec_P : process (clk, reset) is
+    begin
+        if reset = '1' then
+            val_a_out <= (others => '0');
             next_pc_out <= to_signed(2, 32);
-            val_b_out <= (OTHERS => '0');
-            val_d_out <= (OTHERS => '0');
-            opcode_out <= (OTHERS => '0');
-            dest_addr_out <= (OTHERS => '0');
-            func_out <= (OTHERS => '0');
-            imm_out <= (OTHERS => '0');
+            val_b_out <= (others => '0');
+            val_d_out <= (others => '0');
+            opcode_out <= (others => '0');
+            dest_addr_out <= (others => '0');
+            func_out <= (others => '0');
+            imm_out <= (others => '0');
             use_imm_out <= '0';
             use_jmp_out <= '0';
             reg_write_out <= '0';
             memory_read_out <= '0';
             memory_write_out <= '0';
             halt_out <= '0';
-        END IF;
-        IF rising_edge(clk) THEN
+        end if;
+        if rising_edge(clk) then
             next_pc_out <= next_pc_in;
-            IF opcode_in = BRANCH THEN
+            if opcode_in = BRANCH then
                 val_a_out <= pc_in;
-            ELSE
+            else
                 val_a_out <= val_a_in;
-            END IF;
-            IF use_imm_in = '1' THEN
+            end if;
+            if use_imm_in = '1' then
                 val_b_out <= imm_in;
-            ELSE
+            else
                 val_b_out <= val_b_in;
-            END IF;
+            end if;
             val_d_out <= val_d_in;
             opcode_out <= opcode_in;
             dest_addr_out <= dest_addr_in;
@@ -72,6 +72,6 @@ BEGIN
             memory_read_out <= memory_read_in;
             memory_write_out <= memory_write_in;
             halt_out <= halt_in;
-        END IF;
-    END PROCESS pre_exec_P;
-END ARCHITECTURE behavior;
+        end if;
+    end process pre_exec_P;
+end architecture behavior;

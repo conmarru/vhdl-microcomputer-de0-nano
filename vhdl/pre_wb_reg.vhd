@@ -1,43 +1,43 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.NUMERIC_STD.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.all;
 
-ENTITY pre_wb_reg IS
-    PORT (
-        clk : IN STD_LOGIC;
-        reset : IN STD_LOGIC;
-        res_in, mem_val_in : IN signed(31 DOWNTO 0);
-        dest_addr_in : IN signed(4 DOWNTO 0);
-        reg_write_in : IN STD_LOGIC;
-        memory_read_in : IN STD_LOGIC;
-        halt_in : IN STD_LOGIC;
-        res_out : OUT signed(31 DOWNTO 0);
-        dest_addr_out : OUT signed(4 DOWNTO 0);
-        reg_write_out : OUT STD_LOGIC;
-        halt_out : OUT STD_LOGIC
+entity pre_wb_reg is
+    port (
+        clk : in std_logic;
+        reset : in std_logic;
+        res_in, mem_val_in : in signed(31 downto 0);
+        dest_addr_in : in signed(4 downto 0);
+        reg_write_in : in std_logic;
+        memory_read_in : in std_logic;
+        halt_in : in std_logic;
+        res_out : out signed(31 downto 0);
+        dest_addr_out : out signed(4 downto 0);
+        reg_write_out : out std_logic;
+        halt_out : out std_logic
     );
-END ENTITY pre_wb_reg;
+end entity pre_wb_reg;
 
-ARCHITECTURE behavior OF pre_wb_reg IS
-BEGIN
-    pre_wb_P : PROCESS (clk, reset) IS
-    BEGIN
-        IF reset = '1' THEN
-            res_out <= (OTHERS => '0');
-            dest_addr_out <= (OTHERS => '0');
+architecture behavior of pre_wb_reg is
+begin
+    pre_wb_P : process (clk, reset) is
+    begin
+        if reset = '1' then
+            res_out <= (others => '0');
+            dest_addr_out <= (others => '0');
             reg_write_out <= '0';
             halt_out <= '0';
-        END IF;
+        end if;
 
-        IF rising_edge(clk) THEN
-            IF memory_read_in = '1' THEN
+        if rising_edge(clk) then
+            if memory_read_in = '1' then
                 res_out <= mem_val_in;
-            ELSE
+            else
                 res_out <= res_in;
-            END IF;
+            end if;
             dest_addr_out <= dest_addr_in;
             reg_write_out <= reg_write_in;
             halt_out <= halt_in;
-        END IF;
-    END PROCESS pre_wb_P;
-END ARCHITECTURE behavior;
+        end if;
+    end process pre_wb_P;
+end architecture behavior;

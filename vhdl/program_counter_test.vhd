@@ -1,87 +1,87 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
-USE ieee.numeric_std.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-ENTITY program_counter_test IS
-END ENTITY program_counter_test;
-ARCHITECTURE testbench OF program_counter_test IS
+entity program_counter_test is
+end entity program_counter_test;
+architecture testbench of program_counter_test is
 
-    COMPONENT program_counter IS
-        PORT (
+    component program_counter is
+        port (
             -- control
-            reset : IN STD_LOGIC;
-            clk : IN STD_LOGIC;
+            reset : in std_logic;
+            clk : in std_logic;
             -- in
-            used_jmp : IN STD_LOGIC;
-            used_branch : IN STD_LOGIC;
-            halt : IN STD_LOGIC;
-            next_pc_in : IN signed(31 DOWNTO 0);
+            used_jmp : in std_logic;
+            used_branch : in std_logic;
+            halt : in std_logic;
+            next_pc_in : in signed(31 downto 0);
             -- out
-            pc : OUT signed(31 DOWNTO 0);
-            next_pc_out : OUT signed(31 DOWNTO 0)
+            pc : out signed(31 downto 0);
+            next_pc_out : out signed(31 downto 0)
         );
-    END COMPONENT program_counter;
+    end component program_counter;
 
-    SIGNAL reset : STD_LOGIC;
-    SIGNAL clk : STD_LOGIC;
-    SIGNAL used_jmp : STD_LOGIC;
-    SIGNAL used_branch : STD_LOGIC;
-    SIGNAL halt : STD_LOGIC;
-    SIGNAL next_pc_in : signed(31 DOWNTO 0);
-    SIGNAL pc : signed(31 DOWNTO 0);
-    SIGNAL next_pc_out : signed(31 DOWNTO 0);
+    signal reset : std_logic;
+    signal clk : std_logic;
+    signal used_jmp : std_logic;
+    signal used_branch : std_logic;
+    signal halt : std_logic;
+    signal next_pc_in : signed(31 downto 0);
+    signal pc : signed(31 downto 0);
+    signal next_pc_out : signed(31 downto 0);
 
-BEGIN
-    dlI : ENTITY work.program_counter
-        PORT MAP(reset, clk, used_jmp, used_branch, halt, next_pc_in, pc, next_pc_out);
+begin
+    dlI : entity work.program_counter
+        port map(reset, clk, used_jmp, used_branch, halt, next_pc_in, pc, next_pc_out);
 
-    stiP : PROCESS IS
-    BEGIN
-        WAIT FOR 20 ms;
+    stiP : process is
+    begin
+        wait for 20 ms;
         clk <= '0';
         used_branch <= '0';
         used_jmp <= '0';
         reset <= '1';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         reset <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(1, 32);
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(2, 32);
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(30, 32);
         used_jmp <= '1';
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(3, 32);
         used_jmp <= '0';
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(4, 32);
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(5, 32);
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         next_pc_in <= to_signed(34, 32);
         clk <= '1';
-        WAIT FOR 1 ms;
+        wait for 1 ms;
         clk <= '0';
-        WAIT FOR 20 ms;
-        WAIT;
-    END PROCESS stiP;
-END ARCHITECTURE testbench;
+        wait for 20 ms;
+        wait;
+    end process stiP;
+end architecture testbench;

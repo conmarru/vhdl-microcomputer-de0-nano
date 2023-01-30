@@ -1,21 +1,21 @@
-LIBRARY IEEE;
-USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.NUMERIC_STD.ALL;
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.all;
 
-PACKAGE instructions IS
-    CONSTANT NOP : signed(4 DOWNTO 0) := "00000";
-    CONSTANT HALT : signed(4 DOWNTO 0) := "00001";
+package instructions is
+    constant NOP : signed(4 downto 0) := "00000";
+    constant HALT : signed(4 downto 0) := "00001";
 
-    CONSTANT MOVE : signed(4 DOWNTO 0) := "00010";
-    CONSTANT LOADI : signed(4 DOWNTO 0) := "00011";
-    CONSTANT ADD : signed(4 DOWNTO 0) := "00100";
-    CONSTANT ADDI : signed(4 DOWNTO 0) := "00101";
+    constant MOVE : signed(4 downto 0) := "00010";
+    constant LOADI : signed(4 downto 0) := "00011";
+    constant ADD : signed(4 downto 0) := "00100";
+    constant ADDI : signed(4 downto 0) := "00101";
 
-    CONSTANT LOGIC : signed(4 DOWNTO 0) := "00100";
+    constant LOGIC : signed(4 downto 0) := "00100";
 
-    CONSTANT JMP : signed(4 DOWNTO 0) := "00110";
-    CONSTANT BRANCH : signed(4 DOWNTO 0) := "00111";
+    constant JMP : signed(4 downto 0) := "00110";
+    constant BRANCH : signed(4 downto 0) := "00111";
 
-    CONSTANT LOAD : signed(4 DOWNTO 0) := "01000";
-    CONSTANT STORE : signed(4 DOWNTO 0) := "01001";
-END PACKAGE instructions;
+    constant LOAD : signed(4 downto 0) := "01000";
+    constant STORE : signed(4 downto 0) := "01001";
+end package instructions;

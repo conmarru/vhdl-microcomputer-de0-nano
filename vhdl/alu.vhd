@@ -1,55 +1,55 @@
-LIBRARY ieee;
-LIBRARY work;
-USE ieee.std_logic_1164.ALL;
-USE ieee.numeric_std.ALL;
-USE work.instructions.ALL;
+library ieee;
+library work;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
+use work.instructions.all;
 
-ENTITY alu IS
-    PORT (
+entity alu is
+    port (
         --clk : in std_logic;    
-        A, B : IN signed(31 DOWNTO 0);
-        opcode : IN signed(4 DOWNTO 0);
-        func : IN signed(4 DOWNTO 0);
-        C : OUT signed(31 DOWNTO 0)
+        A, B : in signed(31 downto 0);
+        opcode : in signed(4 downto 0);
+        func : in signed(4 downto 0);
+        C : out signed(31 downto 0)
     );
-END ENTITY alu;
+end entity alu;
 
-ARCHITECTURE behave OF alu IS
+architecture behave of alu is
 
-    CONSTANT func_add : signed(4 DOWNTO 0) := "00000";
+    constant func_add : signed(4 downto 0) := "00000";
 
-    CONSTANT func_and : signed(4 DOWNTO 0) := "00011";
-    CONSTANT func_or : signed(4 DOWNTO 0) := "00100";
-    CONSTANT func_not : signed(4 DOWNTO 0) := "00101";
+    constant func_and : signed(4 downto 0) := "00011";
+    constant func_or : signed(4 downto 0) := "00100";
+    constant func_not : signed(4 downto 0) := "00101";
 
-    CONSTANT func_shr : signed(4 DOWNTO 0) := "00001";
-    CONSTANT func_shl : signed(4 DOWNTO 0) := "00010";
-    CONSTANT func_sr8 : signed(4 DOWNTO 0) := "00111";
-    CONSTANT func_sl8 : signed(4 DOWNTO 0) := "01000";
+    constant func_shr : signed(4 downto 0) := "00001";
+    constant func_shl : signed(4 downto 0) := "00010";
+    constant func_sr8 : signed(4 downto 0) := "00111";
+    constant func_sl8 : signed(4 downto 0) := "01000";
     -- constant func_mul : signed(4 downto 0) := "00110"; zu anspruchsvoll / macht Probleme
-BEGIN
-    proc : PROCESS (A, B, func, opcode) IS
-    BEGIN
+begin
+    proc : process (A, B, func, opcode) is
+    begin
         --if rising_edge(clk) then
 
-        IF opcode = BRANCH OR opcode = ADDI THEN
+        if opcode = BRANCH or opcode = ADDI then
             C <= A + B;
-        ELSIF opcode = MOVE OR opcode = LOAD OR opcode = STORE THEN
+        elsif opcode = MOVE or opcode = LOAD or opcode = STORE then
             C <= A;
-        ELSIF opcode = LOADI THEN
+        elsif opcode = LOADI then
             C <= B;
-        ELSE
-            CASE func IS
-                WHEN func_and => C <= A AND B;
-                WHEN func_or => C <= A OR B;
-                WHEN func_not => C <= NOT A;
-                WHEN func_add => C <= A + B;
-                WHEN func_shr => C <= A SRL 1;
-                WHEN func_shl => C <= A SLL 1;
-                WHEN func_sr8 => C <= "00000000" & A(31 DOWNTO 8); --shr Byte;
-                WHEN func_sl8 => C <= A(23 DOWNTO 0) & "00000000"; --shl Byte;
-                WHEN OTHERS => C <= (OTHERS => '-');
-            END CASE;
-        END IF;
-    END PROCESS proc;
-END ARCHITECTURE behave;
+        else
+            case func is
+                when func_and => C <= A and B;
+                when func_or => C <= A or B;
+                when func_not => C <= not A;
+                when func_add => C <= A + B;
+                when func_shr => C <= A srl 1;
+                when func_shl => C <= A sll 1;
+                when func_sr8 => C <= "00000000" & A(31 downto 8); --shr Byte;
+                when func_sl8 => C <= A(23 downto 0) & "00000000"; --shl Byte;
+                when others => C <= (others => '-');
+            end case;
+        end if;
+    end process proc;
+end architecture behave;

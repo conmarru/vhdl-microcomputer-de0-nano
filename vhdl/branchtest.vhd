@@ -1,35 +1,35 @@
-LIBRARY ieee;
-USE ieee.std_logic_1164.ALL;
-USE ieee.numeric_std.ALL;
+library ieee;
+use ieee.std_logic_1164.all;
+use ieee.numeric_std.all;
 
-ENTITY branchtest IS
-END ENTITY branchtest;
-ARCHITECTURE testbench OF branchtest IS
+entity branchtest is
+end entity branchtest;
+architecture testbench of branchtest is
 
-    COMPONENT branch IS
-        PORT (
-            condition : IN signed(31 DOWNTO 0);
-            cond_func : IN signed(2 DOWNTO 0);
-            do_branch : OUT STD_LOGIC
+    component branch is
+        port (
+            condition : in signed(31 downto 0);
+            cond_func : in signed(2 downto 0);
+            do_branch : out std_logic
         );
-    END COMPONENT branch;
+    end component branch;
 
-    SIGNAL condition : signed(31 DOWNTO 0);
-    SIGNAL cond_func : signed(2 DOWNTO 0);
-    SIGNAL do_branch : STD_LOGIC;
+    signal condition : signed(31 downto 0);
+    signal cond_func : signed(2 downto 0);
+    signal do_branch : std_logic;
 
-BEGIN
-    dlI : ENTITY work.branch
-        PORT MAP(condition, cond_func, do_branch);
+begin
+    dlI : entity work.branch
+        port map(condition, cond_func, do_branch);
 
-    stiP : PROCESS IS
-    BEGIN
+    stiP : process is
+    begin
         condition <= to_signed(0, 32);
         cond_func <= "100";
-        WAIT FOR 20 ms;
+        wait for 20 ms;
         condition <= to_signed(1, 32);
         cond_func <= "100";
-        WAIT FOR 20 ms;
-        WAIT;
-    END PROCESS stiP;
-END ARCHITECTURE testbench;
+        wait for 20 ms;
+        wait;
+    end process stiP;
+end architecture testbench;
