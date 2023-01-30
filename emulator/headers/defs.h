@@ -27,3 +27,4 @@ extern const uint32_t EXTRACT_MASK;
 extern const char* REG_STRINGS[];
 extern int err_val;
 extern uint8_t flags;
+extern unsigned int mem_size;

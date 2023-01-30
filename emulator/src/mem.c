@@ -25,13 +25,10 @@ static int tmp_W_valM;
 static int tmp_W_sig_MR;
 static int tmp_W_sig_WR;
 
-static int data_mem_size;
-
 struct data_mem_struct data_mem;
 
 void alloc_data_mem(unsigned int size)
 {
-	data_mem_size = size;
 	data_mem.mem_array = (int32_t*)malloc(sizeof(int32_t)*size);
 }
 
@@ -39,7 +36,7 @@ void access_data_mem(struct data_mem_struct* mem)
 {
 	if (mem->read_in)
 	{
-		if (mem->addr_in >= data_mem_size)
+		if ((uint32_t)mem->addr_in >= mem_size)
 		{
 			printf("ERROR: Invalid memory access. Referenced address exceeded the bounds of memory\n");
 			exit(1);
@@ -48,6 +45,11 @@ void access_data_mem(struct data_mem_struct* mem)
 	}
 	else if (mem->write_in)
 	{
+		if ((uint32_t)mem->addr_in >= mem_size)
+		{	
+			printf("ERROR: Invalid memory access. Referenced address exceeded the bounds of memory\n");
+			exit(1);
+		}
 		mem->mem_array[(uint32_t)mem->addr_in] = mem->data_in;
 	}
 }

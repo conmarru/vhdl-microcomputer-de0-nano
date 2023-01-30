@@ -90,7 +90,7 @@ static void exec_pipelined(uint8_t flags)
 					{
 						reg_dump(regfile.reg_array, REG_STRINGS, pc_str.pc_out);
 					}
-					else if (!strcmp(user_args[1], "-x"))
+					else if (argc == 3 && !strcmp(user_args[1], "-x"))
 					{
 						uint32_t maddr = strtohex(user_args[2]);				 
 						if (err_val == 1)
@@ -101,11 +101,12 @@ static void exec_pipelined(uint8_t flags)
 						{
 							print_mem(data_mem.mem_array, maddr, maddr + 1, false, false, false, 0, true);
 						}
+						err_val = 0;
 					}
 				}
 				else if (!strcmp(user_args[0], CMDS[4]) || !strcmp(user_args[0], CMDS[5]))
 				{
-					free_userargs(user_args, argc);
+					//free_userargs(user_args, argc);
 					exit(0);
 				}
 				else

@@ -148,8 +148,8 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
 			break;
-		case 9: extr_fields->dest_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
-			extr_fields->op1_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+		case 9: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
+			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_B_out = 0;
 			extr_fields->sig_I_out = 0;
 			extr_fields->sig_J_out = 0;

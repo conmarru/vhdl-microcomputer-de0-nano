@@ -9,6 +9,7 @@
 #include "../headers/mem.h"
 #include "../headers/wrback.h"
 #include "../headers/disasm.h"
+#include "../headers/defs.h"
 
 const char* CMDS[] = { "next", "n", "print", "p", "quit", "q" };
 
@@ -16,7 +17,6 @@ const char* REG_STRINGS[] = { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7", "r
 			      "r13", "r14", "r15", "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23", "r24",
 		              "r25", "r26", "r27", "r28", "r29", "r30", "r31" };
 
-// TODO: fix memory allocation bug
 char** parse_uinput(char* input, int* argc)
 {
 	if (!input) return NULL;
@@ -71,6 +71,11 @@ void reg_dump(int32_t* regfile, const char** reg_idnts, int32_t pc_val)
 
 void print_mem(int32_t* mem, uint32_t start_addr, uint32_t end_addr, bool disasm_flag, bool verbose_flag, bool mflag, uint32_t maddr, bool imem)
 {
+	if (start_addr >= mem_size || end_addr >= mem_size)
+	{
+		printf("ERROR: Invalid memory address.\n");
+		return;
+	}
 	if (verbose_flag && imem) printf("================= instruction memory ==================\n");
 	else if (verbose_flag && !imem) printf("================= data memory ==================\n");
 	for (uint32_t i = start_addr; i < end_addr; i++)

@@ -517,7 +517,7 @@ static void gen_store(struct keyword_node* knode)
 		dest_reg = parse_reg();
 	}
 
-	add_instr_struct(false, knode->opcode, dest_reg, src_reg, 0, immediate, 0, imm);
+	add_instr_struct(false, knode->opcode, src_reg, dest_reg, 0, immediate, 0, imm);
 
 	parse_newline(false);
 

@@ -20,6 +20,7 @@ const uint32_t EXTRACT_MASK = 0x0000001f;
 uint8_t flags = 0;
 
 int err_val = 0;
+unsigned int mem_size = 0;
 
 static void print_usage_info()
 {
@@ -90,7 +91,7 @@ int main(int argc, char** args)
 	char* mem_size_buf = (char*)calloc(SIZEBUF_LEN+1, sizeof(char));
 	parse_cli_args(argc, args, filename, mem_size_buf);
 	FILE* input_file = fopen(filename, "rb");
-	uint32_t mem_size = (flags & 0x10) ? strtouint(mem_size_buf) : DEFAULT_MEM_SIZE;
+	mem_size = (flags & 0x10) ? strtouint(mem_size_buf) : DEFAULT_MEM_SIZE;
 	if (err_val)
 	{
 		printf("ERROR: specified size must be a positive integer\n");

@@ -40,7 +40,7 @@ struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t
 
 void free_instr_structs()
 {
-	for (unsigned int i = 0; i <= instr_list_ptr; i++)
+	for (unsigned int i = 0; i < instr_list_ptr; i++)
 	{
 		if (instr_list[i]) free(instr_list[i]);
 	}
@@ -204,7 +204,7 @@ void resolve_instr(struct instr_struct* instr)
 			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, instr->op1, 0, instr->dest, 0), false, false, instr->instr_addr+1, NULL);
 			break;
 		case 9: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), false, true ,instr->instr_addr, NULL);
-			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->op1, 0, instr->dest, 0), false, false, instr->instr_addr+1, NULL);
+			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->dest, 0, instr->op1, 0), false, false, instr->instr_addr+1, NULL);
 			break;
 		case 32: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, instr->op2, 0, instr->op2, 0), false, true, instr->instr_addr, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, instr->op2, 0, instr->op2, 1), false, false, instr->instr_addr+1, NULL);
