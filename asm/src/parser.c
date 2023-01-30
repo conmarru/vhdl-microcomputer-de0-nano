@@ -313,7 +313,7 @@ static int32_t parse_num(bool branch)
 		{
 			error_unexpected_token(TOKEN_RPAREN, t);
 		}
-		// TODO: free ast
+		free_ast(root);
 	}
 	else
 	{

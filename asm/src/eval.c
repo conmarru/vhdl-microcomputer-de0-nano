@@ -129,6 +129,26 @@ int32_t eval(struct ast_node* root)
 	}
 }
 
+void free_ast(struct ast_node* root)
+{
+	if (root)
+	{
+		if (root->type == TOKEN_PLUS || root->type == TOKEN_MINUS || root->type == TOKEN_STAR || root->type == TOKEN_SLASH)
+		{
+			free_ast(root->left);
+			free_ast(root->right);
+		}
+		else
+		{
+			free(root);
+		}
+	}
+	else
+	{
+		return;
+	}
+}
+
 void dump_ast(struct ast_node* root)
 {
 	if (root)
