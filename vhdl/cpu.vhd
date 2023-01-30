@@ -241,7 +241,6 @@ begin
             d_pc, d_next_pc, d_opcode, d_addr_a, d_addr_b, d_addr_dest,
             d_func, d_imm, d_use_imm, d_use_jmp, d_reg_write, d_memory_read,
             d_memory_write, d_halt);
-    d_memory_write, d_halt);
 
     pre_exec_reg_dings : entity work.pre_exec_reg
         port map(
@@ -251,13 +250,11 @@ begin
             e_next_pc, e_val_a, e_val_b, e_val_d, e_opcode, e_dest_addr,
             e_func, e_imm, e_use_imm, e_use_jmp, e_reg_write, e_memory_read,
             e_memory_write, e_halt);
-    e_memory_write, e_halt);
 
     reg_bank_dings : entity work.reg_bank
         port map(
             clk, d_addr_a, d_addr_b, d_addr_dest, w_dest_addr, w_reg_write, w_res,
             reg_val_a, reg_val_b, reg_val_res);
-    reg_val_a, reg_val_b, reg_val_res);
 
     pre_mem_reg_dings : entity work.pre_mem_reg
         port map(
@@ -265,13 +262,11 @@ begin
             e_use_jmp, branch_use_branch, e_reg_write, e_memory_read, e_memory_write, e_halt,
             m_next_pc, m_res, m_val_d, m_dest_addr, m_used_jmp, m_used_branch,
             m_reg_write, m_memory_read, m_memory_write, m_halt);
-    m_reg_write, m_memory_read, m_memory_write, m_halt);
 
     pre_wb_reg_dings : entity work.pre_wb_reg
         port map(
             clk, reset, m_res, mem_val, m_dest_addr, m_reg_write, m_memory_read, m_halt,
             w_res, w_dest_addr, w_reg_write, halt);
-    w_res, w_dest_addr, w_reg_write, halt);
     stiP : process is
         variable x : integer := 0;
     begin
@@ -292,3 +287,4 @@ begin
         end loop;
         wait;
     end process stiP;
+end cpu_go_fast;
