@@ -27,62 +27,67 @@ architecture cpu_go_fast of cpu is
 
     component pre_exec_reg is
         port(
-            -- control
-            reset : in std_logic;
-            clk : in std_logic;
-            -- in
-            next_pc_in, val_a_in, val_b_in, val_d_in : in signed(31 downto 0);
-            opcode_in, dest_addr_in, func_in : in signed(4 downto 0);
-            imm_in : in signed(31 downto 0);
-            use_imm_in : in std_logic;
-            use_jmp_in : in std_logic;
-            reg_write_in : in std_logic;
-            memory_read_in, memory_write_in : in std_logic;
-            -- out
-            next_pc_out, val_a_out, val_b_out, val_d_out : out signed(31 downto 0);
-            opcode_out, dest_addr_out, func_out : out signed(4 downto 0);
-            imm_out : out signed(31 downto 0);
-            use_imm_out : out std_logic;
-            use_jmp_out : out std_logic;
-            reg_write_out : out std_logic;
-            memory_read_out, memory_write_out : out std_logic
+        -- control
+        reset : in std_logic;
+        clk : in std_logic;
+        -- in
+        pc_in, next_pc_in, val_a_in, val_b_in, val_d_in : in signed(31 downto 0);
+        opcode_in, dest_addr_in, func_in : in signed(4 downto 0);
+        imm_in : in signed(31 downto 0);
+        use_imm_in : in std_logic;
+        use_jmp_in : in std_logic;
+        reg_write_in : in std_logic;
+        memory_read_in, memory_write_in : in std_logic;
+        halt_in : in std_logic;
+        -- out
+        next_pc_out, val_a_out, val_b_out, val_d_out : out signed(31 downto 0);
+        opcode_out, dest_addr_out, func_out : out signed(4 downto 0);
+        imm_out : out signed(31 downto 0);
+        use_imm_out : out std_logic;
+        use_jmp_out : out std_logic;
+        reg_write_out : out std_logic;
+        memory_read_out, memory_write_out : out std_logic;
+        halt_out : out std_logic
         );
     end component pre_exec_reg;
 
     component pre_fetch_reg is
         port(
-            clk : in std_logic;
-            next_pc_in, instruction : in signed(31 downto 0);
-            reset : in std_logic;
-            next_pc_out : out signed(31 downto 0);
-            opcode_out, addr_a_out, addr_b_out, addr_dest_out, func_out : out signed(4 downto 0);
-            imm_out : out signed(31 downto 0);
-            use_imm_out : out std_logic;
-            use_jmp_out : out std_logic;
-            reg_write_out : out std_logic;
-            memory_read_out, memory_write_out : out std_logic
+        clk : in std_logic;
+        pc_in, next_pc_in, instruction : in signed(31 downto 0);
+        reset : in std_logic;
+        pc_out, next_pc_out : out signed(31 downto 0);
+        opcode_out, addr_a_out, addr_b_out, addr_dest_out, func_out : out signed(4 downto 0);
+        imm_out : out signed(31 downto 0);
+        use_imm_out : out std_logic;
+        use_jmp_out : out std_logic;
+        reg_write_out : out std_logic;
+        memory_read_out, memory_write_out : out std_logic;
+        halt_out : out std_logic
         );
     end component pre_fetch_reg;
 
     component pre_mem_reg is
         port(
-            -- control
-            reset : in std_logic;
-            clk : in std_logic;
-            -- in
-            next_pc_in, res_in, val_d_in : in signed(31 downto 0);
-            dest_addr_in : in signed(4 downto 0);
-            use_jmp_in : in std_logic;
-            use_branch_in : in std_logic;
-            reg_write_in : in std_logic;
-            memory_read_in, memory_write_in : in std_logic;
-            -- out
-            next_pc_out, res_out, val_d_out : out signed(31 downto 0);
-            dest_addr_out : out signed(4 downto 0);
-            use_jmp_out : out std_logic;
-            use_branch_out : out std_logic;
-            reg_write_out : out std_logic;
-            memory_read_out, memory_write_out : out std_logic
+        -- control
+        reset : in std_logic;
+        clk : in std_logic;
+        -- in
+        next_pc_in, res_in, val_d_in : in signed(31 downto 0);
+        dest_addr_in : in signed(4 downto 0);
+        use_jmp_in : in std_logic;
+        use_branch_in : in std_logic;
+        reg_write_in : in std_logic;
+        memory_read_in, memory_write_in : in std_logic;
+        halt_in : in std_logic;
+        -- out
+        next_pc_out, res_out, val_d_out : out signed(31 downto 0);
+        dest_addr_out : out signed(4 downto 0);
+        use_jmp_out : out std_logic;
+        use_branch_out : out std_logic;
+        reg_write_out : out std_logic;
+        memory_read_out, memory_write_out : out std_logic;
+        halt_out : out std_logic
         );
     end component pre_mem_reg;
 
@@ -94,9 +99,11 @@ architecture cpu_go_fast of cpu is
         dest_addr_in : in signed(4 downto 0);
         reg_write_in : in std_logic;
         memory_read_in : in std_logic;
+        halt_in : in std_logic;
         res_out : out signed(31 downto 0);
         dest_addr_out : out signed(4 downto 0);
-        reg_write_out : out std_logic
+        reg_write_out : out std_logic;
+        halt_out : out std_logic
         );
     end component pre_wb_reg;
     
@@ -108,7 +115,6 @@ architecture cpu_go_fast of cpu is
             -- in
             used_jmp : in std_logic;
             used_branch : in std_logic;
-            halt : in std_logic;
             next_pc_in : in signed(31 downto 0);
             -- out
             pc : out signed(31 downto 0);
@@ -142,10 +148,12 @@ architecture cpu_go_fast of cpu is
     
     signal clk : std_logic;
     signal reset : std_logic;
+    signal halt : std_logic;
 
     signal f_instruction: signed(31 downto 0);
     signal f_next_pc : signed(31 downto 0);
 
+    signal d_pc : signed(31 downto 0);
     signal d_next_pc : signed(31 downto 0);
     signal d_opcode : signed(4 downto 0);
     signal d_addr_a : signed(4 downto 0);
@@ -158,7 +166,9 @@ architecture cpu_go_fast of cpu is
     signal d_reg_write : std_logic;
     signal d_memory_read : std_logic;
     signal d_memory_write : std_logic;
+    signal d_halt : std_logic;
 
+    signal e_pc : signed(31 downto 0);
     signal e_next_pc : signed(31 downto 0);
     signal e_val_a : signed(31 downto 0);
     signal e_val_b : signed(31 downto 0);
@@ -172,6 +182,7 @@ architecture cpu_go_fast of cpu is
     signal e_reg_write : std_logic;
     signal e_memory_read : std_logic;
     signal e_memory_write : std_logic;
+    signal e_halt : std_logic;
     
     signal m_next_pc : signed(31 downto 0);
     signal m_res : signed(31 downto 0);
@@ -182,6 +193,7 @@ architecture cpu_go_fast of cpu is
     signal m_reg_write : std_logic;
     signal m_memory_read : std_logic;
     signal m_memory_write : std_logic;
+    signal m_halt : std_logic;
 
     signal w_res : signed(31 downto 0);
     signal w_dest_addr : signed(4 downto 0);
@@ -213,27 +225,27 @@ begin
 
     pc: entity work.program_counter
     -- todo: nein, m_next_pc muss schon fallunterscheidungen machen
-    port map(reset, clk, m_used_jmp, m_used_branch, nein, m_next_pc, pc_pc, pc_next_pc);
+    port map(reset, clk, m_used_jmp, m_used_branch, m_next_pc, pc_pc, pc_next_pc);
 
     alu_dings: entity work.alu
     port map(e_val_a, e_val_b, e_opcode, e_func, alu_res);
 
     branch_dings: entity work.branch
-    port map(e_val_d, e_func, branch_use_branch);
+    port map(e_val_d, e_opcode, e_func, branch_use_branch);
 
     pre_fetch_reg_dings: entity work.pre_fetch_reg
-    port map(clk, pc_next_pc, instrmem_instr, reset, 
-        d_next_pc, d_opcode, d_addr_a, d_addr_b, d_addr_dest, 
+    port map(clk, pc_pc, pc_next_pc, instrmem_instr, reset, 
+        d_pc, d_next_pc, d_opcode, d_addr_a, d_addr_b, d_addr_dest, 
         d_func, d_imm, d_use_imm, d_use_jmp, d_reg_write, d_memory_read, 
-        d_memory_write);
+        d_memory_write, d_halt);
 
     pre_exec_reg_dings: entity work.pre_exec_reg
-    port map(reset, clk, d_next_pc, reg_val_a, reg_val_b, reg_val_res,
+    port map(reset, clk, d_pc, d_next_pc, reg_val_a, reg_val_b, reg_val_res,
         d_opcode, d_addr_dest, d_func, d_imm, d_use_imm, d_use_jmp,
-        d_reg_write, d_memory_read, d_memory_write,
+        d_reg_write, d_memory_read, d_memory_write, d_halt,
         e_next_pc, e_val_a, e_val_b, e_val_d, e_opcode, e_dest_addr,
         e_func, e_imm, e_use_imm, e_use_jmp, e_reg_write, e_memory_read,
-        e_memory_write);
+        e_memory_write, e_halt);
     
     reg_bank_dings: entity work.reg_bank
     port map(clk, d_addr_a, d_addr_b, d_addr_dest, w_dest_addr, w_reg_write, w_res,
@@ -241,13 +253,13 @@ begin
 
     pre_mem_reg_dings: entity work.pre_mem_reg
     port map(reset, clk, e_next_pc, alu_res, e_val_d, e_dest_addr,
-        e_use_jmp, branch_use_branch, e_reg_write, e_memory_read, e_memory_write,
+        e_use_jmp, branch_use_branch, e_reg_write, e_memory_read, e_memory_write, e_halt,
         m_next_pc, m_res, m_val_d, m_dest_addr, m_used_jmp, m_used_branch,
-        m_reg_write, m_memory_read, m_memory_write);
+        m_reg_write, m_memory_read, m_memory_write, m_halt);
 
     pre_wb_reg_dings: entity work.pre_wb_reg
-    port map(clk, reset, m_res, mem_val, m_dest_addr, m_reg_write, m_memory_read, 
-        w_res, w_dest_addr, w_reg_write);
+    port map(clk, reset, m_res, mem_val, m_dest_addr, m_reg_write, m_memory_read, m_halt,
+        w_res, w_dest_addr, w_reg_write, halt);
     
 
     stiP: process is
@@ -255,12 +267,13 @@ begin
     begin
         wait for 1 ms;
         clk <= '0';
+        wait for 1 ms;
         reset <= '1';
         wait for 1 ms;
         reset <= '0';
         wait for 1 ms;
         
-        while x <= 32 loop
+        while halt = '0' loop
         clk <= '1';
         wait for 1 ms;
         clk <= '0';

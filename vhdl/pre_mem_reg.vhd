@@ -14,13 +14,15 @@ entity pre_mem_reg is
         use_branch_in : in std_logic;
         reg_write_in : in std_logic;
         memory_read_in, memory_write_in : in std_logic;
+        halt_in : in std_logic;
         -- out
         next_pc_out, res_out, val_d_out : out signed(31 downto 0);
         dest_addr_out : out signed(4 downto 0);
         use_jmp_out : out std_logic;
         use_branch_out : out std_logic;
         reg_write_out : out std_logic;
-        memory_read_out, memory_write_out : out std_logic
+        memory_read_out, memory_write_out : out std_logic;
+        halt_out : out std_logic
     );
 end entity pre_mem_reg;
 
@@ -38,6 +40,7 @@ architecture behavior of pre_mem_reg is
             reg_write_out <= '0';
             memory_read_out <= '0';
             memory_write_out <= '0';
+            halt_out <= '0';
         end if;
 
         if rising_edge(clk) then
@@ -56,6 +59,7 @@ architecture behavior of pre_mem_reg is
             reg_write_out <= reg_write_in;
             memory_read_out <= memory_read_in;
             memory_write_out <= memory_write_in;
+            halt_out <= halt_in;
         end if;
     end process pre_mem_P;
 end architecture behavior;

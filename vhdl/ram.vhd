@@ -15,7 +15,7 @@ entity RAM is
 end RAM;
 
 architecture BlockRAM of RAM is
-    type speicher is array(0 to 1024) of signed(31 downto 0);
+    type speicher is array(0 to 16368) of signed(31 downto 0);
     signal memory : speicher;   
 
     file data_in : TEXT;
@@ -39,13 +39,21 @@ architecture BlockRAM of RAM is
           end loop;
           file_close(data_in);
         end if;
+        report to_string(Addr);
         if rising_edge(clk) then
           if (write_in = '1') then
-            memory(to_integer(unsigned(Addr))) <= Din;
+          report "Trying write";
+          if to_integer(Addr) < 16368 then
+            memory(to_integer(Addr)) <= Din;
+          else
+            report "Out of bounds memory read";
+          end if;
           end if;
         end if;
-        if to_integer(unsigned(Addr)) < 1024 then
-        Dout <= memory(to_integer(unsigned(Addr)));
+        if to_integer(Addr) < 16368 and to_integer(Addr) >= 0 then
+          Dout <= memory(to_integer(Addr));
+        else
+          report "Out of bounds memory read";
         end if;
       end process;
     end BlockRAM;

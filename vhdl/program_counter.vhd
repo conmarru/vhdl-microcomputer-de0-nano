@@ -11,7 +11,6 @@ entity program_counter is
         -- in
         used_jmp : in std_logic;
         used_branch : in std_logic;
-        halt : in std_logic;
         next_pc_in : in signed(31 downto 0);
         -- out
         pc : out signed(31 downto 0);
@@ -23,15 +22,12 @@ architecture behavior of program_counter is
     signal jmp_counter : unsigned(2 downto 0);
     signal pc_temp : signed(31 downto 0);
     begin
-        process (clk, reset, halt) is 
+        process (clk, reset) is 
         begin
-        if halt = '1' then
-            -- todo figure out what to do here
-        end if;
         if reset = '1' then
             pc <= (others => '0');
             next_pc_out <= to_signed(4, 32);
-            jmp_counter <= to_unsigned(4, 3);
+            jmp_counter <= to_unsigned(3, 3);
             pc_temp <= to_signed(1, 32);
         end if;
         if rising_edge(clk) then
@@ -47,7 +43,7 @@ architecture behavior of program_counter is
             pc_temp <= pc_temp + to_signed(1, 32);
           else
             pc <= next_pc_in;
-            next_pc_out <= next_pc_in + to_signed(1, 32);
+            next_pc_out <= next_pc_in + to_signed(4, 32);
           end if;
         end if;
       end process;

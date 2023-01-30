@@ -36,7 +36,7 @@ begin
         
         if opcode = BRANCH or opcode = ADDI then
             C <= A + B;
-        elsif opcode = MOVE or opcode = LOAD then
+        elsif opcode = MOVE or opcode = LOAD or opcode = STORE then
             C <= A;
         elsif opcode = LOADI then
             C <= B;
