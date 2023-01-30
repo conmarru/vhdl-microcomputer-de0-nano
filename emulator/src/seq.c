@@ -154,8 +154,8 @@ static void exec(int flag)
 				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 				reg[dest_reg] = ((uint32_t)mem[reg[op1_reg]]);
 				break;
-			case 9: src_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+			case 9: src_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				dest_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 				mem[reg[dest_reg]] = reg[src_reg];
 				break;
 		}
