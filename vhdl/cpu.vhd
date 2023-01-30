@@ -251,46 +251,22 @@ begin
     
 
     stiP: process is
+    variable x : integer := 0;
     begin
-        wait for 20 ms;
+        wait for 1 ms;
         clk <= '0';
         reset <= '1';
         wait for 1 ms;
         reset <= '0';
-        wait for 20 ms;
+        wait for 1 ms;
+        
+        while x <= 32 loop
         clk <= '1';
         wait for 1 ms;
         clk <= '0';
         wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-        clk <= '1';
-        wait for 1 ms;
-        clk <= '0';
-        wait for 1 ms;
-
+        x := x + 1;
+        end loop;
         wait;
     end process stiP;
 end architecture cpu_go_fast;
