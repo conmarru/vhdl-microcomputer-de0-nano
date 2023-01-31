@@ -35,6 +35,7 @@ struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t
 	new->func = func;
 	new->jmp_target = NULL;
 	new->p_from = NULL;
+	new->p_from_count = 0;
 
 	return new;
 }
@@ -43,6 +44,7 @@ void free_instr_structs()
 {
 	for (unsigned int i = 0; i < instr_list_ptr; i++)
 	{
+		if (instr_list[i]->p_from) free(instr_list[i]->p_from);
 		if (instr_list[i]) free(instr_list[i]);
 	}
 	free(instr_list);
@@ -103,7 +105,10 @@ void add_instr_struct_at_index(bool jmp_flag, uint8_t opcode, uint8_t dest, uint
 		struct instr_struct* old_instr = instr_list[addr];	
 		instr_list[addr] = new_instr_struct(jmp_flag, addr, opcode, dest, op1, op2, immediate, func, mltp_flag);
 		instr_list[addr]->jmp_target = jmp_target;
-		old_instr->p_from->jmp_target = instr_list[addr];
+		for (unsigned int i = 0; i < old_instr->p_from_count; i++)
+		{
+			old_instr->p_from[i]->jmp_target = instr_list[addr];
+		}
 		instr_list[addr]->p_from = old_instr->p_from;
 	}
 	else
@@ -193,6 +198,21 @@ static void gen_dynamic_instr(struct dyn_instr_struct* dyn_instr, bool jmp_tag, 
 	add_instr_struct_at_index(jmp_tag, opcode, dest, op1, op2, immediate, func, addr, first_flag, false, jmp_target);	
 }
 
+static void add_p_from(struct instr_struct* instr)
+{
+	unsigned int jmp_target_pcount = instr->jmp_target->p_from_count;
+	if (!jmp_target_pcount)
+	{
+		instr->jmp_target->p_from = malloc(sizeof(struct instr_struct*)*(++jmp_target_pcount));
+	}
+	else
+	{
+		instr->jmp_target->p_from = realloc(instr->jmp_target->p_from, sizeof(struct instr_struct*)*(++jmp_target_pcount));
+	}
+	instr->jmp_target->p_from_count = jmp_target_pcount;
+	instr->jmp_target->p_from[jmp_target_pcount-1] = instr;
+}
+
 // disgusting function
 // TODO: probably refactor?
 void resolve_instr(struct instr_struct* instr)
@@ -224,11 +244,11 @@ void resolve_instr(struct instr_struct* instr)
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->instr_addr+5), true, true, instr->instr_addr, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, ADDR_REG, 0, STACK_POINTER_REG, 0), false, false, instr->instr_addr+1, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+2, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, call_pointer->instr_addr), true, false, instr->instr_addr+3, call_pointer);
-			 call_pointer->p_from = instr_list[instr->instr_addr+3];
+			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, call_pointer->instr_addr), true, false, instr->instr_addr+3, call_pointer); 
+			 add_p_from(instr_list[instr->instr_addr+3]);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+4, NULL);
 			 instr_list[instr->instr_addr]->jmp_target = instr_list[instr->instr_addr+5];
-			 instr_list[instr->instr_addr+5]->p_from = instr_list[instr->instr_addr];
+			 add_p_from(instr_list[instr->instr_addr]);
 		         break;
 		case 36: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 1), false, true, instr->instr_addr, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false, false, instr->instr_addr+1, NULL);
@@ -292,7 +312,7 @@ void resolve_pseudo_instr()
 			{
 				instr_list[i]->jmp_target = instr_list[instr_list[i]->instr_addr + instr_list[i]->immediate];
 			}
-			instr_list[i]->jmp_target->p_from = instr_list[i];
+			add_p_from(instr_list[i]);			
 		}
 	}
 

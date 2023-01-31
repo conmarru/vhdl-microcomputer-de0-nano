@@ -9,7 +9,8 @@ struct instr_struct {
 	uint32_t immediate;
 	uint8_t func;
 	struct instr_struct* jmp_target;
-	struct instr_struct* p_from;
+	struct instr_struct** p_from;
+	unsigned int p_from_count;
 };
 
 typedef enum {
