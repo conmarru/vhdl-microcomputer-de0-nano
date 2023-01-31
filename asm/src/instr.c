@@ -34,6 +34,7 @@ struct instr_struct* new_instr_struct(bool jmp_tag, uint32_t instr_addr, uint8_t
 	new->immediate = immediate;
 	new->func = func;
 	new->jmp_target = NULL;
+	new->p_from = NULL;
 
 	return new;
 }
@@ -44,6 +45,7 @@ void free_instr_structs()
 	{
 		if (instr_list[i]) free(instr_list[i]);
 	}
+	free(instr_list);
 }
 
 void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1, uint8_t op2, int32_t immediate, uint8_t func, bool mltp_tag)

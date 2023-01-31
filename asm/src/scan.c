@@ -268,6 +268,7 @@ void init_scanner(char* buf, int length)
 	strcpy(input, buf);
 	init_label_hashset();
 	scan();
+	free(input);
 }
 
 bool check_ttype(token* t, token_type ttype)

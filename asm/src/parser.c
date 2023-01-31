@@ -308,6 +308,7 @@ static int32_t parse_num(bool branch)
 	{
 		struct ast_node* root = parse_expr();
 		immediate_val = eval(root);
+		free_token(t);
 		t = consume_token();
 		if (!expect(t, TOKEN_RPAREN))
 		{
@@ -328,6 +329,7 @@ static int32_t parse_num(bool branch)
 		if (check_ttype(t, TOKEN_MINUS))
 		{
 			sign_flag = true;
+			free_token(t);
 			t = consume_token();
 		}
 
@@ -608,6 +610,7 @@ void parse()
 		{
 			if (current->type == TOKEN_IDNT && get_label(current->value))
 			{
+				free(current);
 				parse_newline(true);	
 				continue;
 			}
@@ -615,6 +618,7 @@ void parse()
 			else printf("ERROR: Instruction expected at line %d\n", current->line_num);
 			exit(1);
 		}
+		free_token(current);
 		switch (knode->opcode)
 		{
 			case 0: 

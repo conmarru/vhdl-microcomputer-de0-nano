@@ -105,7 +105,7 @@ int main(int argc, char** args)
 		printf("ERROR: Couldn't create output file\n");
 		exit(1);
 	}
-	if (input_file == NULL)
+	if (!input_file)
 	{
 		printf("ERROR: Couldn't open input file\n");
 		exit(1);
@@ -119,6 +119,7 @@ int main(int argc, char** args)
 	memcpy(input, buf, fsize);
 	input[fsize] = 0x00;
 	munmap(buf, fsize);
+	fclose(input_file);
 	init_scanner(input, fsize);
 	parse();
 	encode_instr();
@@ -128,6 +129,7 @@ int main(int argc, char** args)
 	free_reg_hashset();
 	free_keyword_hashset();
 	free_lbl_hashset();
+	fclose(output_file);
 
 	return 0;
 }
