@@ -125,6 +125,7 @@ int main(int argc, char** args)
 		run(mem_size, binary_data, fsize);
 	}	
 	munmap(buf, fsize);
+	fclose(input_file);
 	free(binary_data);
 	return 0;
 }

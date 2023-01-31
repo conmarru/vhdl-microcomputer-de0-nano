@@ -16,7 +16,7 @@ void disasm_instr(uint32_t instr)
 	switch (opcode)
 	{
 		case 0: 
-		case 1: printf(MNEMONICS[opcode]);
+		case 1: printf("%s", MNEMONICS[opcode]);
 			break;
 		case 2: printf("%s %%%s, %%%s", MNEMONICS[opcode], REG_STRINGS[op1_reg], REG_STRINGS[dest_reg]);
 			break;

@@ -270,7 +270,6 @@ static void adjust_jumps()
 			{
 				int dif = instr_list[i]->instr_addr - instr_list[i]->jmp_target->instr_addr;
 				instr_list[i]->immediate = (dif < 0) ? -dif : dif;
-				if (!(cli_flags & NO_BR_ADJ_FLAG)) instr_list[i]->immediate -= 4;
 			}
 		}
 	}

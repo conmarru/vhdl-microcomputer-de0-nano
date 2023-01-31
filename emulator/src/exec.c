@@ -18,6 +18,7 @@ int8_t E_func;
 int E_sig_MR;
 int E_sig_MW;
 int E_sig_WR;
+int E_cur_pc;
 
 static int32_t tmp_M_next_pc;
 static int8_t tmp_M_dest;
@@ -105,7 +106,7 @@ void execute_update_pipeline_regs()
 
 void execute()
 {
-	alu.op1_in = multiplex(E_valA, E_next_pc, E_sig_B);
+	alu.op1_in = multiplex(E_valA, E_cur_pc, E_sig_B);
 	alu.op2_in = multiplex(E_valB, E_imm, E_sig_I);
 	alu.opcode_in = E_opcode;
 	alu.func_in = E_func;

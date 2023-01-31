@@ -113,7 +113,7 @@ static void exec_pipelined(uint8_t flags)
 				{
 					printf("ERROR: Unknown command\n");
 				}
-				//free_userargs(user_args, argc);
+				free_userargs(user_args, argc);
 			}
 			next_count--;
 		}

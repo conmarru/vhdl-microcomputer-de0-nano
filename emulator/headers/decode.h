@@ -14,6 +14,7 @@ extern int8_t D_func;
 extern int D_sig_MR;
 extern int D_sig_MW;
 extern int D_sig_WR;
+extern int D_cur_pc;
 
 struct regfile_struct {
 	int8_t r_in1;

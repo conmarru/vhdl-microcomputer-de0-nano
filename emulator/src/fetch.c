@@ -26,6 +26,7 @@ static int8_t tmp_D_func;
 static int tmp_D_sig_MR; 
 static int tmp_D_sig_MW;
 static int tmp_D_sig_WR; 
+static int tmp_D_cur_pc;
 
 static unsigned int instr_mem_size;
 
@@ -162,7 +163,6 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 
 void update_pc(struct pc_struct* pc_strct)
 {
-	//pc = new_pc;
 	if (pc_strct->used_jump_in || pc_strct->used_branch_in)
 	{
 		pc_strct->jmp_counter = 3;
@@ -210,6 +210,7 @@ void fetch_update_pipeline_regs()
         D_sig_MR = tmp_D_sig_MR;
         D_sig_MW = tmp_D_sig_MW;
         D_sig_WR = tmp_D_sig_WR;
+	D_cur_pc = tmp_D_cur_pc;
 }
 
 void fetch()
@@ -217,6 +218,7 @@ void fetch()
 	read_instr_mem(&instr_mem, &extract_fields, &pc_str);
 	extract_field_info(&extract_fields);
 	tmp_D_next_pc = pc_str.next_pc_out;
+	tmp_D_cur_pc = pc_str.pc_out;
 	tmp_D_opcode = extract_fields.opcode_out;
         tmp_D_dest = extract_fields.dest_out;
         tmp_D_op1 = extract_fields.op1_out;

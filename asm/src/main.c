@@ -24,7 +24,6 @@ static void print_usage()
 	printf("usage: ./asm -i <input_file> [ flags ]\n");
 	printf("flags:\t-o, --output <output_file>\n");
 	printf("\t-n, --no-nops\n");
-	printf("\t-b, --no-branch-adjustment\n");
 	printf("\t-l, --one-instr-line-format\n");
 	printf("\t-d, --show-debug-info\n");
 	printf("\t-h, --help\n");
@@ -40,7 +39,6 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 			{"input", required_argument, NULL, 'i'},
 			{"output", required_argument, NULL, 'o'},
 			{"no-nops", no_argument, NULL, 'n'},
-			{"no-branch-adjustment", no_argument, NULL, 'b'},
 			{"one-instr-line-format", no_argument, NULL, 'l'},
 			{"show-debug-info", no_argument, NULL, 'd'},
 			{"help", no_argument, NULL, 'h'},
@@ -48,7 +46,7 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:o:nbdhl", long_options, &option_index);
+		c = getopt_long(argc, args, "i:o:ndhl", long_options, &option_index);
 		
 		if (c == -1)
 		{
@@ -63,8 +61,6 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 			case 'o': memcpy(filename_out, optarg, MAX_FILENAME);
 				  break;
 			case 'n': cli_flags |= NO_NOPS_FLAG;
-				  break;
-			case 'b': cli_flags |= NO_BR_ADJ_FLAG;
 				  break;
 			case 'd': cli_flags |= DEBUG_FLAG;
 				  break;

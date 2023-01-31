@@ -52,7 +52,11 @@ char** parse_uinput(char* input, int* argc)
 		(*argc)++;
 		counter = 0;
 		k = 0;
-		if (input[i] == ' ') i++;
+		if (input[i] == ' ')
+		{
+			i++;
+			args = realloc(args, sizeof(char*)*(*argc+1));
+		}
 	}
 
 	return args;
