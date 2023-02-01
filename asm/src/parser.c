@@ -283,7 +283,7 @@ static void parse_newline(bool lbl)
 	if (!lbl) cur_addr++;
 	while (get_current_token() && get_current_token()->type == TOKEN_NEWLINE)
 	{
-		consume_token();
+		free_token(consume_token());
 	}
 }
 

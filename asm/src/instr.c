@@ -213,6 +213,17 @@ static void add_p_from(struct instr_struct* instr)
 	instr->jmp_target->p_from[jmp_target_pcount-1] = instr;
 }
 
+static void add_p_from_replace(struct instr_struct* instr, uint32_t addr)
+{
+	for (unsigned int i = 0; i < instr->jmp_target->p_from_count; i++)
+	{
+		if (instr->jmp_target->p_from[i]->instr_addr == addr)
+		{
+			instr->jmp_target->p_from[i] = instr;
+		}
+	}
+}
+
 // disgusting function
 // TODO: probably refactor?
 void resolve_instr(struct instr_struct* instr)
@@ -245,7 +256,7 @@ void resolve_instr(struct instr_struct* instr)
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, ADDR_REG, 0, STACK_POINTER_REG, 0), false, false, instr->instr_addr+1, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+2, NULL);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, call_pointer->instr_addr), true, false, instr->instr_addr+3, call_pointer); 
-			 add_p_from(instr_list[instr->instr_addr+3]);
+			 add_p_from_replace(instr_list[instr->instr_addr+3], instr->instr_addr);
 			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+4, NULL);
 			 instr_list[instr->instr_addr]->jmp_target = instr_list[instr->instr_addr+5];
 			 add_p_from(instr_list[instr->instr_addr]);
