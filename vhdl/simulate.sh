@@ -1,1 +1,1 @@
-ghdl -r cpu --wave=waveform.ghw
+ghdl -r cpu --wave=waveform.ghw --std=08
