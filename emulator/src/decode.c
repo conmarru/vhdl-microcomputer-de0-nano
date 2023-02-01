@@ -18,6 +18,7 @@ int D_sig_MR;
 int D_sig_MW;
 int D_sig_WR;
 int D_cur_pc;
+int D_sig_hlt;
 
 static int32_t tmp_E_next_pc;
 static int8_t tmp_E_opcode;
@@ -34,6 +35,7 @@ static int tmp_E_sig_MR;
 static int tmp_E_sig_MW; 
 static int tmp_E_sig_WR; 
 static int tmp_E_cur_pc;
+static int tmp_E_sig_hlt;
 
 struct regfile_struct regfile;
 
@@ -74,6 +76,7 @@ void decode_update_pipeline_regs()
 	E_sig_MW = tmp_E_sig_MW;
 	E_sig_WR = tmp_E_sig_WR;
 	E_cur_pc = tmp_E_cur_pc;
+	E_sig_hlt = tmp_E_sig_hlt;
 }
 
 void decode()
@@ -97,4 +100,5 @@ void decode()
 	tmp_E_sig_MW = D_sig_MW;
 	tmp_E_sig_WR = D_sig_WR;
 	tmp_E_cur_pc = D_cur_pc;
+	tmp_E_sig_hlt = D_sig_hlt;
 }

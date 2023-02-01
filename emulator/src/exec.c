@@ -19,6 +19,7 @@ int E_sig_MR;
 int E_sig_MW;
 int E_sig_WR;
 int E_cur_pc;
+int E_sig_hlt;
 
 static int32_t tmp_M_next_pc;
 static int8_t tmp_M_dest;
@@ -30,6 +31,7 @@ static int tmp_M_sig_B;
 static int tmp_M_sig_MW;
 static int tmp_M_sig_MR;
 static int tmp_M_sig_WR;
+static int tmp_M_sig_hlt;
 
 struct alu_struct {
 	int32_t op1_in;
@@ -102,6 +104,7 @@ void execute_update_pipeline_regs()
 	M_sig_MW = tmp_M_sig_MW;
 	M_sig_MR = tmp_M_sig_MR;
 	M_sig_WR = tmp_M_sig_WR;
+	M_sig_hlt = tmp_M_sig_hlt;
 }
 
 void execute()
@@ -122,4 +125,5 @@ void execute()
 	tmp_M_sig_MW = E_sig_MW;
 	tmp_M_sig_MR = E_sig_MR;
 	tmp_M_sig_WR = E_sig_WR;
+	tmp_M_sig_hlt = E_sig_hlt;
 }

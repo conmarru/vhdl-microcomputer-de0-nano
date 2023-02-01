@@ -10,6 +10,7 @@ extern int M_sig_B;
 extern int M_sig_MW;
 extern int M_sig_MR;
 extern int M_sig_WR;
+extern int M_sig_hlt;
 
 struct data_mem_struct {
 	int32_t addr_in;

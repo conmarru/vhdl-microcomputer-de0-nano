@@ -108,6 +108,24 @@ void print_mem(int32_t* mem, uint32_t start_addr, uint32_t end_addr, bool disasm
 	}
 }
 
+void print_stack(int32_t* mem, uint32_t stack_ptr)
+{
+	uint32_t start_addr = (stack_ptr > 5) ? stack_ptr - 5 : 0;
+	uint32_t end_addr = (stack_ptr < mem_size-6) ? stack_ptr + 5 : mem_size-1;
+
+	for (uint32_t i = start_addr; i <= end_addr; i++)
+	{
+		if (i == stack_ptr)
+		{
+			printf("0x%.8x: %.8x <-- r30\n", i, mem[i]);
+		}
+		else
+		{
+			printf("0x%.8x: %.8x\n", i, mem[i]);
+		}
+	}
+}
+
 void load_program(int32_t* mem, uint8_t* bin_data, int size, unsigned int memsize)
 {
 	unsigned int j = 0;

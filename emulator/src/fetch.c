@@ -11,8 +11,6 @@
 
 bool hlt_flag = false;
 
-// TODO: hlt
-
 static int32_t tmp_D_next_pc;
 static int8_t tmp_D_opcode;
 static int8_t tmp_D_dest;
@@ -27,6 +25,7 @@ static int tmp_D_sig_MR;
 static int tmp_D_sig_MW;
 static int tmp_D_sig_WR; 
 static int tmp_D_cur_pc;
+static int tmp_D_sig_hlt;
 
 static unsigned int instr_mem_size;
 
@@ -44,6 +43,7 @@ struct extract_fields_struct {
 	int sig_MR_out; // read memory
 	int sig_MW_out; // write memory
 	int sig_WR_out; // write register
+	int sig_hlt_out; // hlt signal
 };
 
 struct instr_mem_struct instr_mem;
@@ -80,9 +80,11 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 0;
+			extr_fields->sig_hlt_out = 0;
 			break; 
 		case 1: if (flags & 32) hlt_flag = true;
-			break; // TODO: hlt
+			extr_fields->sig_hlt_out = 1;
+			break; 
 		case 2: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_I_out = 0;
@@ -91,6 +93,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 3: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->imm_out = instr & IMM_17_MASK;
@@ -100,6 +103,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 4: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -111,6 +115,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 5: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -121,6 +126,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 6: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_J_out = 1;
@@ -129,6 +135,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 0;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 7: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->imm_out = (instr & 0x003fffe0) >> 5;
@@ -139,6 +146,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 0;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 8: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -148,6 +156,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 1;
 			extr_fields->sig_MW_out = 0;
 			extr_fields->sig_WR_out = 1;
+			extr_fields->sig_hlt_out = 0;
 			break;
 		case 9: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -157,6 +166,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_MR_out = 0;
 			extr_fields->sig_MW_out = 1;
 			extr_fields->sig_WR_out = 0;
+			extr_fields->sig_hlt_out = 0;
 			break;
 	}
 }
@@ -211,6 +221,7 @@ void fetch_update_pipeline_regs()
         D_sig_MW = tmp_D_sig_MW;
         D_sig_WR = tmp_D_sig_WR;
 	D_cur_pc = tmp_D_cur_pc;
+	D_sig_hlt = tmp_D_sig_hlt;
 }
 
 void fetch()
@@ -231,4 +242,5 @@ void fetch()
         tmp_D_sig_MR = extract_fields.sig_MR_out;
         tmp_D_sig_MW = extract_fields.sig_MW_out;
         tmp_D_sig_WR = extract_fields.sig_WR_out;
+	tmp_D_sig_hlt = extract_fields.sig_hlt_out;
 }

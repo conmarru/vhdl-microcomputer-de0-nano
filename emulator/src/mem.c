@@ -17,6 +17,7 @@ int M_sig_B;
 int M_sig_MW;
 int M_sig_MR;
 int M_sig_WR;
+int M_sig_hlt;
 
 static int32_t tmp_F_next_pc;
 static int8_t tmp_W_dest;
@@ -24,6 +25,7 @@ static int32_t tmp_W_res;
 static int tmp_W_valM;
 static int tmp_W_sig_MR;
 static int tmp_W_sig_WR;
+static int tmp_W_sig_hlt;
 
 struct data_mem_struct data_mem;
 
@@ -68,6 +70,7 @@ void memory_update_pipeline_regs()
 	W_valM = tmp_W_valM;
 	W_sig_MR = tmp_W_sig_MR;	
 	W_sig_WR = tmp_W_sig_WR;
+	W_sig_hlt = tmp_W_sig_hlt;
 }
 
 void memory()
@@ -85,4 +88,5 @@ void memory()
 	tmp_W_valM = data_mem.out;
 	tmp_W_sig_MR = M_sig_MR;
 	tmp_W_sig_WR = M_sig_WR;
+	tmp_W_sig_hlt = M_sig_hlt;
 }

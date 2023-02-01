@@ -103,10 +103,17 @@ static void exec_pipelined(uint8_t flags)
 						}
 						err_val = 0;
 					}
+					else if (argc == 2 && !strcmp(user_args[1], "-s"))
+					{
+						print_stack(data_mem.mem_array, regfile.reg_array[30]);
+					}
+					else
+					{
+						printf("ERROR: invalid argument\n");
+					}
 				}
 				else if (!strcmp(user_args[0], CMDS[4]) || !strcmp(user_args[0], CMDS[5]))
 				{
-					//free_userargs(user_args, argc);
 					exit(0);
 				}
 				else
@@ -126,7 +133,7 @@ static void exec_pipelined(uint8_t flags)
 		decode_update_pipeline_regs();
 		execute_update_pipeline_regs();
 		memory_update_pipeline_regs();
-		if (hlt_flag) return;
+		if (hlt_flag || wr_hlt_flag) return;
 	}
 }
 
