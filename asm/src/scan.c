@@ -165,98 +165,126 @@ static void scan()
 	{
 		switch (input[pointer])
 		{
-			case '%' : append_token(new_token(NULL, 0, TOKEN_PERCENT, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '$' : append_token(new_token(NULL, 0, TOKEN_DOLLAR, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case ',' : append_token(new_token(NULL, 0, TOKEN_COMMA, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '+' : append_token(new_token(NULL, 0, TOKEN_PLUS, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '-' : append_token(new_token(NULL, 0, TOKEN_MINUS, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '*' : append_token(new_token(NULL, 0, TOKEN_STAR, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '/' : append_token(new_token(NULL, 0, TOKEN_SLASH, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case '(' : append_token(new_token(NULL, 0, TOKEN_LPAREN, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case ')' : append_token(new_token(NULL, 0, TOKEN_RPAREN, VAL_NUM, line));
-				   pointer++;
-				   break;
-			case ';' : pointer++;
-				   while (input[pointer] != 0x00 && input[pointer] != '\n')
-				   {
-					pointer++;
-				   }
-				   break;
-			case '\n' : append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, line));
-				    pointer++;
-				    line++;
-				    effective_line = (!lbl_flag) ? effective_line + 1 : effective_line;
-				    while (input[pointer] != 0x00 && input[pointer] == '\n')
-				    {
-					line++;
-					pointer++;
-				    }
-				    lbl_flag = false;
-				    break;
-			case '\t' : 
-			case ' ' : pointer++;
-				   break;
-			case '.' : pointer++; // maybe tokenize point as well
-				   if (isalpha(input[pointer]))
-				   {
-				   	char* name = scan_identifier(&pointer);
-					add_label(new_label(name, effective_line));
-					append_token(new_token(name, 0, TOKEN_IDNT, VAL_STR, effective_line));
-					lbl_flag = true;
-				   }
-				   else 
-				   {
-					   printf("ERROR: Invalid identifier at line %d\n", line);
-					   exit(1);
-				   }
-				   break;
-			default : if (isalpha(input[pointer]))
-				  {
-				  	char* val = scan_identifier(&pointer);
-					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
-					break;
-				  }
-				  else if (input[pointer] == '0' && input[pointer+1] == 'x')
-				  {
-					  pointer += 2;
-					  int val = scan_hexnum(&pointer);
-					  append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
+			case '%': {
+					  append_token(new_token(NULL, 0, TOKEN_PERCENT, VAL_NUM, line));
+					  pointer++;
 					  break;
 				  }
-				  else if (is_digit(input[pointer]) || input[pointer] == '-')
-				  {
-					bool sign_flag = false; // sign_flag now obsolete, TODO: clean up 
-					if (input[pointer] == '-')
-					{
-						sign_flag = true;
-						pointer++;
-						
-					}
-					int val = scan_num(&pointer, sign_flag);
-					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
-					break;
-				  } 
-				  else
-				  {
-					  printf("ERROR: Unknown token at line %d\n", line);
-					  exit(1);
+			case '$': {
+					  append_token(new_token(NULL, 0, TOKEN_DOLLAR, VAL_NUM, line));
+					  pointer++;
+					  break;
 				  }
+			case ',': {
+					  append_token(new_token(NULL, 0, TOKEN_COMMA, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case '+': {
+					  append_token(new_token(NULL, 0, TOKEN_PLUS, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case '-': {
+					  append_token(new_token(NULL, 0, TOKEN_MINUS, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case '*': {
+					  append_token(new_token(NULL, 0, TOKEN_STAR, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case '/': {
+					  append_token(new_token(NULL, 0, TOKEN_SLASH, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case '(': {
+					  append_token(new_token(NULL, 0, TOKEN_LPAREN, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case ')': {
+					  append_token(new_token(NULL, 0, TOKEN_RPAREN, VAL_NUM, line));
+					  pointer++;
+					  break;
+				  }
+			case ';': {
+					  pointer++;
+					  while (input[pointer] != 0x00 && input[pointer] != '\n')
+					  {
+						  pointer++;
+					  }
+					  break;
+				  }
+			case '\n': {
+					   append_token(new_token(NULL, 0, TOKEN_NEWLINE, VAL_NUM, line));
+					   pointer++;
+					   line++;
+					   effective_line = (!lbl_flag) ? effective_line + 1 : effective_line;
+					   while (input[pointer] != 0x00 && input[pointer] == '\n')
+					   {
+						   line++;
+						   pointer++;
+					   }
+					   lbl_flag = false;
+					   break;
+				   }
+			case '\t': 
+			case ' ': {
+					  pointer++;
+					  break;
+				  }
+			case '.': {
+					  pointer++; // maybe tokenize point as well
+					  if (isalpha(input[pointer]))
+					  {
+						  char* name = scan_identifier(&pointer);
+						  add_label(new_label(name, effective_line));
+						  append_token(new_token(name, 0, TOKEN_IDNT, VAL_STR, effective_line));
+						  lbl_flag = true;
+					  }
+					  else 
+					  {
+						  printf("ERROR: Invalid identifier at line %d\n", line);
+						  exit(1);
+					  }
+					  break;
+				  }
+			default: {
+					 if (isalpha(input[pointer]))
+					 {
+						 char* val = scan_identifier(&pointer);
+						 append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
+						 break;
+					 }
+					 else if (input[pointer] == '0' && input[pointer+1] == 'x')
+					 {
+						 pointer += 2;
+						 int val = scan_hexnum(&pointer);
+						 append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
+						 break;
+					 }
+					 else if (is_digit(input[pointer]) || input[pointer] == '-')
+					 {
+						 bool sign_flag = false; // sign_flag now obsolete, TODO: clean up 
+						 if (input[pointer] == '-')
+						 {
+							 sign_flag = true;
+							 pointer++;
+
+						 }
+						 int val = scan_num(&pointer, sign_flag);
+						 append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
+						 break;
+					 } 
+					 else
+					 {
+						 printf("ERROR: Unknown token at line %d\n", line);
+						 exit(1);
+					 }
+				 }
 		}
 	}
 }

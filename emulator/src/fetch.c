@@ -74,100 +74,120 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 
 	switch (opcode)
 	{
-		case 0: extr_fields->sig_I_out = 0;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 0;
-			extr_fields->sig_hlt_out = 0;
-			break; 
-		case 1: if (flags & 32) hlt_flag = true;
-			extr_fields->sig_hlt_out = 1;
-			break; 
-		case 2: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->sig_I_out = 0;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 1;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 3: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->imm_out = instr & IMM_17_MASK;
-			extr_fields->sig_I_out = 1;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 1;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 4: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op2_out = (instr >> OP2_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->func_out = instr & EXTRACT_MASK;
-			extr_fields->sig_I_out = 0;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 1;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 5: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->imm_out = instr & IMM_17_MASK;
-			extr_fields->sig_I_out = 1;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 1;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 6: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->sig_J_out = 1;
-			extr_fields->sig_I_out = 0;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 0;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 7: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->imm_out = (instr & 0x003fffe0) >> 5;
-			extr_fields->func_out = (instr & LAST_FIELD_MASK) & EXTRACT_MASK;
-			extr_fields->sig_B_out = 1;
-			extr_fields->sig_I_out = 1;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 0;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 8: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_I_out = 0;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_MR_out = 1;
-			extr_fields->sig_MW_out = 0;
-			extr_fields->sig_WR_out = 1;
-			extr_fields->sig_hlt_out = 0;
-			break;
-		case 9: extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
-			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-			extr_fields->sig_B_out = 0;
-			extr_fields->sig_I_out = 0;
-			extr_fields->sig_J_out = 0;
-			extr_fields->sig_MR_out = 0;
-			extr_fields->sig_MW_out = 1;
-			extr_fields->sig_WR_out = 0;
-			extr_fields->sig_hlt_out = 0;
-			break;
+		case 0: {
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 0;
+				extr_fields->sig_hlt_out = 0;
+				break; 
+			}
+		case 1: {
+				if (flags & 32) hlt_flag = true;
+				extr_fields->sig_hlt_out = 1;
+				break; 
+			}
+		case 2: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 1;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 3: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->imm_out = instr & IMM_17_MASK;
+				extr_fields->sig_I_out = 1;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 1;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 4: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->op2_out = (instr >> OP2_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->func_out = instr & EXTRACT_MASK;
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 1;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 5: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->imm_out = instr & IMM_17_MASK;
+				extr_fields->sig_I_out = 1;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 1;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 6: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->sig_J_out = 1;
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 0;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 7: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->imm_out = (instr & 0x003fffe0) >> 5;
+				extr_fields->func_out = (instr & LAST_FIELD_MASK) & EXTRACT_MASK;
+				extr_fields->sig_B_out = 1;
+				extr_fields->sig_I_out = 1;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 0;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
+		case 8: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_MR_out = 1;
+				extr_fields->sig_MW_out = 0;
+				extr_fields->sig_WR_out = 1;
+				extr_fields->sig_hlt_out = 0;	
+				break;
+			}
+		case 9: {
+				extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK; // flip source and dest
+				extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+				extr_fields->sig_B_out = 0;
+				extr_fields->sig_I_out = 0;
+				extr_fields->sig_J_out = 0;
+				extr_fields->sig_MR_out = 0;
+				extr_fields->sig_MW_out = 1;
+				extr_fields->sig_WR_out = 0;
+				extr_fields->sig_hlt_out = 0;
+				break;
+			}
 	}
 }
 

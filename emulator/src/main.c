@@ -62,25 +62,43 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 
 		switch (c)
 		{
-			case 'i' : memcpy(filename, optarg, MAX_FILENAME);
-				   break;
-			case 'r' : flags |= 1;
-				   break;
-			case 'm' : flags |= 2;
-				   break;
-			case 'I' : flags |= 4;
-				   break;
-			case 'n' : flags |= 8;
-				   break;
-			case 's' : memcpy(mem_size, optarg, SIZEBUF_LEN);
-				   flags |= 16;
-				   break;
-			case 'H' : flags |= 32;
-				   break;
-			case 'h' : print_usage_info();
-				   exit(0);
-			case '?' : print_usage_info(); 
-				   exit(1);
+			case 'i': {
+					  memcpy(filename, optarg, MAX_FILENAME);
+					  break;
+				  }
+			case 'r': {
+					  flags |= 1;
+					  break;
+				  }
+			case 'm': {
+					  flags |= 2;
+					  break;
+				  }
+			case 'I': {
+					  flags |= 4;
+					  break;
+				  }
+			case 'n': {
+					  flags |= 8;
+					  break;
+				  }
+			case 's': {
+					  memcpy(mem_size, optarg, SIZEBUF_LEN);
+					  flags |= 16;
+					  break;
+				  }
+			case 'H': {
+					  flags |= 32;
+					  break;
+				  }
+			case 'h': {
+					  print_usage_info();
+					  exit(0);
+				  }
+			case '?': {
+					  print_usage_info(); 
+					  exit(1);
+				  }
 		}
 	}
 }

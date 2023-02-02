@@ -51,23 +51,27 @@ static void exec(int flag)
 					bool disasm_flag = true;
 					switch (argc)
 					{
-						case 1 : reg_dump(reg, REG_STRINGS, pc);
-							 int32_t pc_start = 0;
-							 if ((int32_t)pc-2 < 0) pc_start = 0;
-							 else pc_start = pc-2;
-							 print_mem(mem, pc_start, pc+3, disasm_flag, true, true, pc, false);
-							 break;
-						case 3 : if (!strcmp(user_args[1], "-x"))
-							 {
-							 	uint32_t maddr = strtohex(user_args[2]);				 
-								if (err_val == 1)
-								{
-									printf("ERROR: invalid address\n");
-								}
-								else
-								{
-									print_mem(mem, maddr, maddr + 1, false, false, false, 0, false);
-								}
+						case 1 : {
+								 reg_dump(reg, REG_STRINGS, pc);
+								 int32_t pc_start = 0;
+								 if ((int32_t)pc-2 < 0) pc_start = 0;
+								 else pc_start = pc-2;
+								 print_mem(mem, pc_start, pc+3, disasm_flag, true, true, pc, false);
+								 break;
+							 }
+						case 3 : {
+								 if (!strcmp(user_args[1], "-x"))
+								 {
+									 uint32_t maddr = strtohex(user_args[2]);				 
+									 if (err_val == 1)
+									 {
+										 printf("ERROR: invalid address\n");
+									 }
+									 else
+									 {
+										 print_mem(mem, maddr, maddr + 1, false, false, false, 0, false);
+									 }
+								 }
 							 }
 					}
 				}
@@ -89,75 +93,113 @@ static void exec(int flag)
 		{
 			case 0: break;
 			case 1: return;
-			case 2:	dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				reg[dest_reg] = reg[op1_reg];
-				break;
-			case 3: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				immediate = instr & 0x0001ffff; 
-				if (immediate >> 16) immediate |= 0xfffe0000;
-				reg[dest_reg] = immediate;
-				break;
-			case 4: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				op2_reg = (instr >> OP2_REG_SHIFT_VAL) & EXTRACT_MASK;
-				func = instr & EXTRACT_MASK;
-				switch (func)
-				{
-					case 0: reg[dest_reg] = reg[op1_reg] + reg[op2_reg];
-						break;
-					case 1: reg[dest_reg] = reg[op1_reg] >> 1;
-						break;
-					case 2: reg[dest_reg] = reg[op1_reg] << 1;
-						break;
-					case 3: reg[dest_reg] = reg[op1_reg] & reg[op2_reg];
-						break;
-					case 4: reg[dest_reg] = reg[op1_reg] | reg[op2_reg];
-						break;
-					case 5: reg[dest_reg] = ~reg[op1_reg];
-						break;
-					case 7: reg[dest_reg] = reg[op1_reg] >> 8;
-						break;
-					case 8: reg[dest_reg] = reg[op1_reg] << 8;
-						break;
+			case 2:	{
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+					reg[dest_reg] = reg[op1_reg];
+					break;
 				}
-				break;
-			case 5: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				immediate = instr & 0x0001ffff; 
-				if (immediate >> 16) immediate |= 0xfffe0000;
-				reg[dest_reg] = reg[op1_reg] + immediate;
-				break;
-			case 6: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				pc = reg[dest_reg];
-				jmp_flag = true;
-				break;
-			case 7: cond_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				func = instr & EXTRACT_MASK;
-				offset = (instr & 0x003fffe0) >> 5;
-				offset = (offset >> 16) ? offset | 0xfffe0000 : offset;
-				int32_t extracted_offset = (int32_t)offset;
-				switch (func)
-				{
-					case BRE_FUNC: pc = (reg[cond_reg] == 0) ? pc + extracted_offset : pc;
-						 jmp_flag = reg[cond_reg] == 0;
-						 break;
-					case BRL_FUNC: pc = (reg[cond_reg] < 0) ? pc + extracted_offset : pc;
-						 jmp_flag = reg[cond_reg] < 0;
-						 break;
-					case BRG_FUNC: pc = (reg[cond_reg] > 0) ? pc + extracted_offset : pc;
-						 jmp_flag = reg[cond_reg] > 0;
-						 break;
-				}	
-				break;
-			case 8: dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				reg[dest_reg] = ((uint32_t)mem[reg[op1_reg]]);
-				break;
-			case 9: src_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
-				dest_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
-				mem[reg[dest_reg]] = reg[src_reg];
-				break;
+			case 3: {
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					immediate = instr & 0x0001ffff; 
+					if (immediate >> 16) immediate |= 0xfffe0000;
+					reg[dest_reg] = immediate;
+					break;
+				}
+			case 4: {
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+					op2_reg = (instr >> OP2_REG_SHIFT_VAL) & EXTRACT_MASK;
+					func = instr & EXTRACT_MASK;
+					switch (func)
+					{
+						case 0: {
+								reg[dest_reg] = reg[op1_reg] + reg[op2_reg];
+								break;
+							}
+						case 1: {
+								reg[dest_reg] = reg[op1_reg] >> 1;
+								break;
+							}
+						case 2: {
+								reg[dest_reg] = reg[op1_reg] << 1;
+								break;
+							}
+						case 3: {
+								reg[dest_reg] = reg[op1_reg] & reg[op2_reg];
+								break;
+							}
+						case 4: {
+								reg[dest_reg] = reg[op1_reg] | reg[op2_reg];
+								break;
+							}
+						case 5: {
+								reg[dest_reg] = ~reg[op1_reg];
+								break;
+							}
+						case 7: {
+								reg[dest_reg] = reg[op1_reg] >> 8;
+								break;
+							}
+						case 8: {
+								reg[dest_reg] = reg[op1_reg] << 8;
+								break;
+							}
+					}
+					break;
+				}
+			case 5: {
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+					immediate = instr & 0x0001ffff; 
+					if (immediate >> 16) immediate |= 0xfffe0000;
+					reg[dest_reg] = reg[op1_reg] + immediate;
+					break;
+				}
+			case 6: {
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					pc = reg[dest_reg];
+					jmp_flag = true;
+					break;
+				}
+			case 7: {
+					cond_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					func = instr & EXTRACT_MASK;
+					offset = (instr & 0x003fffe0) >> 5;
+					offset = (offset >> 16) ? offset | 0xfffe0000 : offset;
+					int32_t extracted_offset = (int32_t)offset;
+					switch (func)
+					{
+						case BRE_FUNC: {
+								       pc = (reg[cond_reg] == 0) ? pc + extracted_offset : pc;
+								       jmp_flag = reg[cond_reg] == 0;
+								       break;
+							       }
+						case BRL_FUNC: {
+								       pc = (reg[cond_reg] < 0) ? pc + extracted_offset : pc;
+								       jmp_flag = reg[cond_reg] < 0;
+								       break;
+							       }
+						case BRG_FUNC: {
+								       pc = (reg[cond_reg] > 0) ? pc + extracted_offset : pc;
+								       jmp_flag = reg[cond_reg] > 0;
+								       break;
+							       }
+					}	
+					break;
+				}
+			case 8: {
+					dest_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					op1_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+					reg[dest_reg] = ((uint32_t)mem[reg[op1_reg]]);
+					break;
+				}
+			case 9: {
+					src_reg = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
+					dest_reg = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
+					mem[reg[dest_reg]] = reg[src_reg];
+					break;
+				}
 		}
 		if (!jmp_flag) pc = pc + 1;
 		jmp_flag = false;	

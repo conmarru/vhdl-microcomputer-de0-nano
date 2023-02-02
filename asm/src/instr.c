@@ -230,63 +230,80 @@ void resolve_instr(struct instr_struct* instr)
 {
 	switch (instr->opcode)
 	{
-		case 6: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, instr->dest, instr->jmp_target->instr_addr), true, true, instr->instr_addr, instr->jmp_target);
-			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+1, NULL);
-			break;
-		case 8: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), false, true, instr->instr_addr, NULL);
-			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, instr->op1, 0, instr->dest, 0), false, false, instr->instr_addr+1, NULL);
-			break;
-		case 9: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), false, true ,instr->instr_addr, NULL);
-			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->dest, 0, instr->op1, 0), false, false, instr->instr_addr+1, NULL);
-			break;
-		case 32: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, instr->op2, 0, instr->op2, 0), false, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, instr->op2, 0, instr->op2, 1), false, false, instr->instr_addr+1, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, instr->op1, instr->op2, instr->dest, 0), false, false, instr->instr_addr+2, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, instr->op2, 0, instr->op2, 0), false, false, instr->instr_addr+3, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, instr->op2, 0, instr->op2, 1), false, false, instr->instr_addr+4, NULL);
-			 break;
-		case 33: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->op1, 0, STACK_POINTER_REG, 0), false, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+1, NULL);
-			 break;
-		case 34: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 1), false, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, instr->op1, 0), false, false, instr->instr_addr+1, NULL);
-			 break;
-		case 35: struct instr_struct* call_pointer = instr->jmp_target;
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->instr_addr+5), true, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, ADDR_REG, 0, STACK_POINTER_REG, 0), false, false, instr->instr_addr+1, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+2, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, call_pointer->instr_addr), true, false, instr->instr_addr+3, call_pointer); 
-			 add_p_from_replace(instr_list[instr->instr_addr+3], instr->instr_addr);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+4, NULL);
-			 if (instr->instr_addr+5 >= instr_list_ptr) 
-			 {
-				 INSERT_NOP_AT_INDEX(instr->instr_addr+5);
+		case 6: {
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, instr->dest, instr->jmp_target->instr_addr), true, true, instr->instr_addr, instr->jmp_target);
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+1, NULL);
+				break;
+			}
+		case 8: {
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), false, true, instr->instr_addr, NULL);
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, instr->op1, 0, instr->dest, 0), false, false, instr->instr_addr+1, NULL);
+				break;
+			}
+		case 9: {
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), false, true ,instr->instr_addr, NULL);
+				gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->dest, 0, instr->op1, 0), false, false, instr->instr_addr+1, NULL);
+				break;
+			}
+		case 32: {
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, instr->op2, 0, instr->op2, 0), false, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, instr->op2, 0, instr->op2, 1), false, false, instr->instr_addr+1, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, instr->op1, instr->op2, instr->dest, 0), false, false, instr->instr_addr+2, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_NOT, instr->op2, 0, instr->op2, 0), false, false, instr->instr_addr+3, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, instr->op2, 0, instr->op2, 1), false, false, instr->instr_addr+4, NULL);
+				 break;
 			 }
-		 	 instr_list[instr->instr_addr]->jmp_target = instr_list[instr->instr_addr+5]; 
-			 add_p_from(instr_list[instr->instr_addr]);
-
-			 break;
-		case 36: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 1), false, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false, false, instr->instr_addr+1, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+2, NULL);
-			 break;
-		case 37: gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, instr->op1, 0, 25, 0), false, true, instr->instr_addr, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, instr->op2, 0, 24, 0), false, false, instr->instr_addr+1, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 26, 0), false, false, instr->instr_addr+2, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 28, 1), false, false, instr->instr_addr+3, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 24, 8), true, false, instr->instr_addr+4, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, 24, 28, 27, 0), false, false, instr->instr_addr+5, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 27, 6), true, false, instr->instr_addr+6, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, 25, 26, 0), false, false, instr->instr_addr+7, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHR, 24, 0, 24, 0), false, false, instr->instr_addr+8, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, 25, 0, 25, 0), false, false, instr->instr_addr+9, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, instr->instr_addr+3), true, false, instr->instr_addr+10, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, false, instr->instr_addr+11, NULL);
-			 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, 26, 0, instr->dest, 0), false, false, instr->instr_addr+12, NULL);
-			 instr_list[instr->instr_addr+4]->jmp_target = instr_list[instr->instr_addr+12];
-			 instr_list[instr->instr_addr+6]->jmp_target = instr_list[instr->instr_addr+12];
-			 instr_list[instr->instr_addr+10]->jmp_target = instr_list[instr->instr_addr+3];
-			 break;
+		case 33: {
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->op1, 0, STACK_POINTER_REG, 0), false, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+1, NULL);
+				 break;
+			 }
+		case 34: {
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 1), false, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, instr->op1, 0), false, false, instr->instr_addr+1, NULL);
+				 break;
+			 }
+		case 35: {
+				 struct instr_struct* call_pointer = instr->jmp_target;
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->instr_addr+5), true, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, ADDR_REG, 0, STACK_POINTER_REG, 0), false, false, instr->instr_addr+1, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, -1), false, false, instr->instr_addr+2, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, call_pointer->instr_addr), true, false, instr->instr_addr+3, call_pointer); 
+				 add_p_from_replace(instr_list[instr->instr_addr+3], instr->instr_addr);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+4, NULL);
+				 if (instr->instr_addr+5 >= instr_list_ptr) 
+				 {
+					 INSERT_NOP_AT_INDEX(instr->instr_addr+5);
+				 }
+				 instr_list[instr->instr_addr]->jmp_target = instr_list[instr->instr_addr+5]; 
+				 add_p_from(instr_list[instr->instr_addr]);
+				 break;
+			 }
+		case 36: {
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADDI, STACK_POINTER_REG, 0, STACK_POINTER_REG, 1), false, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOAD, STACK_POINTER_REG, 0, 29, 0), false, false, instr->instr_addr+1, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, ADDR_REG, 0), false, false, instr->instr_addr+2, NULL);
+				 break;
+			 }
+		case 37: {
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, instr->op1, 0, 25, 0), false, true, instr->instr_addr, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, instr->op2, 0, 24, 0), false, false, instr->instr_addr+1, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 26, 0), false, false, instr->instr_addr+2, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 28, 1), false, false, instr->instr_addr+3, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 24, 8), true, false, instr->instr_addr+4, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_AND, 24, 28, 27, 0), false, false, instr->instr_addr+5, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_BRE, 0, 0, 27, 6), true, false, instr->instr_addr+6, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_ADD, 26, 25, 26, 0), false, false, instr->instr_addr+7, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHR, 24, 0, 24, 0), false, false, instr->instr_addr+8, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_SHL, 25, 0, 25, 0), false, false, instr->instr_addr+9, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, 29, instr->instr_addr+3), true, false, instr->instr_addr+10, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_JMP, 0, 0, 29, 0), false, false, instr->instr_addr+11, NULL);
+				 gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_MOVE, 26, 0, instr->dest, 0), false, false, instr->instr_addr+12, NULL);
+				 instr_list[instr->instr_addr+4]->jmp_target = instr_list[instr->instr_addr+12];
+				 instr_list[instr->instr_addr+6]->jmp_target = instr_list[instr->instr_addr+12];
+				 instr_list[instr->instr_addr+10]->jmp_target = instr_list[instr->instr_addr+3];
+				 break;
+			 }
 	}
 
 	free(instr);
@@ -383,64 +400,82 @@ void gen_nops()
 		decr_ref_count();
 		switch (instr_list[i]->opcode)
 		{
-			case 1: for (int j = 0; j < 4; j++)
-				{
-					INSERT_NOP_AT_INDEX(i);
-					i++;
-				}
-				break;
-			case 2: gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, 0, i, true);
-				break;
-			case 3: ref_count[instr_list[i]->dest] = 5;
-				break;
-			case 4: gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, instr_list[i]->op2, i, false);
-				break;
-			case 5: gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, 0, i, true); 
-				break;			
-			case 6:	if (ref_count[instr_list[i]->dest])
-				{
-					INSERT_NOP_AT_INDEX(i);
-				}
-				else
-				{
-					i++;
-					for (int j = 0; j < JMP_NOPS_NUM; j++)
+			case 1: {
+					for (int j = 0; j < 4; j++)
 					{
-						INSERT_NOP_AT_INDEX(i);		
+						INSERT_NOP_AT_INDEX(i);
+						i++;
 					}
+					break;
 				}
-				break;
-			case 7: if (ref_count[instr_list[i]->dest])
-				{
-					INSERT_NOP_AT_INDEX(i);
+			case 2: {
+					gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, 0, i, true);
+					break;
 				}
-				else
-				{
-					i++;
-					for (int j = 0; j < JMP_NOPS_NUM; j++)
+			case 3: {
+					ref_count[instr_list[i]->dest] = 5;
+					break;
+				}
+			case 4: {
+					gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, instr_list[i]->op2, i, false);
+					break;
+				}
+			case 5: {
+					gen_nops_arith(instr_list[i]->dest, instr_list[i]->op1, 0, i, true); 
+					break;			
+				}
+			case 6:	{
+					if (ref_count[instr_list[i]->dest])
 					{
-						INSERT_NOP_AT_INDEX(i);		
+						INSERT_NOP_AT_INDEX(i);
 					}
+					else
+					{
+						i++;
+						for (int j = 0; j < JMP_NOPS_NUM; j++)
+						{
+							INSERT_NOP_AT_INDEX(i);		
+						}
+					}
+					break;
 				}
-				break;
-			case 8:	if (ref_count[instr_list[i]->op1])
-				{
-					INSERT_NOP_AT_INDEX(i);
+			case 7: {
+					if (ref_count[instr_list[i]->dest])
+					{
+						INSERT_NOP_AT_INDEX(i);
+					}
+					else
+					{
+						i++;
+						for (int j = 0; j < JMP_NOPS_NUM; j++)
+						{
+							INSERT_NOP_AT_INDEX(i);		
+						}
+					}
+					break;
 				}
-				else
-				{
-					ref_count[instr_list[i]->dest] = 5;
+			case 8:	{
+					if (ref_count[instr_list[i]->op1])
+					{
+						INSERT_NOP_AT_INDEX(i);
+					}
+					else
+					{
+						ref_count[instr_list[i]->dest] = 5;
+					}
+					break;
 				}
-				break;
-			case 9: if (ref_count[instr_list[i]->op1])
-				{
-					INSERT_NOP_AT_INDEX(i);
+			case 9: {
+					if (ref_count[instr_list[i]->op1])
+					{
+						INSERT_NOP_AT_INDEX(i);
+					}
+					else
+					{
+						ref_count[instr_list[i]->dest] = 5;
+					}
+					break;
 				}
-				else
-				{
-					ref_count[instr_list[i]->dest] = 5;
-				}
-				break;
 		}
 	}
 

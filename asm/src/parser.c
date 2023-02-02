@@ -622,40 +622,71 @@ void parse()
 		switch (knode->opcode)
 		{
 			case 0: 
-			case 1: 
-				add_instr_struct(false, knode->opcode, 0, 0, 0, 0, 0, false);	
-				parse_newline(false);
-				break;
-			case 2: gen_move_instr(knode);
-				break;
-			case 3: gen_loadi(knode);
-				break;
-			case 4: gen_opcode4_instr(knode);
-				break;
-			case 5: gen_addi(knode);
-				break;
-			case 6: gen_jump(knode);
-				break;
-			case 7: gen_branches(knode);
-				break;
-			case 8: gen_load(knode);
-				break;
-			case 9: gen_store(knode);
-				break;
-			case 32: gen_pseudo_sub();
-				 break;
-			case 33: gen_pseudo_push();
-				 break;
-			case 34: gen_pseudo_pop();
-				 break;
-			case 35: gen_pseudo_call();
-				 break;
-			case 36: gen_pseudo_ret();
-				 break;
-			case 37: gen_pseudo_mul();
-				 break;
-			default : printf("ERROR: Invalid opcode parsed\n");
-				  exit(1);
+			case 1: {
+					add_instr_struct(false, knode->opcode, 0, 0, 0, 0, 0, false);	
+					parse_newline(false);
+					break;
+				}
+			case 2: {
+					gen_move_instr(knode);
+					break;
+				}
+			case 3: {
+					gen_loadi(knode);
+					break;
+				}
+			case 4: {
+					gen_opcode4_instr(knode);
+					break;
+				}
+			case 5: {
+					gen_addi(knode);
+					break;
+				}
+			case 6: {
+					gen_jump(knode);
+					break;
+				}
+			case 7: {
+					gen_branches(knode);
+					break;
+				}
+			case 8: {
+					gen_load(knode);
+					break;
+				}
+			case 9: {
+					gen_store(knode);
+					break;
+				}
+			case 32: {
+					 gen_pseudo_sub();
+					 break;
+				 }
+			case 33: {
+					 gen_pseudo_push();
+					 break;
+				 }
+			case 34: {
+					 gen_pseudo_pop();
+					 break;
+				 }
+			case 35: {
+					 gen_pseudo_call();
+					 break;
+				 }
+			case 36: {
+					 gen_pseudo_ret();
+					 break;
+				 }
+			case 37: {
+					 gen_pseudo_mul();
+					 break;
+				 }
+			default: {
+					 printf("ERROR: Invalid opcode parsed\n");
+					 exit(1);
+				 }
 		}		
 	}
 	

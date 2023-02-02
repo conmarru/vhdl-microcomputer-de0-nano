@@ -15,6 +15,6 @@ struct label_node {
 void init_label_hashset();
 label* new_label(char* name, int line);
 void add_label(label* lbl);
-label* get_label();
+label* get_label(char* lbl);
 void update_lbls(uint32_t cur_addr);
 void free_lbl_hashset();

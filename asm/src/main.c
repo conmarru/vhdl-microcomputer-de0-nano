@@ -55,21 +55,35 @@ void parse_args(int argc, char** args, char* filename_in, char* filename_out)
 
 		switch (c)
 		{
-			case 'i': memcpy(filename_in, optarg, MAX_FILENAME);
-				  input_flag = true;
-				  break;
-			case 'o': memcpy(filename_out, optarg, MAX_FILENAME);
-				  break;
-			case 'n': cli_flags |= NO_NOPS_FLAG;
-				  break;
-			case 'd': cli_flags |= DEBUG_FLAG;
-				  break;
-			case 'l': cli_flags |= ONE_LINE_FFLAG;
-				  break;
-			case 'h': print_usage();
-				  exit(0);
-			case '?': print_usage();
-				  exit(1);
+			case 'i': {
+					  memcpy(filename_in, optarg, MAX_FILENAME);
+					  input_flag = true;
+					  break;
+				  }
+			case 'o': {
+					  memcpy(filename_out, optarg, MAX_FILENAME);
+					  break;
+				  }
+			case 'n': {
+					  cli_flags |= NO_NOPS_FLAG;
+					  break;
+				  }
+			case 'd': {
+					  cli_flags |= DEBUG_FLAG;
+					  break;
+				  }
+			case 'l': {
+					  cli_flags |= ONE_LINE_FFLAG;
+					  break;
+				  }
+			case 'h': {
+					  print_usage();
+					  exit(0);
+				  }
+			case '?': {
+					  print_usage();
+					  exit(1);
+				  }
 		}
 		
 	}
