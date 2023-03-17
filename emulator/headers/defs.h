@@ -22,6 +22,21 @@
 #define BRE_FUNC 4
 #define BRL_FUNC 2
 #define BRG_FUNC 1
+#define ADD_FUNC 0
+#define SHR_FUNC 1
+#define SHL_FUNC 2
+#define AND_FUNC 3
+#define OR_FUNC 4
+#define NOT_FUNC 5
+#define SHRB_FUNC 7
+#define SHLB_FUNC 8
+
+#define REGDUMP_FLAG 1
+#define MEMDUMP_FLAG 2
+#define INTRCTV_FLAG 4
+#define NO_PIPEL_FLAG 8
+#define MEMSZ_FLAG 16
+#define TERMHLT_FLAG 32
 
 extern const uint32_t EXTRACT_MASK;
 extern const char* REG_STRINGS[];

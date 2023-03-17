@@ -4,7 +4,7 @@
 #include "../headers/decode.h"
 #include "../headers/utils.h"
 
-bool wr_hlt_flag;
+bool wr_hlt_flag = false;
 
 int8_t W_dest;
 int32_t W_res;

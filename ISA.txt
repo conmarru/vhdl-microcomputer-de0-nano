@@ -15,8 +15,8 @@ SHRB (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00111)
 SHLB (00100|<destination:5>|<operand1:5>|00000|<unused:7>|01000)
 
 Logische Operationen
-AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00001)
-OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00010)
+AND (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00011)
+OR (00100|<destination:5>|<operand1:5>|<operand2:5>|<unused:7>|00100)
 NOT (00100|<destination:5>|<operand1:5>|00000|<unused:7>|00101)
 
 Branches

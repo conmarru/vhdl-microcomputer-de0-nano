@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <errno.h>
 #include "../headers/mem.h"
 #include "../headers/defs.h"
 #include "../headers/utils.h"
@@ -10,7 +11,7 @@
 int32_t M_next_pc = 1;
 int8_t M_dest;
 int32_t M_res;
-int32_t M_valA; // addr if mem operation
+int32_t M_valA; 
 int32_t M_valD; 
 int M_sig_J;
 int M_sig_B;
@@ -32,25 +33,22 @@ struct data_mem_struct data_mem;
 void alloc_data_mem(unsigned int size)
 {
 	data_mem.mem_array = (int32_t*)malloc(sizeof(int32_t)*size);
+	if (!data_mem.mem_array) {
+		errn_exit(errno);
+	}
 }
 
 void access_data_mem(struct data_mem_struct* mem)
 {
-	if (mem->read_in)
-	{
-		if ((uint32_t)mem->addr_in >= mem_size)
-		{
-			printf("ERROR: Invalid memory access. Referenced address exceeded the bounds of memory\n");
-			exit(1);
+	if (mem->read_in) {
+		if ((uint32_t)mem->addr_in >= mem_size) {
+			err_exit("Invalid memory access. Referenced address exceeded the bounds of memory\n");
 		}
 		mem->out = mem->mem_array[(uint32_t)mem->addr_in];	
 	}
-	else if (mem->write_in)
-	{
-		if ((uint32_t)mem->addr_in >= mem_size)
-		{	
-			printf("ERROR: Invalid memory access. Referenced address exceeded the bounds of memory\n");
-			exit(1);
+	else if (mem->write_in) {
+		if ((uint32_t)mem->addr_in >= mem_size) {
+			err_exit("Invalid memory access. Referenced address exceeded the bounds of memory\n");
 		}
 		mem->mem_array[(uint32_t)mem->addr_in] = mem->data_in;
 	}

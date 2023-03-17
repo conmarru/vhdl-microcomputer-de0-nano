@@ -6,16 +6,23 @@
 #include <sys/mman.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <limits.h>
+#include <errno.h>
 #include "../headers/defs.h"
 #include "../headers/cmds.h"
 #include "../headers/utils.h"
 #include "../headers/pipeline.h"
 #include "../headers/seq.h"
 
-#define MAX_FILENAME 200
+#ifndef SIZEBUF_LEN
 #define SIZEBUF_LEN 10
-#define DEFAULT_MEM_SIZE 2056
+#endif
 
+#ifndef DEFAULT_MEM_SIZE
+#define DEFAULT_MEM_SIZE 2056
+#endif
+
+static long max_file_name;
 const uint32_t EXTRACT_MASK = 0x0000001f;
 uint8_t flags = 0;
 
@@ -38,8 +45,7 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 {
 	int c = 0; 
 	opterr = 0;
-	while (1)
-	{
+	while (1) {
 		static struct option long_options[] = {
 			{"input", required_argument, NULL, 'i'},
 			{"regdump", no_argument, NULL, 'r'},
@@ -55,95 +61,106 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 		int option_index = 0;
 		c = getopt_long(argc, args, "i:rmIns:Hh", long_options, &option_index);
 
-		if (c == -1)
-		{
+		if (c == -1) {
 			return;
 		}
 
-		switch (c)
-		{
-			case 'i': {
-					  memcpy(filename, optarg, MAX_FILENAME);
-					  break;
-				  }
-			case 'r': {
-					  flags |= 1;
-					  break;
-				  }
-			case 'm': {
-					  flags |= 2;
-					  break;
-				  }
-			case 'I': {
-					  flags |= 4;
-					  break;
-				  }
-			case 'n': {
-					  flags |= 8;
-					  break;
-				  }
-			case 's': {
-					  memcpy(mem_size, optarg, SIZEBUF_LEN);
-					  flags |= 16;
-					  break;
-				  }
-			case 'H': {
-					  flags |= 32;
-					  break;
-				  }
-			case 'h': {
-					  print_usage_info();
-					  exit(0);
-				  }
-			case '?': {
-					  print_usage_info(); 
-					  exit(1);
-				  }
+		switch (c) {
+			case 'i': 
+				memcpy(filename, optarg, max_file_name);
+				break;
+
+			case 'r': 
+				flags |= REGDUMP_FLAG;
+				break;
+
+			case 'm': 
+				flags |= MEMDUMP_FLAG;
+				break;
+
+			case 'I': 
+				flags |= INTRCTV_FLAG;
+				break;
+
+			case 'n': 
+				flags |= NO_PIPEL_FLAG;
+				break;
+
+			case 's': 
+				memcpy(mem_size, optarg, SIZEBUF_LEN);
+				flags |= MEMSZ_FLAG;
+				break;
+
+			case 'H': 
+				flags |= TERMHLT_FLAG;
+				break;
+
+			case 'h': 
+				print_usage_info();
+				exit(0);
+
+			case '?': 
+				print_usage_info(); 
+				exit(1);
+
 		}
 	}
 }
 
 int main(int argc, char** args)
 {
-	char* filename = (char*)calloc(MAX_FILENAME+1, sizeof(char));
+	max_file_name = pathconf("/", _PC_NAME_MAX);	
+	char* filename = (char*)calloc(max_file_name+1, sizeof(char));
+	if (!filename) {
+		errn_exit(errno);
+	}
 	char* mem_size_buf = (char*)calloc(SIZEBUF_LEN+1, sizeof(char));
+	if (!mem_size_buf) {
+		errn_exit(errno);
+	}
 	parse_cli_args(argc, args, filename, mem_size_buf);
 	FILE* input_file = fopen(filename, "rb");
+	if (!input_file) {
+		errn_exit(errno);
+	}
 	mem_size = (flags & 0x10) ? strtouint(mem_size_buf) : DEFAULT_MEM_SIZE;
-	if (err_val)
-	{
-		printf("ERROR: specified size must be a positive integer\n");
-		exit(1);
+	if (err_val) {
+		err_exit("specified size must be a positive integer\n");
 	}
 	free(filename);
-	free(mem_size_buf);
-	if (!input_file)
-	{
-		printf("ERROR: Failed to open input file\n");
-		exit(1);
-	}
+	free(mem_size_buf);	
 	int ifd = fileno(input_file);
-	int fsize = lseek(ifd, 0, SEEK_END);
+	if (ifd == -1) {
+		errn_exit(errno);
+	}
+	off_t fsize = lseek(ifd, 0, SEEK_END);
+	if (fsize == -1) {
+		errn_exit(errno);
+	}
 
 	void* buf = mmap(NULL, fsize, PROT_READ, MAP_PRIVATE, ifd, 0);
-	if (!buf)
+	if ((intptr_t)buf == -1)
 	{
-		printf("ERROR: Failed to open input file\n");
-		exit(1);
+		errn_exit(errno);
 	}
 
 	uint8_t* binary_data = (uint8_t*)calloc(fsize,sizeof(uint8_t));
+	if (!binary_data) {
+		errn_exit(errno);
+	}
 	memcpy(binary_data, buf, fsize);
-	if (flags & 0x08) 
-	{
+	if (flags & 0x08) {
 		seq_run(binary_data, fsize, mem_size);
 	}
-	else
-	{
+	else {
 		run(mem_size, binary_data, fsize);
 	}	
-	munmap(buf, fsize);
-	fclose(input_file);
+	if (munmap(buf, fsize) == -1) {
+		errn_exit(errno);
+	}
+	if (fclose(input_file) == -1) {
+		errn_exit(errno);
+	}
 	free(binary_data);
 	return 0;
 }

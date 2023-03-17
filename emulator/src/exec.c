@@ -45,69 +45,54 @@ struct alu_struct alu;
 
 static void exec_alu(struct alu_struct* alu_strct)
 {
-	switch (alu_strct->opcode_in)
-	{
-		case MOVE_OPCODE: {
-					  alu_strct->out = alu_strct->op1_in;
-					  break;
-				  }
-		case LOADI_OPCODE: {
-					   alu_strct->out = alu_strct->op2_in;
-					   break;
-				   }
-		case BIN_ALU_OP_OPCODE: switch (alu_strct->func_in)
-					{
-						case 0: {
-								alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
-								break;
-							}
-						case 1: {
-								alu_strct->out = alu_strct->op1_in >> 1;
-								break;
-							}
-						case 2: {
-								alu_strct->out = alu_strct->op1_in << 1;
-								break;
-							}
-						case 3: {
-								alu_strct->out = alu_strct->op1_in & alu_strct->op2_in;
-								break;
-							}
-						case 4: {
-								alu_strct->out = alu_strct->op1_in | alu_strct->op2_in;
-								break;
-							}
-						case 5: {
-								alu_strct->out = ~alu_strct->op1_in;
-								break;
-							}
-						case 7: {
-								alu_strct->out = alu_strct->op1_in >> 8;
-								break;
-							}
-						case 8: {
-								alu_strct->out = alu_strct->op1_in << 8;
-								break;
-							}
-					}
+	switch (alu_strct->opcode_in) {
+		case MOVE_OPCODE: 
+			alu_strct->out = alu_strct->op1_in;
+			break;
+		case LOADI_OPCODE: 
+			alu_strct->out = alu_strct->op2_in;
+			break;
+		case BIN_ALU_OP_OPCODE: 
+			switch (alu_strct->func_in) {
+				case 0: 
+					alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
 					break;
-		case ADDI_OPCODE: {
-					  alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
-					  break;
-				  }
-		case BRANCH_OPCODE: {
-					    alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
-					    break;	
-				    }
+				case 1: 
+					alu_strct->out = alu_strct->op1_in >> 1;
+					break;
+				case 2: 
+					alu_strct->out = alu_strct->op1_in << 1;
+					break;
+				case 3: 
+					alu_strct->out = alu_strct->op1_in & alu_strct->op2_in;
+					break;
+				case 4: 
+					alu_strct->out = alu_strct->op1_in | alu_strct->op2_in;
+					break;
+				case 5: 
+					alu_strct->out = ~alu_strct->op1_in;
+					break;
+				case 7: 
+					alu_strct->out = alu_strct->op1_in >> 8;
+					break;
+				case 8: 
+					alu_strct->out = alu_strct->op1_in << 8;
+					break;
+			}
+			break;
+		case ADDI_OPCODE: 
+			alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
+			break;
+		case BRANCH_OPCODE: 
+			alu_strct->out = alu_strct->op1_in + alu_strct->op2_in;
+			break;	
 	}
 }
 
 static int branch_taken(int32_t cond, int8_t func, int b_sig)
 {
-	if (b_sig)
-	{
-		switch (func)
-		{
+	if (b_sig) {
+		switch (func) {
 			case BRE_FUNC: return cond == 0;
 			case BRL_FUNC: return cond < 0;
 			case BRG_FUNC: return cond > 0;
