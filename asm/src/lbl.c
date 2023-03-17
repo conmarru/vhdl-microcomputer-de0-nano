@@ -5,7 +5,8 @@
 #include "../headers/lbl.h"
 #include "../headers/utils.h"
 
-static struct label_node* label_hashset[LABEL_HASHSET_SIZE] = { NULL };
+// hashset that stores label definitions
+static struct label_node* label_hashset[LBL_HASHSET_SIZE] = { NULL };
 
 static struct label_node* new_label_node(struct label_node* next, label* lbl)
 {
@@ -17,10 +18,9 @@ static struct label_node* new_label_node(struct label_node* next, label* lbl)
 	return new;
 }
 
-void init_label_hashset()
+void init_label_hashset(void)
 {
-	for (int i = 0; i < LABEL_HASHSET_SIZE; i++)
-	{
+	for (int i = 0; i < LBL_HASHSET_SIZE; i++) {
 		label_hashset[i] = new_label_node(NULL, NULL);
 	}
 }
@@ -37,10 +37,9 @@ label* new_label(char* name, int line)
 
 void add_label(label* lbl)
 {
-	struct label_node* head = label_hashset[get_hash(lbl->name, LABEL_HASHSET_SIZE)];
+	struct label_node* head = label_hashset[get_hash(lbl->name, LBL_HASHSET_SIZE)];
 	
-	if (!head->next)
-	{
+	if (!head->next) {
 		head->next = new_label_node(NULL, lbl); 
 		return;
 	}
@@ -50,37 +49,17 @@ void add_label(label* lbl)
 
 label* get_label(char* name)
 {
-	struct label_node* node = label_hashset[get_hash(name, LABEL_HASHSET_SIZE)];
+	struct label_node* node = label_hashset[get_hash(name, LBL_HASHSET_SIZE)];
 	node = node->next;
 
-	while (node)
-	{
-		if (!strcmp(name, node->lbl->name))
-		{
+	while (node) {
+		if (!strcmp(name, node->lbl->name)) {
 			return node->lbl;
 		}
 		node = node->next;
 	}
 
 	return NULL;
-}
-
-void update_lbls(uint32_t cur_addr)
-{
-	struct label_node* node = NULL;
-	for (int i = 0; i < LABEL_HASHSET_SIZE; i++)
-	{
-		node = label_hashset[i]->next;	
-		while (node)
-		{
-			if (node->lbl->addr > cur_addr)
-			{
-				node->lbl->addr += 1;
-				printf("%s, %d\n", node->lbl->name, node->lbl->addr);
-			}
-			node = node->next;
-		}
-	}
 }
 
 static void free_lbl(label* lbl)
@@ -96,13 +75,11 @@ static void free_lbl_node(struct label_node* node)
 	free(node);
 }
 
-void free_lbl_hashset()
+void free_lbl_hashset(void)
 {
-	for (int i = 0; i < LABEL_HASHSET_SIZE; i++)
-	{
+	for (int i = 0; i < LBL_HASHSET_SIZE; i++) {
 		struct label_node* head = label_hashset[i];
-		while (head->next)
-		{
+		while (head->next) {
 			struct label_node* node = head->next;
 			head->next = node->next;
 			free_lbl_node(node);

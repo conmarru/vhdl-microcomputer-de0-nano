@@ -4,12 +4,17 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <stdint.h>
+#include <errno.h>
 #include "../headers/scan.h"
 #include "../headers/def.h"
 #include "../headers/utils.h"
 #include "../headers/lbl.h"
 #include "../headers/eval.h"
 #include "../headers/instr.h"
+
+#ifndef KYWRD_HASHSET_SIZE
+#define KYWRD_HASHSET_SIZE 30
+#endif
 
 struct keyword_node {
 	struct keyword_node* next;
@@ -28,21 +33,32 @@ struct reg_struct_node {
 	struct reg_struct* reg;	
 };
 
-static struct keyword_node* keyword_hashset[KEYWORD_HASHSET_LEN] = { NULL };
+// hashset for keywords
+static struct keyword_node* keyword_hashset[KYWRD_HASHSET_SIZE] = { NULL };
+
+// hashset for register structs
 static struct reg_struct_node* reg_hashset[REG_NUM] = { NULL };
 
 static struct reg_struct* new_reg_struct(char* name, uint8_t encoding)
 {
 	struct reg_struct* new = (struct reg_struct*)malloc(sizeof(struct reg_struct));
+	if (!new) {
+		errn_exit(errno);
+	}
+
 	new->name = name; 
 	new->encoding = encoding;
 
 	return new;
 }
 
-static struct reg_struct_node* new_reg_struct_node(struct reg_struct_node* next, struct reg_struct* reg)
+static struct reg_struct_node* new_reg_struct_node(struct reg_struct_node* next, 
+									struct reg_struct* reg)
 {
 	struct reg_struct_node* new = (struct reg_struct_node*)malloc(sizeof(struct reg_struct_node));
+	if (!new) {
+		errn_exit(errno);
+	}
 	new->next = next;
 	new->reg = reg;
 
@@ -55,13 +71,11 @@ static void free_reg_struct_node(struct reg_struct_node* node)
 	free(node);
 }
 
-void free_reg_hashset()
+void free_reg_hashset(void)
 {
-	for (int i = 0; i < REG_NUM; i++)
-	{
+	for (int i = 0; i < REG_NUM; i++) {
 		struct reg_struct_node* head = reg_hashset[i];
-		while (head->next)
-		{
+		while (head->next) {
 			struct reg_struct_node* node = head->next;
 			head->next = node->next;	
 			free_reg_struct_node(node);	
@@ -74,8 +88,7 @@ static void add_reg(char* name, uint8_t encoding)
 {
 	struct reg_struct_node* head = reg_hashset[get_hash(name, REG_NUM)];	
 	struct reg_struct* reg = new_reg_struct(name, encoding);
-	if (!head->next)
-	{
+	if (!head->next) {
 		head->next = new_reg_struct_node(NULL, reg);
 		return;
 	}
@@ -87,23 +100,19 @@ struct reg_struct* get_reg_struct(char* name)
 {
 	struct reg_struct_node* node = reg_hashset[get_hash(name, REG_NUM)]->next;
 
-	while (node)
-	{
-		if (!strcmp(node->reg->name, name))
-		{
+	while (node) {
+		if (!strcmp(node->reg->name, name)) {
 			return node->reg;
 		}
-
 		node = node->next;
 	}
 
 	return NULL;
 }
 
-static void init_reg_hashset()
+static void init_reg_hashset(void)
 {
-	for (int i = 0; i < REG_NUM; i++)
-	{
+	for (int i = 0; i < REG_NUM; i++) {
 		reg_hashset[i] = new_reg_struct_node(NULL, NULL);
 	}
 
@@ -141,9 +150,13 @@ static void init_reg_hashset()
 	add_reg("r31", 31);
 }
 
-static struct keyword_node* new_keyword_node(struct keyword_node* next, char* keyword, uint8_t opcode, uint8_t func)
+static struct keyword_node* new_keyword_node(struct keyword_node* next, char* keyword, 
+								uint8_t opcode, uint8_t func)
 {
 	struct keyword_node* new = (struct keyword_node*)malloc(sizeof(struct keyword_node));
+	if (!new) {
+		errn_exit(errno);
+	}
 	new->next = next;
 	new->keyword = keyword;
 	new->opcode = opcode;
@@ -152,13 +165,11 @@ static struct keyword_node* new_keyword_node(struct keyword_node* next, char* ke
 	return new;
 }
 
-void free_keyword_hashset()
+void free_keyword_hashset(void)
 {
-	for (int i = 0; i < KEYWORD_HASHSET_LEN; i++)
-	{
+	for (int i = 0; i < KYWRD_HASHSET_SIZE; i++) {
 		struct keyword_node* head = keyword_hashset[i];
-		while (head->next)
-		{
+		while (head->next) {
 			struct keyword_node* knode = head->next;
 			head->next = knode->next;
 			free(knode);
@@ -169,10 +180,9 @@ void free_keyword_hashset()
 
 static void add_keyword(char* keyword, uint8_t opcode, uint8_t func)
 {
-	struct keyword_node* head = keyword_hashset[get_hash(keyword, KEYWORD_HASHSET_LEN)];
+	struct keyword_node* head = keyword_hashset[get_hash(keyword, KYWRD_HASHSET_SIZE)];
 
-	if (!head->next)
-	{
+	if (!head->next) {
 		head->next = new_keyword_node(NULL, keyword, opcode, func);
 		return;
 	}
@@ -182,91 +192,79 @@ static void add_keyword(char* keyword, uint8_t opcode, uint8_t func)
 
 static struct keyword_node* get_keyword_node(char* keyword)
 {
-	struct keyword_node* node = keyword_hashset[get_hash(keyword, KEYWORD_HASHSET_LEN)]->next;
+	struct keyword_node* node = keyword_hashset[get_hash(keyword, KYWRD_HASHSET_SIZE)]->next;
 
-	while (node)
-	{
-		if (!strcmp(node->keyword, keyword))
-		{
+	while (node) {
+		if (!strcmp(node->keyword, keyword)) {
 			return node;
 		}
-
 		node = node->next;
 	}
 
 	return NULL;
 }
 
-static void init_keyword_hashset()
+static void init_keyword_hashset(void)
 {
-	for (int i = 0; i < KEYWORD_HASHSET_LEN; i++)
-	{
+	for (int i = 0; i < KYWRD_HASHSET_SIZE; i++) {
 		keyword_hashset[i] = new_keyword_node(NULL, NULL, 0, 0);
 	}
 	
-	// ISA instructions
-	add_keyword("nop", 0, 0);
-	add_keyword("hlt", 1, 0);
-	add_keyword("move", 2, 0);
-	add_keyword("loadi", 3, 0);
-	add_keyword("add", 4, 0);
-	add_keyword("shr", 4, 1);
-	add_keyword("shl", 4, 2);
-	add_keyword("shrb", 4, 7);
-	add_keyword("shlb", 4, 8);
-	add_keyword("and", 4, 3);
-	add_keyword("or", 4, 4);
-	add_keyword("not", 4, 5);
-	add_keyword("addi", 5, 0);
-	add_keyword("bre", 7, 4);
-	add_keyword("brl", 7, 2);
-	add_keyword("brg", 7, 1);
+	add_keyword("nop", OP_NOP, 0);
+	add_keyword("hlt", OP_HLT, 0);
+	add_keyword("move", OP_MOVE, 0);
+	add_keyword("loadi", OP_LOADI, 0);
+	add_keyword("add", OP_ADD, FUNC_ADD);
+	add_keyword("shr", OP_SHR, FUNC_SHR);
+	add_keyword("shl", OP_SHL, FUNC_SHL);
+	add_keyword("shrb", OP_SHRB, FUNC_SHRB);
+	add_keyword("shlb", OP_SHLB, FUNC_SHLB);
+	add_keyword("and", OP_AND, FUNC_AND);
+	add_keyword("or", OP_OR, FUNC_OR);
+	add_keyword("not", OP_NOT, FUNC_NOT);
+	add_keyword("addi", OP_ADDI, 0);
+	add_keyword("bre", OP_BRE, FUNC_BRE);
+	add_keyword("brl", OP_BRL, FUNC_BRL);
+	add_keyword("brg", OP_BRG, FUNC_BRG);
 	
-	// instructions that decode into mutliple instructions
-	add_keyword("jmp", 6, 0);	
-	add_keyword("load", 8, 0);
-	add_keyword("store", 9, 0);
+	add_keyword("jmp", OP_JMP, 0);	
+	add_keyword("load", OP_LOAD, 0);
+	add_keyword("store", OP_STORE, 0);
 
-	// pseudoinstructions
-	add_keyword("sub", 32, 0);
-	add_keyword("push", 33, 0);
-	add_keyword("pop", 34, 0);
-	add_keyword("call", 35, 0);
-	add_keyword("ret", 36, 0);
-	add_keyword("mul", 37, 0);
+	add_keyword("sub", OP_SUB, 0);
+	add_keyword("push", OP_PUSH, 0);
+	add_keyword("pop", OP_POP, 0);
+	add_keyword("call", OP_CALL, 0);
+	add_keyword("ret", OP_RET, 0);
+	add_keyword("mul", OP_MUL, 0);
 }
 
-static uint8_t parse_reg()
+static uint8_t parse_reg(void)
 {
 	token* t = consume_token();
-	if (!expect(t, TOKEN_PERCENT))
-	{
+	if (!expect(t, TOKEN_PERCENT)) {
 		error_unexpected_token(TOKEN_PERCENT, t);
 	}
 	free_token(t);
 
 	t = consume_token();
-	if (!expect(t, TOKEN_IDNT))
-	{
+	if (!expect(t, TOKEN_IDNT)) {
 		error_unexpected_token(TOKEN_IDNT, t);
 	}
 
 	struct reg_struct* reg = get_reg_struct(t->value);
-	if (!reg)
-	{
-		printf("ERROR: Invalid register '%s' at line %d\n", t->value, t->line_num);
-		exit(1);
+	if (!reg) {
+		err_exit("Invalid register '%s' at line %d\n", t->value, t->line_num);
 	}
 	free_token(t);
 
 	return reg->encoding;
 }
 
-static void parse_comma()
+static void parse_comma(void)
 {
 	token* t = consume_token();
-	if (!expect(t, TOKEN_COMMA))
-	{
+	if (!expect(t, TOKEN_COMMA)) {
 		error_unexpected_token(TOKEN_COMMA, t);
 	}
 	free_token(t);
@@ -275,14 +273,12 @@ static void parse_comma()
 static void parse_newline(bool lbl)
 {
 	token* t = consume_token();
-	if (!expect(t, TOKEN_NEWLINE))
-	{
+	if (!expect(t, TOKEN_NEWLINE)) {
 		error_unexpected_token(TOKEN_NEWLINE, t);
 	}
 	free_token(t);	
 	if (!lbl) cur_addr++;
-	while (get_current_token() && get_current_token()->type == TOKEN_NEWLINE)
-	{
+	while (get_current_token() && get_current_token()->type == TOKEN_NEWLINE) {
 		free_token(consume_token());
 	}
 }
@@ -293,57 +289,45 @@ static int32_t parse_num(bool branch)
 	bool label_flag = false;
 	bool sign_flag = false;
 	token* t = consume_token();
-	if (t->type == TOKEN_IDNT)
-	{
+	if (t->type == TOKEN_IDNT) {
 		label* lbl = get_label(t->value);
-		if (!lbl)
-		{
-			printf("ERROR: Referenced undefined label\n");
-			exit(1);
+		if (!lbl) {
+			err_exit("Referenced undefined label\n");
 		}
 		immediate_val = lbl->addr;
 		label_flag = true;
 	}
-	else if (t->type == TOKEN_LPAREN)
-	{
+	else if (t->type == TOKEN_LPAREN) {
 		struct ast_node* root = parse_expr();
 		immediate_val = eval(root);
 		free_token(t);
 		t = consume_token();
-		if (!expect(t, TOKEN_RPAREN))
-		{
+		if (!expect(t, TOKEN_RPAREN)) {
 			error_unexpected_token(TOKEN_RPAREN, t);
 		}
 		free_ast(root);
 	}
-	else
-	{
-
-		if (!expect(t, TOKEN_DOLLAR))
-		{
+	else {
+		if (!expect(t, TOKEN_DOLLAR)) {
 			error_unexpected_token(TOKEN_DOLLAR, t);
 		}
 		free_token(t);
 
 		t = consume_token();
-		if (check_ttype(t, TOKEN_MINUS))
-		{
+		if (check_ttype(t, TOKEN_MINUS)) {
 			sign_flag = true;
 			free_token(t);
 			t = consume_token();
 		}
 
-		if (!expect(t, TOKEN_NUM))
-		{
+		if (!expect(t, TOKEN_NUM)) {
 			error_unexpected_token(TOKEN_NUM, t);
 		}
 
 		immediate_val = (sign_flag) ? -t->num_value : t->num_value;
 	}
-	if (branch)
-	{
-		if (label_flag)
-		{
+	if (branch) {
+		if (label_flag) {
 			int dif = immediate_val - cur_addr;
 			immediate_val = (dif < 0) ? immediate_val - cur_addr + 1: immediate_val - cur_addr;
 		}
@@ -440,13 +424,11 @@ static void gen_jump(struct keyword_node* knode)
 	bool jmp_tag = true;
 
 	token* t = get_current_token();
-	if (check_ttype(t, TOKEN_PERCENT))
-	{
+	if (check_ttype(t, TOKEN_PERCENT)) {
 		dest_reg = parse_reg();	
 		jmp_tag = false;
 	}
-	else if (check_curttype(TOKEN_DOLLAR) || check_curttype(TOKEN_IDNT))
-	{
+	else if (check_curttype(TOKEN_DOLLAR) || check_curttype(TOKEN_IDNT)) {
 		immediate = parse_num(false);	
 	}	
 	
@@ -479,13 +461,11 @@ static void gen_load(struct keyword_node* knode)
 	uint32_t src_reg = ADDR_REG;
 	bool imm = false;
 
-	if (check_curttype(TOKEN_DOLLAR))
-	{
+	if (check_curttype(TOKEN_DOLLAR)) {
 		imm = true;
 		immediate = parse_num(false);
 	}
-	else
-	{
+	else {
 		src_reg = parse_reg();	 
 	}
 
@@ -509,13 +489,11 @@ static void gen_store(struct keyword_node* knode)
 
 	parse_comma();
 	
-	if (check_curttype(TOKEN_DOLLAR))
-	{
+	if (check_curttype(TOKEN_DOLLAR)) {
 		imm = true;
 		immediate = parse_num(false);
 	}
-	else
-	{
+	else {
 		dest_reg = parse_reg();
 	}
 
@@ -525,7 +503,7 @@ static void gen_store(struct keyword_node* knode)
 
 }
 
-static void gen_pseudo_sub()
+static void gen_pseudo_sub(void)
 {
 	uint8_t reg_op1 = parse_reg();
 
@@ -542,7 +520,7 @@ static void gen_pseudo_sub()
 	parse_newline(false);
 }
 
-static void gen_pseudo_push()
+static void gen_pseudo_push(void)
 {
 	uint8_t op1 = parse_reg();
 	
@@ -551,7 +529,7 @@ static void gen_pseudo_push()
 	parse_newline(false);
 }
 
-static void gen_pseudo_pop()
+static void gen_pseudo_pop(void)
 {
 	uint8_t op1 = parse_reg();
 	
@@ -560,7 +538,7 @@ static void gen_pseudo_pop()
 	parse_newline(false);
 }
 
-static void gen_pseudo_call()
+static void gen_pseudo_call(void)
 {
 	uint32_t addr = parse_num(false);
 	
@@ -569,14 +547,14 @@ static void gen_pseudo_call()
 	parse_newline(false);
 }
 
-static void gen_pseudo_ret()
+static void gen_pseudo_ret(void)
 {
 	add_instr_struct(false, 36, 0, 0, 0, 0, 0, false);	
 
 	parse_newline(false);
 }
 
-static void gen_pseudo_mul()
+static void gen_pseudo_mul(void)
 {	
 	uint8_t reg_op1 = parse_reg();
 
@@ -593,103 +571,87 @@ static void gen_pseudo_mul()
 	parse_newline(false);	
 }
 
-void parse()
+void parse(void)
 {
 	init_keyword_hashset();
 	init_reg_hashset();
 	instr_list = (struct instr_struct**)malloc(sizeof(struct instr_struct*)*instr_list_len);
-	while (get_current_token())
-	{
+	if (!instr_list) {
+		errn_exit(errno);
+	}
+	while (get_current_token()) {
 		token* current = consume_token();
-		if (!expect(current, TOKEN_IDNT))
-		{
+		if (!expect(current, TOKEN_IDNT)) {
 			error_unexpected_token(TOKEN_IDNT, current);
 		}
 		struct keyword_node* knode = get_keyword_node(current->value);
-		if (!knode)
-		{
-			if (current->type == TOKEN_IDNT && get_label(current->value))
-			{
+		if (!knode) {
+			if (current->type == TOKEN_IDNT && get_label(current->value)) {
 				free(current);
 				parse_newline(true);	
 				continue;
 			}
-			else if (current->type == TOKEN_IDNT) printf("Invalid instruction found at line %d\n", current->line_num);
-			else printf("ERROR: Instruction expected at line %d\n", current->line_num);
-			exit(1);
+			else if (current->type == TOKEN_IDNT) 
+				err_exit("Invalid instruction found at line %d\n", 
+							current->line_num);
+			else 
+				err_exit("Instruction expected at line %d\n", 
+							current->line_num);
 		}
 		free_token(current);
-		switch (knode->opcode)
-		{
-			case 0: 
-			case 1: {
-					add_instr_struct(false, knode->opcode, 0, 0, 0, 0, 0, false);	
-					parse_newline(false);
-					break;
-				}
-			case 2: {
-					gen_move_instr(knode);
-					break;
-				}
-			case 3: {
-					gen_loadi(knode);
-					break;
-				}
-			case 4: {
-					gen_opcode4_instr(knode);
-					break;
-				}
-			case 5: {
-					gen_addi(knode);
-					break;
-				}
-			case 6: {
-					gen_jump(knode);
-					break;
-				}
-			case 7: {
-					gen_branches(knode);
-					break;
-				}
-			case 8: {
-					gen_load(knode);
-					break;
-				}
-			case 9: {
-					gen_store(knode);
-					break;
-				}
-			case 32: {
-					 gen_pseudo_sub();
-					 break;
-				 }
-			case 33: {
-					 gen_pseudo_push();
-					 break;
-				 }
-			case 34: {
-					 gen_pseudo_pop();
-					 break;
-				 }
-			case 35: {
-					 gen_pseudo_call();
-					 break;
-				 }
-			case 36: {
-					 gen_pseudo_ret();
-					 break;
-				 }
-			case 37: {
-					 gen_pseudo_mul();
-					 break;
-				 }
-			default: {
-					 printf("ERROR: Invalid opcode parsed\n");
-					 exit(1);
-				 }
+		switch (knode->opcode) {
+			case OP_NOP: 
+			case OP_HLT: 
+				add_instr_struct(false, knode->opcode, 0, 0, 0, 0, 0, false);	
+				parse_newline(false);
+				break;
+			case OP_MOVE: 
+				gen_move_instr(knode);
+				break;
+			case OP_LOADI: 
+				gen_loadi(knode);
+				break;
+			case OP_ADD: 
+				gen_opcode4_instr(knode);
+				break;
+			case OP_ADDI: 
+				gen_addi(knode);
+				break;
+			case OP_JMP: 
+				gen_jump(knode);
+				break;
+			case OP_BRE: 
+				gen_branches(knode);
+				break;
+			case OP_LOAD: 
+				gen_load(knode);
+				break;
+			case OP_STORE: 
+				gen_store(knode);
+				break;
+			case OP_SUB: 
+				gen_pseudo_sub();
+				break;
+			case OP_PUSH: 
+				gen_pseudo_push();
+				break;
+			case OP_POP: 
+				gen_pseudo_pop();
+				break;
+			case OP_CALL: 
+				gen_pseudo_call();
+				break;
+			case OP_RET: 
+				gen_pseudo_ret();
+				break;
+			case OP_MUL: 
+				gen_pseudo_mul();
+				break;
+			default: 
+				err_exit("Invalid opcode parsed\n");
 		}		
 	}
-	
+
 	resolve_pseudo_instr();
 
 	if (!(cli_flags & NO_NOPS_FLAG))

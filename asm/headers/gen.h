@@ -1,2 +1,1 @@
-void encode_instr();
-
+void encode_instr(void);

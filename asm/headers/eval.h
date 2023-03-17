@@ -6,7 +6,7 @@ struct ast_node {
 	bool unary;
 };
 
-struct ast_node* parse_expr();
+struct ast_node* parse_expr(void);
 int32_t eval(struct ast_node* root);
 void dump_ast(struct ast_node* root);
 void free_ast(struct ast_node* root);

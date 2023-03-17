@@ -1,3 +1,3 @@
-void parse();
-void free_reg_hashset();
-void free_keyword_hashset();
+void parse(void);
+void free_reg_hashset(void);
+void free_keyword_hashset(void);

@@ -17,7 +17,7 @@ static struct ast_node* new_ast_node(token_type type, struct ast_node* left, str
 	return new;
 }
 
-static struct ast_node* parse_factor()
+static struct ast_node* parse_factor(void)
 {
 	struct ast_node* node = NULL;
 
@@ -49,7 +49,7 @@ static struct ast_node* parse_factor()
 	return node;
 }
 
-static struct ast_node* parse_term()
+static struct ast_node* parse_term(void)
 {
 	struct ast_node* left = NULL;
 	struct ast_node* right = NULL;
@@ -73,7 +73,7 @@ static struct ast_node* parse_term()
 	return left;
 }
 
-struct ast_node* parse_expr()
+struct ast_node* parse_expr(void)
 {
 	struct ast_node* sign = NULL;
 	struct ast_node* left = NULL;

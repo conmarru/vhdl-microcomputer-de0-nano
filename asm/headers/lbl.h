@@ -1,6 +1,8 @@
 #include <stdint.h>
 
-#define LABEL_HASHSET_SIZE 20
+#ifndef LBL_HASHSET_SIZE
+#define LBL_HASHSET_SIZE 20
+#endif
 
 typedef struct {
 	char* name;
@@ -12,9 +14,8 @@ struct label_node {
 	label* lbl;
 };
 
-void init_label_hashset();
+void init_label_hashset(void);
 label* new_label(char* name, int line);
 void add_label(label* lbl);
 label* get_label(char* lbl);
-void update_lbls(uint32_t cur_addr);
-void free_lbl_hashset();
+void free_lbl_hashset(void);

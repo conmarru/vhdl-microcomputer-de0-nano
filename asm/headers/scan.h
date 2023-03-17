@@ -1,7 +1,5 @@
 #include <stdint.h>
 
-#define LABEL_HASHSET_SIZE 20
-
 typedef enum {
 	TOKEN_IDNT,
 	TOKEN_NUM,
@@ -32,7 +30,7 @@ struct token_stream_node {
 	token* tkn;
 };
 
-extern char* TOKEN_TYPE_NAMES[];
+extern const char* TOKEN_TYPE_NAMES[];
 
 extern struct token_stream_node head;
 
@@ -40,9 +38,8 @@ void init_scanner(char* buf, int length);
 bool check_ttype(token* t, token_type ttype);
 bool check_curttype(token_type ttype);
 void free_token(token* t);
-token* consume_token();
-token* get_current_token();
-token* peek();
+token* consume_token(void);
+token* get_current_token(void);
 bool expect(token* t, token_type ttype);
 void error_unexpected_token(token_type expected, token* current);
-void free_token_stream();
+void free_token_stream(void);
