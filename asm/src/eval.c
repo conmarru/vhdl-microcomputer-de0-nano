@@ -1,12 +1,18 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <errno.h>
 #include "../headers/scan.h"
 #include "../headers/eval.h"
+#include "../headers/utils.h"
 
-static struct ast_node* new_ast_node(token_type type, struct ast_node* left, struct ast_node* right, int32_t val, bool unary)
+static struct ast_node* new_ast_node(token_type type, struct ast_node* left, 
+							struct ast_node* right, int32_t val, bool unary)
 {
 	struct ast_node* new = (struct ast_node*)malloc(sizeof(struct ast_node));
+	if (!new) {
+		errn_exit(errno);
+	}
 
 	new->type = type;
 	new->left = left;
@@ -23,12 +29,10 @@ static struct ast_node* parse_factor(void)
 
 	token* t = consume_token();
 
-	if (check_ttype(t, TOKEN_NUM))
-	{	
+	if (check_ttype(t, TOKEN_NUM)) {
 		node = new_ast_node(TOKEN_NUM, NULL, NULL, t->num_value, false);
 	}
-	else if (check_ttype(t, TOKEN_LPAREN))
-	{
+	else if (check_ttype(t, TOKEN_LPAREN)) {
 		node = parse_expr();
 		t = consume_token();
 		if (!check_ttype(t, TOKEN_RPAREN))
@@ -38,8 +42,7 @@ static struct ast_node* parse_factor(void)
 			exit(1);
 		}
 	}
-	else
-	{
+	else {
 		printf("ERROR: Syntax error at line %d\n", t->line_num);
 		if (t) free(t);
 		exit(1);
@@ -56,16 +59,15 @@ static struct ast_node* parse_term(void)
 
 	left = parse_factor();
 
-	while ((get_current_token() && get_current_token()->type == TOKEN_STAR) || get_current_token()->type == TOKEN_SLASH)
-	{
+	while ((get_current_token() && get_current_token()->type == TOKEN_STAR) || 
+			get_current_token()->type == TOKEN_SLASH) {
 		token* t = consume_token();
 		right = parse_factor();
 
 		left = new_ast_node(t->type, left, right, 0, false);
 		free(t);
 
-		if (get_current_token() && get_current_token()->type == TOKEN_RPAREN)
-		{
+		if (get_current_token() && get_current_token()->type == TOKEN_RPAREN) {
 			return left;
 		}
 	}
@@ -79,8 +81,8 @@ struct ast_node* parse_expr(void)
 	struct ast_node* left = NULL;
 	struct ast_node* right = NULL;	
 
-	if (check_ttype(get_current_token(), TOKEN_PLUS) || check_ttype(get_current_token(), TOKEN_MINUS))
-	{
+	if (check_ttype(get_current_token(), TOKEN_PLUS) || 
+			check_ttype(get_current_token(), TOKEN_MINUS)) {
 		token* t = consume_token();
 		sign = new_ast_node(t->type, NULL, NULL, 0, true);
 	}
@@ -88,22 +90,21 @@ struct ast_node* parse_expr(void)
 	left = parse_term();
 	if (sign) sign->left = left;
 
-	if (get_current_token() && get_current_token()->type == TOKEN_RPAREN)
-	{
+	if (get_current_token() && get_current_token()->type == TOKEN_RPAREN) {
 		return (sign) ? sign : left;
 	}
 
-	while (check_ttype(get_current_token(), TOKEN_PLUS) || check_ttype(get_current_token(), TOKEN_MINUS))
-	{
+	while (check_ttype(get_current_token(), TOKEN_PLUS) || 
+			check_ttype(get_current_token(), TOKEN_MINUS)) {
 		token* t = consume_token();
 
 		right = parse_term();
 
-		left = (sign) ? new_ast_node(t->type, sign, right, 0, false) : new_ast_node(t->type, left, right, 0, false);
+		left = (sign) ? new_ast_node(t->type, sign, right, 0, false) : 
+			new_ast_node(t->type, left, right, 0, false);
 		free(t);	
 
-		if (get_current_token() && get_current_token()->type == TOKEN_RPAREN)
-		{
+		if (get_current_token() && get_current_token()->type == TOKEN_RPAREN) {
 			break;
 		}
 	}
@@ -112,10 +113,8 @@ struct ast_node* parse_expr(void)
 
 int32_t eval(struct ast_node* root)
 {
-	if (root)
-	{
-		switch (root->type)
-		{
+	if (root) {
+		switch (root->type) {
 			case TOKEN_PLUS: return eval(root->left) + eval(root->right);
 			case TOKEN_MINUS: return (root->unary) ? -eval(root->left) : eval(root->left) - eval(root->right);
 			case TOKEN_STAR: return eval(root->left) * eval(root->right);
@@ -123,8 +122,7 @@ int32_t eval(struct ast_node* root)
 			default: return root->value;
 		}
 	}
-	else
-	{
+	else {
 		return 0;
 	}
 }
@@ -133,26 +131,24 @@ void free_ast(struct ast_node* root)
 {
 	if (root)
 	{
-		if (root->type == TOKEN_PLUS || root->type == TOKEN_MINUS || root->type == TOKEN_STAR || root->type == TOKEN_SLASH)
-		{
+		if (root->type == TOKEN_PLUS || root->type == TOKEN_MINUS || 
+				root->type == TOKEN_STAR || root->type == TOKEN_SLASH) {
 			free_ast(root->left);
 			free_ast(root->right);
 		}
-		else
-		{
+		else {
 			free(root);
 		}
 	}
-	else
-	{
+	else {
 		return;
 	}
 }
 
+#ifdef DEBUG
 void dump_ast(struct ast_node* root)
 {
-	if (root)
-	{
+	if (root) {
 		printf("Token: %s\n", TOKEN_TYPE_NAMES[root->type]);
 		printf("Child nodes: (\n");
 		printf("\n");
@@ -161,3 +157,4 @@ void dump_ast(struct ast_node* root)
 		printf(")\n");
 	}
 }
+#endif
