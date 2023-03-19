@@ -21,7 +21,7 @@ static void init_pipeline(unsigned int mem_size, uint8_t* binary_data, int fsize
 	pc_str.next_pc_out = 4;
 }
 
-static void free_mem()
+static void free_mem(void)
 {
 	free_instr_mem();
 	free_data_mem();

@@ -23,7 +23,7 @@ struct data_mem_struct {
 
 extern struct data_mem_struct data_mem;
 
-void memory_update_pipeline_regs();
+void memory_update_pipeline_regs(void);
 void alloc_data_mem(unsigned int size);
-void free_data_mem();
-void memory();
+void free_data_mem(void);
+void memory(void);

@@ -8,4 +8,4 @@ extern int W_sig_WR;
 extern int W_sig_hlt;
 extern int wr_hlt_flag;
 
-void write_back();
+void write_back(void);

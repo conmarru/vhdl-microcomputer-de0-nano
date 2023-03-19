@@ -13,7 +13,7 @@ int W_sig_MR;
 int W_sig_WR;
 int W_sig_hlt;
 
-void write_back()
+void write_back(void)
 {
 	wr_hlt_flag = W_sig_hlt;
 	regfile.sig_w = W_sig_WR;

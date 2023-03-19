@@ -53,12 +53,12 @@ void access_data_mem(struct data_mem_struct* mem)
 	}
 }
 
-void free_data_mem()
+void free_data_mem(void)
 {
 	if (data_mem.mem_array) free(data_mem.mem_array);
 }
 
-void memory_update_pipeline_regs()
+void memory_update_pipeline_regs(void)
 {
 	pc_str.next_pc_in = tmp_F_next_pc;
 	update_pc(&pc_str);
@@ -70,7 +70,7 @@ void memory_update_pipeline_regs()
 	W_sig_hlt = tmp_W_sig_hlt;
 }
 
-void memory()
+void memory(void)
 {
 	data_mem.addr_in = M_valA;
 	data_mem.read_in = M_sig_MR;

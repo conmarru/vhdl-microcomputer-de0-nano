@@ -23,8 +23,8 @@ extern struct instr_mem_struct instr_mem;
 extern struct pc_struct pc_str;
 extern bool hlt_flag;
 
-void fetch_update_pipeline_regs();
+void fetch_update_pipeline_regs(void);
 void update_pc(struct pc_struct* pc_strct);
 void alloc_instr_mem(unsigned int mem);
-void free_instr_mem();
-void fetch();
+void free_instr_mem(void);
+void fetch(void);

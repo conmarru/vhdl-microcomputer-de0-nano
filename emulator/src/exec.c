@@ -101,7 +101,7 @@ static int branch_taken(int32_t cond, int8_t func, int b_sig)
 	return 0;
 }
 
-void execute_update_pipeline_regs()
+void execute_update_pipeline_regs(void)
 {
 	M_next_pc = tmp_M_next_pc;
 	M_dest = tmp_M_dest;
@@ -116,7 +116,7 @@ void execute_update_pipeline_regs()
 	M_sig_hlt = tmp_M_sig_hlt;
 }
 
-void execute()
+void execute(void)
 {
 	alu.op1_in = multiplex(E_valA, E_cur_pc, E_sig_B);
 	alu.op2_in = multiplex(E_valB, E_imm, E_sig_I);

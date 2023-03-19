@@ -209,12 +209,12 @@ void alloc_instr_mem(unsigned int size)
 	}
 }
 
-void free_instr_mem()
+void free_instr_mem(void)
 {
 	if (instr_mem.mem_array) free(instr_mem.mem_array);
 }
 
-void fetch_update_pipeline_regs()
+void fetch_update_pipeline_regs(void)
 {
 	D_next_pc = tmp_D_next_pc;
 	D_opcode = tmp_D_opcode;
@@ -233,7 +233,7 @@ void fetch_update_pipeline_regs()
 	D_sig_hlt = tmp_D_sig_hlt;
 }
 
-void fetch()
+void fetch(void)
 {
 	read_instr_mem(&instr_mem, &extract_fields, &pc_str);
 	extract_field_info(&extract_fields);

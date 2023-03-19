@@ -1,4 +1,4 @@
-CFLAGS = -fno-common -O3 -Wall -Wextra -pedantic -Wno-unused-functions -Wno-unused-parameter -std=c11
+CFLAGS = -fno-common -O3 -Wall -Wextra -pedantic -Wno-unused-function -Wno-unused-parameter -std=c11
 MACRO_DEFS = -D_POSIX_C_SOURCE=200809L
 PREPROC_FLAGS = -DSIZEBUF_LEN=10 -DDEFAULT_MEM_SIZE=2056
 CC = gcc

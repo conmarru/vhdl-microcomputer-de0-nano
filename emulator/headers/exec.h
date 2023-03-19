@@ -17,5 +17,5 @@ extern int E_sig_WR;
 extern int E_cur_pc;
 extern int E_sig_hlt;
 
-void execute_update_pipeline_regs();
-void execute();
+void execute_update_pipeline_regs(void);
+void execute(void);

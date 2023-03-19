@@ -56,7 +56,7 @@ void access_reg_file(struct regfile_struct* rg_file)
 		rg_file->reg_array[rg_file->w_in] = rg_file->w_val;
 	}
 }
-void decode_update_pipeline_regs()
+void decode_update_pipeline_regs(void)
 {
 	E_next_pc = tmp_E_next_pc;
 	E_opcode = tmp_E_opcode;
@@ -76,7 +76,7 @@ void decode_update_pipeline_regs()
 	E_sig_hlt = tmp_E_sig_hlt;
 }
 
-void decode()
+void decode(void)
 {
 	regfile.r_in1 = D_op1;
 	regfile.r_in2 = D_op2;

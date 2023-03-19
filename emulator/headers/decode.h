@@ -33,5 +33,5 @@ struct regfile_struct {
 extern struct regfile_struct regfile;
 
 void access_reg_file(struct regfile_struct* rg_file);
-void decode_update_pipeline_regs();
-void decode();
+void decode_update_pipeline_regs(void);
+void decode(void);
