@@ -73,7 +73,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 
 	switch (opcode)
 	{
-		case 0: 
+		case NOP_OPCODE: 
 			extr_fields->sig_I_out = 0;
 			extr_fields->sig_J_out = 0;
 			extr_fields->sig_B_out = 0;
@@ -82,11 +82,11 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 0;
 			extr_fields->sig_hlt_out = 0;
 			break; 
-		case 1: 
+		case HLT_OPCODE: 
 			if (flags & TERMHLT_FLAG) hlt_flag = true;
 			extr_fields->sig_hlt_out = 1;
 			break; 
-		case 2: 
+		case MOVE_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_I_out = 0;
@@ -97,7 +97,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 1;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 3: 
+		case LOADI_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->imm_out = instr & IMM_17_MASK;
 			extr_fields->sig_I_out = 1;
@@ -108,7 +108,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 1;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 4: 
+		case BIN_ALU_OP_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op2_out = (instr >> OP2_REG_SHIFT_VAL) & EXTRACT_MASK;
@@ -121,7 +121,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 1;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 5: 
+		case ADDI_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->imm_out = instr & IMM_17_MASK;
@@ -133,7 +133,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 1;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 6: 
+		case JMP_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_J_out = 1;
 			extr_fields->sig_I_out = 0;
@@ -143,7 +143,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 0;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 7: 
+		case BRANCH_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->imm_out = (instr & 0x003fffe0) >> 5;
 			extr_fields->func_out = (instr & EXTRACT_MASK) & EXTRACT_MASK;
@@ -155,7 +155,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 0;
 			extr_fields->sig_hlt_out = 0;
 			break;
-		case 8: 
+		case LOAD_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_B_out = 0;
@@ -166,7 +166,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 1;
 			extr_fields->sig_hlt_out = 0;	
 			break;
-		case 9: 
+		case STORE_OPCODE: 
 			extr_fields->dest_out = (instr >> DEST_REG_SHIFT_VAL) & EXTRACT_MASK; 
 			extr_fields->op1_out = (instr >> OP1_REG_SHIFT_VAL) & EXTRACT_MASK;
 			extr_fields->sig_B_out = 0;
@@ -177,6 +177,8 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_WR_out = 0;
 			extr_fields->sig_hlt_out = 0;
 			break;
+		default:
+			err_exit("invalid instruction fetched\n");
 	}
 }
 
