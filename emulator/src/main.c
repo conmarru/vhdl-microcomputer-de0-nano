@@ -29,9 +29,9 @@ uint8_t flags = 0;
 int err_val = 0;
 unsigned int mem_size = 0;
 
-static void print_usage_info()
+static void print_usage_info(char* progname)
 {
-	printf("usage: ./emu -i <filename> [flags]\n");
+	printf("usage: %s -i <filename> [flags]\n", progname);
 	printf("flags:\t-r, --regdump\n");
 	printf("\t-m, --memdump\n");
 	printf("\t-I, --interactive\n");
@@ -41,7 +41,7 @@ static void print_usage_info()
 	printf("\t-h, --help\n");
 }
 
-static void parse_cli_args(int argc, char** args, char* filename, char* mem_size)
+static void parse_cli_argv(int argc, char** argv, char* filename, char* mem_size)
 {
 	int c = 0; 
 	opterr = 0;
@@ -59,7 +59,7 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 		};
 
 		int option_index = 0;
-		c = getopt_long(argc, args, "i:rmIns:Hh", long_options, &option_index);
+		c = getopt_long(argc, argv, "i:rmIns:Hh", long_options, &option_index);
 
 		if (c == -1) {
 			return;
@@ -96,18 +96,18 @@ static void parse_cli_args(int argc, char** args, char* filename, char* mem_size
 				break;
 
 			case 'h': 
-				print_usage_info();
-				exit(0);
+				print_usage_info(argv[0]);
+				exit(EXIT_FAILURE);
 
 			case '?': 
-				print_usage_info(); 
-				exit(1);
+				print_usage_info(argv[0]); 
+				exit(EXIT_FAILURE);
 
 		}
 	}
 }
 
-int main(int argc, char** args)
+int main(int argc, char** argv)
 {
 	max_file_name = pathconf("/", _PC_NAME_MAX);	
 	char* filename = (char*)calloc(max_file_name+1, sizeof(char));
@@ -118,7 +118,7 @@ int main(int argc, char** args)
 	if (!mem_size_buf) {
 		errn_exit(errno);
 	}
-	parse_cli_args(argc, args, filename, mem_size_buf);
+	parse_cli_argv(argc, argv, filename, mem_size_buf);
 	FILE* input_file = fopen(filename, "rb");
 	if (!input_file) {
 		errn_exit(errno);
@@ -149,10 +149,9 @@ int main(int argc, char** args)
 		errn_exit(errno);
 	}
 	memcpy(binary_data, buf, fsize);
-	if (flags & 0x08) {
+	if (flags & NO_PIPEL_FLAG) {
 		seq_run(binary_data, fsize, mem_size);
-	}
-	else {
+	} else {
 		run(mem_size, binary_data, fsize);
 	}	
 	if (munmap(buf, fsize) == -1) {

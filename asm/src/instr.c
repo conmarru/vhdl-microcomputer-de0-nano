@@ -62,8 +62,14 @@ void add_instr_struct(bool jmp_flag, uint8_t opcode, uint8_t dest, uint8_t op1,
 				uint8_t op2, int32_t immediate, uint8_t func, bool mltp_tag)
 {
 	if (instr_list_ptr == instr_list_len-1) {
-		instr_list = realloc(instr_list, sizeof(struct instr_struct*)*
+		struct instr_struct** nptr;
+		nptr = realloc(instr_list, sizeof(struct instr_struct*)*
 								instr_list_len*2);
+		if (!nptr) {
+			errn_exit(errno);
+		} else {
+			instr_list = nptr;
+		}
 		instr_list_len = instr_list_len*2;
 	}
 	instr_list[instr_list_ptr++] = new_instr_struct(jmp_flag, cur_addr, opcode, dest, op1, 
@@ -92,7 +98,13 @@ void add_instr_struct_at_index(bool jmp_flag, uint8_t opcode, uint8_t dest, uint
 				bool mltp_flag, struct instr_struct* jmp_target)
 {
 	if (instr_list_ptr == instr_list_len-1) {
-		instr_list = realloc(instr_list, sizeof(struct instr_struct*)*instr_list_len*2);
+		struct instr_struct** nptr;
+		nptr = realloc(instr_list, sizeof(struct instr_struct*)*instr_list_len*2);
+		if (!nptr) {
+			errn_exit(errno);
+		} else {
+			instr_list = nptr;
+		}
 		instr_list_len = instr_list_len*2;
 	}
 
@@ -120,8 +132,7 @@ void add_instr_struct_at_index(bool jmp_flag, uint8_t opcode, uint8_t dest, uint
 			old_instr->p_from[i]->jmp_target = instr_list[addr];
 		}
 		instr_list[addr]->p_from = old_instr->p_from;
-	}
-	else {
+	} else {
 		instr_list[addr] = new_instr_struct(jmp_flag, addr, opcode, dest, op1, 
 									op2, immediate, func, mltp_flag);
 		instr_list[addr]->jmp_target = jmp_target;
@@ -229,10 +240,15 @@ static void add_p_from(struct instr_struct* instr)
 	if (!jmp_target_pcount) {
 		instr->jmp_target->p_from = malloc(sizeof(struct instr_struct*)*
 				(++jmp_target_pcount));
-	}
-	else {
-		instr->jmp_target->p_from = realloc(instr->jmp_target->p_from, 
-				sizeof(struct instr_struct*)*(++jmp_target_pcount));
+	} else {
+		struct instr_struct** nptr;
+		nptr = realloc(instr->jmp_target->p_from, 
+					sizeof(struct instr_struct*)*(++jmp_target_pcount));
+		if (!nptr) {
+			errn_exit(errno);
+		} else {
+			instr->jmp_target->p_from = nptr;
+		}
 	}
 	instr->jmp_target->p_from_count = jmp_target_pcount;
 	instr->jmp_target->p_from[jmp_target_pcount-1] = instr;
@@ -367,8 +383,7 @@ static void adjust_jumps(void)
 		if (instr_list[i]->jmp_tag) {
 			if (instr_list[i]->opcode == OP_LOADI) {
 				instr_list[i]->immediate = instr_list[i]->jmp_target->instr_addr;
-			}
-			else {
+			} else {
 				int dif = instr_list[i]->instr_addr - instr_list[i]->jmp_target->instr_addr;
 				instr_list[i]->immediate = (dif < 0) ? -dif : dif;
 			}
@@ -388,8 +403,7 @@ void resolve_pseudo_instr(void)
 			if (instr_list[i]->opcode == OP_JMP || 
 					instr_list[i]->opcode == OP_CALL) {
 				instr_list[i]->jmp_target = instr_list[instr_list[i]->immediate];	
-			}
-			else {
+			} else {
 				instr_list[i]->jmp_target = instr_list[instr_list[i]->instr_addr + instr_list[i]->immediate];
 			}
 			add_p_from(instr_list[i]);			
@@ -418,8 +432,7 @@ static void gen_nops_arith(uint8_t dest, uint8_t op1, uint8_t op2,
 	uint8_t op;
 	if (unary) {
 		op = op1;
-	}
-	else {
+	} else {
 		op = (ref_count[op1] >= ref_count[op2]) ? op1 : op2;
 	}
 
@@ -427,8 +440,7 @@ static void gen_nops_arith(uint8_t dest, uint8_t op1, uint8_t op2,
 		for (int j = 0; j < ref_count[op]; j++) {
 			INSERT_NOP_AT_INDEX(index);
 		}
-	}
-	else {
+	} else {
 		ref_count[dest] = 5; // 5, since it gets decremented instantly the next iteration
 	}
 }
@@ -462,8 +474,7 @@ void gen_nops(void)
 			case OP_JMP:	
 				if (ref_count[instr_list[i]->dest]) {
 					INSERT_NOP_AT_INDEX(i);
-				}
-				else {
+				} else {
 					i++;
 					for (int j = 0; j < JMP_NOPS_NUM; j++) {
 						INSERT_NOP_AT_INDEX(i);		
@@ -473,8 +484,7 @@ void gen_nops(void)
 			case OP_BRE: 
 				if (ref_count[instr_list[i]->dest]) {
 					INSERT_NOP_AT_INDEX(i);
-				}
-				else {
+				} else {
 					i++;
 					for (int j = 0; j < JMP_NOPS_NUM; j++) {
 						INSERT_NOP_AT_INDEX(i);		
@@ -484,8 +494,7 @@ void gen_nops(void)
 			case OP_LOAD:	
 				if (ref_count[instr_list[i]->op1]) {
 					INSERT_NOP_AT_INDEX(i);
-				}
-				else {
+				} else {
 					ref_count[instr_list[i]->dest] = 5;
 				}
 				break;
@@ -493,8 +502,7 @@ void gen_nops(void)
 			case OP_STORE: 
 				if (ref_count[instr_list[i]->op1]) {
 					INSERT_NOP_AT_INDEX(i);
-				}
-				else {
+				} else {
 					ref_count[instr_list[i]->dest] = 5;
 				}
 				break;
@@ -523,8 +531,7 @@ void debug_print_instr_list(bool filter, int opcode, int func)
 						instr_list[i]->op1, instr_list[i]->op2, instr_list[i]->dest, 
 						instr_list[i]->immediate, instr_list[i]->func, instr_list[i]->instr_addr, 
 						target_addr);
-		}
-		else {
+		} else {
 			printf("i: %d, opcode: %d, op1: %d, op2: %d, dest: %d, imm: %d, func: %d, \
 					addr: %d, jmp_target: %d\n", i, instr_list[i]->opcode, instr_list[i]->op1, 
 					instr_list[i]->op2, instr_list[i]->dest, instr_list[i]->immediate, instr_list[i]->func, 

@@ -83,7 +83,7 @@ static void extract_field_info(struct extract_fields_struct* extr_fields)
 			extr_fields->sig_hlt_out = 0;
 			break; 
 		case 1: 
-			if (flags & 32) hlt_flag = true;
+			if (flags & TERMHLT_FLAG) hlt_flag = true;
 			extr_fields->sig_hlt_out = 1;
 			break; 
 		case 2: 
@@ -187,14 +187,12 @@ void update_pc(struct pc_struct* pc_strct)
 		pc_strct->pc_out = pc_strct->next_pc_in;
 		pc_strct->pc_temp = pc_strct->next_pc_in + 1;
 		pc_strct->next_pc_out = pc_strct->next_pc_in + 4;
-	}
-	else if (pc_strct->jmp_counter > 0) {
+	} else if (pc_strct->jmp_counter > 0) {
 		pc_strct->jmp_counter--;
 		pc_strct->pc_out = pc_strct->pc_temp;
 		pc_strct->next_pc_out = pc_strct->pc_temp + 4;
 		pc_strct->pc_temp = pc_strct->pc_temp + 1;
-	}
-	else {
+	} else {
 		pc_strct->pc_out = pc_strct->next_pc_in;
 		pc_strct->next_pc_out = pc_strct->next_pc_out + 1;
 	}

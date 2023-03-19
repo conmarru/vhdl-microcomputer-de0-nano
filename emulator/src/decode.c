@@ -52,8 +52,7 @@ void access_reg_file(struct regfile_struct* rg_file)
 		rg_file->r_out1 = rg_file->reg_array[rg_file->r_in1];
 		rg_file->r_out2 = rg_file->reg_array[rg_file->r_in2];
 		rg_file->r_out3 = rg_file->reg_array[rg_file->r_in3];
-	}
-	else {
+	} else {
 		rg_file->reg_array[rg_file->w_in] = rg_file->w_val;
 	}
 }

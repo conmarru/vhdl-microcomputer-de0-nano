@@ -65,8 +65,7 @@ char** parse_uinput(char* input, int* argc)
 			nptr = realloc(args, sizeof(char*)*(*argc+1));
 			if (!nptr) {
 				errn_exit(errno);
-			}
-			else {
+			} else {
 				args = nptr;
 			}
 		}

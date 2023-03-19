@@ -78,8 +78,7 @@ static char* scan_identifier(int* pointer)
 		nptr = realloc(idnt, ++idnt_length);
 		if (!nptr) {
 			errn_exit(errno);
-		}
-		else {
+		} else {
 			idnt = nptr;
 		}
 		idnt[idnt_length-1] = input[(*pointer)++];	
@@ -123,8 +122,7 @@ bool expect(token* t, token_type ttype)
 {
 	if (t) {
 		return (t->type == ttype);
-	}
-	else {
+	} else {
 		return false; 
 	}
 }
@@ -134,8 +132,7 @@ noreturn void error_unexpected_token(token_type expected, token* current)
 	if (current) {
 		err_exit("Expected %s, parsed %s at line %d\n", TOKEN_TYPE_NAMES[expected], 
 				TOKEN_TYPE_NAMES[current->type], current->line_num);
-	}
-	else {
+	} else {
 		err_exit("Expected %s, parsed NULL\n", TOKEN_TYPE_NAMES[expected]);
 	}
 }
@@ -229,8 +226,7 @@ static void scan(void)
 					add_label(new_label(name, effective_line));
 					append_token(new_token(name, 0, TOKEN_IDNT, VAL_STR, effective_line));
 					lbl_flag = true;
-				}
-				else {
+				} else {
 					err_exit("Invalid identifier at line %d\n", line);
 				}
 				break;
@@ -241,14 +237,12 @@ static void scan(void)
 					char* val = scan_identifier(&pointer);
 					append_token(new_token(val, 0, TOKEN_IDNT, VAL_STR, line));
 					break;
-				}
-				else if (input[pointer] == '0' && input[pointer+1] == 'x') {
+				} else if (input[pointer] == '0' && input[pointer+1] == 'x') {
 					pointer += 2;
 					int val = scan_hexnum(&pointer);
 					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					break;
-				}
-				else if (isdigit(input[pointer]) || input[pointer] == '-') {
+				} else if (isdigit(input[pointer]) || input[pointer] == '-') {
 					if (input[pointer] == '-')
 					{
 						pointer++;
@@ -257,8 +251,7 @@ static void scan(void)
 					int val = scan_num(&pointer);
 					append_token(new_token(NULL, val, TOKEN_NUM, VAL_NUM, line));
 					break;
-				} 
-				else {
+				} else {
 					err_exit("Unknown token at line %d\n", line);
 				}
 		}

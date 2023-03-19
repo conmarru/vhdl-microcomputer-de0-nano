@@ -59,8 +59,7 @@ static void exec(int flag)
 								uint32_t maddr = strtohex(user_args[2]);				 
 								if (err_val == 1) {
 									printf("ERROR: invalid address\n");
-								}
-								else {
+								} else {
 									print_mem(mem, maddr, maddr + 1, false, false, false, 0, false);
 								}
 							}
@@ -180,11 +179,11 @@ void seq_run(uint8_t* binary_data, int fsize, unsigned int mem_size)
 	mem = (int32_t*)calloc(mem_size, sizeof(uint8_t));
 	load_program(mem, binary_data, fsize, mem_size);
 	exec(flags);
-	if (!(flags & 0x04)) {
-		if (flags & 0x01) {
+	if (!(flags & INTRCTV_FLAG)) {
+		if (flags & REGDUMP_FLAG) {
 			reg_dump(reg, REG_STRINGS, pc);
 		}
-		if (flags & 0x02) {
+		if (flags & MEMDUMP_FLAG) {
 			print_mem(mem, 0, 0x00000404, false, true, false, 0, true);
 		}
 	}

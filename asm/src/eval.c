@@ -31,8 +31,7 @@ static struct ast_node* parse_factor(void)
 
 	if (check_ttype(t, TOKEN_NUM)) {
 		node = new_ast_node(TOKEN_NUM, NULL, NULL, t->num_value, false);
-	}
-	else if (check_ttype(t, TOKEN_LPAREN)) {
+	} else if (check_ttype(t, TOKEN_LPAREN)) {
 		node = parse_expr();
 		t = consume_token();
 		if (!check_ttype(t, TOKEN_RPAREN))
@@ -41,8 +40,7 @@ static struct ast_node* parse_factor(void)
 			if (t) free(t);
 			exit(1);
 		}
-	}
-	else {
+	} else {
 		printf("ERROR: Syntax error at line %d\n", t->line_num);
 		if (t) free(t);
 		exit(1);
@@ -121,26 +119,22 @@ int32_t eval(struct ast_node* root)
 			case TOKEN_SLASH: return eval(root->left) / eval(root->right);
 			default: return root->value;
 		}
-	}
-	else {
+	} else {
 		return 0;
 	}
 }
 
 void free_ast(struct ast_node* root)
 {
-	if (root)
-	{
+	if (root) {
 		if (root->type == TOKEN_PLUS || root->type == TOKEN_MINUS || 
 				root->type == TOKEN_STAR || root->type == TOKEN_SLASH) {
 			free_ast(root->left);
 			free_ast(root->right);
-		}
-		else {
+		} else {
 			free(root);
 		}
-	}
-	else {
+	} else {
 		return;
 	}
 }

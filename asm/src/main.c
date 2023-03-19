@@ -110,10 +110,11 @@ int main(int argc, char** args)
 		errn_exit(errno);
 	}
 	if (output_file_name[0] != 0x00) {
-		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen(output_file_name, "w") : fopen(output_file_name, "wb");
-	}	
-	else {
-		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen("output", "w") : fopen("output", "wb");
+		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen(output_file_name, "w") : 
+									fopen(output_file_name, "wb");
+	} else {
+		output_file = (cli_flags & ONE_LINE_FFLAG) ? fopen("output", "w") : 
+									fopen("output", "wb");
 	}
 	free(input_file_name);
 	free(output_file_name);

@@ -50,8 +50,7 @@ static void exec_pipelined(uint8_t flags)
 						skip = strtouint(user_args[1]);	
 					}
 					next_count = skip;
-				}
-				else if (!strcmp(user_args[0], CMDS[2]) || !strcmp(user_args[0], CMDS[3])) {
+				} else if (!strcmp(user_args[0], CMDS[2]) || !strcmp(user_args[0], CMDS[3])) {
 					if (argc == 1 || !strcmp(user_args[1], "-a")) {
 						printf("fetch stage:");
 						printf("\t\tdecode stage:");
@@ -91,11 +90,9 @@ static void exec_pipelined(uint8_t flags)
 						else pc_start = pc_str.pc_out-2;
 						print_mem(instr_mem.mem_array, pc_start, pc_str.pc_out+3, true, 
 								true, true, pc_str.pc_out, true);
-					}
-					else if (!strcmp(user_args[1], "-r")) {
+					} else if (!strcmp(user_args[1], "-r")) {
 						reg_dump(regfile.reg_array, REG_STRINGS, pc_str.pc_out);
-					}
-					else if (argc == 3 && !strcmp(user_args[1], "-x")) {
+					} else if (argc == 3 && !strcmp(user_args[1], "-x")) {
 						uint32_t maddr = strtohex(user_args[2]);				 
 						if (err_val == 1) {
 							printf("ERROR: invalid address\n");

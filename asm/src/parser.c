@@ -296,8 +296,7 @@ static int32_t parse_num(bool branch)
 		}
 		immediate_val = lbl->addr;
 		label_flag = true;
-	}
-	else if (t->type == TOKEN_LPAREN) {
+	} else if (t->type == TOKEN_LPAREN) {
 		struct ast_node* root = parse_expr();
 		immediate_val = eval(root);
 		free_token(t);
@@ -306,8 +305,7 @@ static int32_t parse_num(bool branch)
 			error_unexpected_token(TOKEN_RPAREN, t);
 		}
 		free_ast(root);
-	}
-	else {
+	} else {
 		if (!expect(t, TOKEN_DOLLAR)) {
 			error_unexpected_token(TOKEN_DOLLAR, t);
 		}
@@ -427,8 +425,7 @@ static void gen_jump(struct keyword_node* knode)
 	if (check_ttype(t, TOKEN_PERCENT)) {
 		dest_reg = parse_reg();	
 		jmp_tag = false;
-	}
-	else if (check_curttype(TOKEN_DOLLAR) || check_curttype(TOKEN_IDNT)) {
+	} else if (check_curttype(TOKEN_DOLLAR) || check_curttype(TOKEN_IDNT)) {
 		immediate = parse_num(false);	
 	}	
 	
@@ -464,8 +461,7 @@ static void gen_load(struct keyword_node* knode)
 	if (check_curttype(TOKEN_DOLLAR)) {
 		imm = true;
 		immediate = parse_num(false);
-	}
-	else {
+	} else {
 		src_reg = parse_reg();	 
 	}
 
@@ -492,8 +488,7 @@ static void gen_store(struct keyword_node* knode)
 	if (check_curttype(TOKEN_DOLLAR)) {
 		imm = true;
 		immediate = parse_num(false);
-	}
-	else {
+	} else {
 		dest_reg = parse_reg();
 	}
 
@@ -590,8 +585,7 @@ void parse(void)
 				free(current);
 				parse_newline(true);	
 				continue;
-			}
-			else if (current->type == TOKEN_IDNT) 
+			} else if (current->type == TOKEN_IDNT) 
 				err_exit("Invalid instruction found at line %d\n", 
 							current->line_num);
 			else 

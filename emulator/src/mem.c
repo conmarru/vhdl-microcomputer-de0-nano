@@ -45,8 +45,7 @@ void access_data_mem(struct data_mem_struct* mem)
 			err_exit("Invalid memory access. Referenced address exceeded the bounds of memory\n");
 		}
 		mem->out = mem->mem_array[(uint32_t)mem->addr_in];	
-	}
-	else if (mem->write_in) {
+	} else if (mem->write_in) {
 		if ((uint32_t)mem->addr_in >= mem_size) {
 			err_exit("Invalid memory access. Referenced address exceeded the bounds of memory\n");
 		}

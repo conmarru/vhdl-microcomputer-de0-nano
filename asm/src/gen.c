@@ -20,8 +20,7 @@ static void write_file(uint32_t instr)
 		fwrite(&p1, 1, 1, output_file);
 		fwrite(&p4, 1, 1, output_file);
 		fwrite(&p3, 1, 1, output_file);
-	}
-	else {
+	} else {
 		fprintf(output_file, "%d\n", instr);	
 	}
 }
