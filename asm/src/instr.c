@@ -283,7 +283,7 @@ void resolve_instr(struct instr_struct* instr)
 		case OP_STORE: 
 			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_LOADI, 0, 0, ADDR_REG, instr->immediate), 
 					false, true ,instr->instr_addr, NULL);
-			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->dest, 0, instr->op1, 0), 
+			gen_dynamic_instr(new_dyn_instr_struct(DYN_INSTR_STORE, instr->op1, 0, instr->dest, 0), 
 					false, false, instr->instr_addr+1, NULL);
 			break;
 		case OP_SUB: 
