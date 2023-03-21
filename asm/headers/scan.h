@@ -34,7 +34,7 @@ extern const char* TOKEN_TYPE_NAMES[];
 
 extern struct token_stream_node head;
 
-void init_scanner(char* buf, int length);
+void scan(char* buf, int length);
 bool check_ttype(token* t, token_type ttype);
 bool check_curttype(token_type ttype);
 void free_token(token* t);

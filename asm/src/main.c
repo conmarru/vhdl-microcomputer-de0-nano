@@ -148,7 +148,7 @@ int main(int argc, char** args)
 	if (fclose(input_file) == EOF) {
 		errn_exit(errno);
 	}
-	init_scanner(input, fsize);
+	scan(input, fsize);
 	parse();
 	encode_instr();
 	free(input);

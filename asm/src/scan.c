@@ -71,6 +71,9 @@ static char* scan_identifier(int* pointer)
 {
 	unsigned int idnt_length = 0;
 	char* idnt = (char*)calloc(2, sizeof(char));
+	if (!idnt) {
+		errn_exit(errno);
+	}
 	char* nptr;
 	idnt[1] = 0x00;
 
@@ -156,8 +159,20 @@ static uint32_t scan_hexnum(int* pointer)
 	return val;
 }
 
-static void scan(void)
+static void init_scanner(char* buf, int length)
+{
+	input = (char*)calloc(length+1, sizeof(char));
+	if (!input) {
+		errn_exit(errno);
+	}
+	input_length = length;
+	strcpy(input, buf);
+	init_label_hashset();
+}
+
+void scan(char* buf, int length)
 {		
+	init_scanner(buf, length);
 	int pointer = 0;
 	while (input[pointer] != 0x00 && pointer <= input_length) {
 		switch (input[pointer]) {
@@ -256,15 +271,6 @@ static void scan(void)
 				}
 		}
 	}
-}
-
-void init_scanner(char* buf, int length)
-{
-	input = (char*)calloc(length+1, sizeof(char));
-	input_length = length;
-	strcpy(input, buf);
-	init_label_hashset();
-	scan();
 	free(input);
 }
 
