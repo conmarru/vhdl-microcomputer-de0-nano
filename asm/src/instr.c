@@ -451,6 +451,7 @@ void gen_nops(void)
 		decr_ref_count();
 		switch (instr_list[i]->opcode) {
 			case OP_HLT: 
+				i++;
 				for (int j = 0; j < 4; j++) {
 					INSERT_NOP_AT_INDEX(i);
 					i++;
