@@ -9,14 +9,14 @@
 	loadi	$0, %r2
 	loadi	$1, %r3
 	loadi	$2, %r4
-	.test
+	.loop
 		sub	%r0, %r1, %r5
 		bre	%r5, done
 		add	%r2, %r3, %r4
 		move	%r3, %r2
 		move	%r4, %r3
 		addi	$1, %r1, %r1
-		jmp	test
+		jmp	loop
 	.done
 		move %r2, %r31
 		ret
